@@ -1,0 +1,17 @@
+{
+  "name": "@esimplicity/katalyst-bdd-test",
+  "private": true,
+  "version": "0.0.0",
+  "workspaces": [
+    "stack-tests",
+    "create-stack-tests"
+  ],
+  "scripts": {
+    "build": "npm -ws run build",
+    "lint": "echo 'no lint configured'",
+    "test": "npm -ws run test --if-present"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
