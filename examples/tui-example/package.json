@@ -1,0 +1,20 @@
+{
+  "name": "tui-example",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Example project demonstrating @kata/stack-tests TUI testing",
+  "scripts": {
+    "test": "playwright test",
+    "test:debug": "DEBUG=tui-tester playwright test"
+  },
+  "dependencies": {
+    "@kata/stack-tests": "^0.1.0",
+    "@playwright/test": "^1.49.0",
+    "playwright-bdd": "^8.3.0",
+    "tui-tester": "^1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}
