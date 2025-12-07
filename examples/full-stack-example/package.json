@@ -1,0 +1,25 @@
+{
+  "name": "full-stack-example",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Example project demonstrating full-stack testing with @kata/stack-tests",
+  "scripts": {
+    "test": "playwright test",
+    "test:api": "playwright test --grep @api",
+    "test:ui": "playwright test --grep @ui",
+    "test:tui": "playwright test --grep @tui",
+    "test:hybrid": "playwright test --grep @hybrid",
+    "test:headed": "playwright test --headed",
+    "test:debug": "PWDEBUG=1 playwright test"
+  },
+  "dependencies": {
+    "@kata/stack-tests": "^0.1.0",
+    "@playwright/test": "^1.49.0",
+    "playwright-bdd": "^8.3.0",
+    "tui-tester": "^1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}
