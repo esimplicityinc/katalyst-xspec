@@ -1,0 +1,17 @@
+{
+  "name": "@esimplicity/create-stack-tests",
+  "version": "0.1.0",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "private": false,
+  "type": "commonjs",
+  "bin": {
+    "create-stack-tests": "bin/create-stack-tests.js"
+  },
+  "description": "Scaffold a Playwright-BDD stack-tests project",
+  "files": ["bin"],
+  "engines": {
+    "node": ">=18"
+  }
+}
