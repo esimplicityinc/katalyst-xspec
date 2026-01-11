@@ -23,27 +23,27 @@ export function registerApiHttpSteps(test: any): void {
     world.lastResponse = result.response;
   }
 
-  When('I GET {string}', { tags: '@api' }, async ({ api, world }: any, path: string) => {
+  When('I GET {string}', { tags: '@api or @hybrid' }, async ({ api, world }: any, path: string) => {
     await send({ api, world }, 'GET', path);
   });
 
-  When('I DELETE {string}', { tags: '@api' }, async ({ api, world }: any, path: string) => {
+  When('I DELETE {string}', { tags: '@api or @hybrid' }, async ({ api, world }: any, path: string) => {
     await send({ api, world }, 'DELETE', path);
   });
 
-  When('I POST {string} with JSON body:', { tags: '@api' }, async ({ api, world }: any, path: string, docString: string) => {
+  When('I POST {string} with JSON body:', { tags: '@api or @hybrid' }, async ({ api, world }: any, path: string, docString: string) => {
     const interpolated = interpolate(docString ?? '', world.vars);
     const parsed = (tryParseJson(interpolated) ?? interpolated) as unknown;
     await send({ api, world }, 'POST', path, parsed);
   });
 
-  When('I PATCH {string} with JSON body:', { tags: '@api' }, async ({ api, world }: any, path: string, docString: string) => {
+  When('I PATCH {string} with JSON body:', { tags: '@api or @hybrid' }, async ({ api, world }: any, path: string, docString: string) => {
     const interpolated = interpolate(docString ?? '', world.vars);
     const parsed = (tryParseJson(interpolated) ?? interpolated) as unknown;
     await send({ api, world }, 'PATCH', path, parsed);
   });
 
-  When('I PUT {string} with JSON body:', { tags: '@api' }, async ({ api, world }: any, path: string, docString: string) => {
+  When('I PUT {string} with JSON body:', { tags: '@api or @hybrid' }, async ({ api, world }: any, path: string, docString: string) => {
     const interpolated = interpolate(docString ?? '', world.vars);
     const parsed = (tryParseJson(interpolated) ?? interpolated) as unknown;
     await send({ api, world }, 'PUT', path, parsed);

@@ -212,20 +212,20 @@ TEST_TAGS=@critical npx playwright test --project=api
 
 ## Step-Level Tags
 
-Steps are also tagged to ensure they only run in appropriate contexts:
+Steps are tagged to ensure they run in appropriate contexts. Steps use tag expressions to support multiple scenario types:
 
 ```typescript
-// Only available in @api scenarios
-When('I GET {string}', { tags: '@api' }, async ({ api }, path) => {
+// Available in @api and @hybrid scenarios
+When('I GET {string}', { tags: '@api or @hybrid' }, async ({ api }, path) => {
   // ...
 });
 
-// Only available in @ui scenarios
-When('I click the button {string}', { tags: '@ui' }, async ({ ui }, name) => {
+// Available in @ui and @hybrid scenarios
+When('I click the button {string}', { tags: '@ui or @hybrid' }, async ({ ui }, name) => {
   // ...
 });
 
-// Only available in @tui scenarios
+// Available in @tui scenarios only
 When('I type {string}', { tags: '@tui' }, async ({ tui }, text) => {
   // ...
 });
@@ -235,6 +235,8 @@ Given('I set variable {string} to {string}', async ({ world }, name, value) => {
   // ...
 });
 ```
+
+This pattern allows `@hybrid` scenarios to use both API and UI steps in the same test.
 
 ## Tag Inheritance
 
