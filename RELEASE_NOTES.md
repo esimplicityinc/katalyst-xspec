@@ -6,8 +6,8 @@ Initial release of the Katalyst BDD Test framework.
 
 | Package | Version | Description |
 |---------|---------|-------------|
-| `@esimplicity/stack-tests` | 0.1.0 | Core testing library with fixtures, ports, adapters, and step definitions |
-| `@esimplicity/create-stack-tests` | 0.1.0 | CLI scaffolding tool for new projects |
+| `@esimplicityinc/stack-tests` | 0.1.0 | Core testing library with fixtures, ports, adapters, and step definitions |
+| `@esimplicityinc/create-stack-tests` | 0.1.0 | CLI scaffolding tool for new projects |
 
 ## Highlights
 
@@ -60,10 +60,10 @@ Four complete example projects demonstrating real-world usage:
 
 ```bash
 # From npm
-npm install @esimplicity/stack-tests
+npm install @esimplicityinc/stack-tests
 
 # Scaffold a new project
-npx @esimplicity/create-stack-tests my-tests
+npx @esimplicityinc/create-stack-tests my-tests
 ```
 
 ## Requirements

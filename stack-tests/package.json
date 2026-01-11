@@ -1,5 +1,5 @@
 {
-  "name": "@esimplicity/stack-tests",
+  "name": "@esimplicityinc/stack-tests",
   "version": "0.1.0",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"

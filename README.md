@@ -6,8 +6,8 @@ Internal monorepo for Playwright BDD testing utilities and scaffolding.
 
 | Package | Description |
 |---------|-------------|
-| **@esimplicity/stack-tests** (`stack-tests/`) | Reusable fixtures, ports, adapters, and step definitions for API/UI/TUI testing |
-| **@esimplicity/create-stack-tests** (`create-stack-tests/`) | CLI to scaffold a new Playwright-BDD test project |
+| **@esimplicityinc/stack-tests** (`stack-tests/`) | Reusable fixtures, ports, adapters, and step definitions for API/UI/TUI testing |
+| **@esimplicityinc/create-stack-tests** (`create-stack-tests/`) | CLI to scaffold a new Playwright-BDD test project |
 
 ## Quick Start
 
@@ -16,10 +16,10 @@ Internal monorepo for Playwright BDD testing utilities and scaffolding.
 npm install
 
 # Build the library
-npm run build -w @esimplicity/stack-tests
+npm run build -w @esimplicityinc/stack-tests
 
 # Scaffold a new test project
-npx @esimplicity/create-stack-tests my-tests
+npx @esimplicityinc/create-stack-tests my-tests
 ```
 
 ## Documentation
@@ -105,10 +105,10 @@ npm run lint --workspaces
 ### From npm (Recommended)
 
 ```bash
-npm install @esimplicity/stack-tests
+npm install @esimplicityinc/stack-tests
 
 # or scaffold a new project
-npx @esimplicity/create-stack-tests my-tests
+npx @esimplicityinc/create-stack-tests my-tests
 ```
 
 ### From GitHub Packages
@@ -133,7 +133,7 @@ export NPM_TOKEN=your_github_token
 4. Install the packages:
 
 ```bash
-npm install @esimplicity/stack-tests
+npm install @esimplicityinc/stack-tests
 ```
 
 ## Publishing
