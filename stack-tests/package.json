@@ -1,6 +1,6 @@
 {
   "name": "@esimplicityinc/stack-tests",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -38,11 +38,13 @@
     "cli"
   ],
   "files": [
-    "dist"
+    "dist",
+    "scripts"
   ],
   "scripts": {
     "build": "tsup",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "postinstall": "node scripts/postinstall.cjs"
   },
   "peerDependencies": {
     "@playwright/test": "^1.49.0",
