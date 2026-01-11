@@ -1,0 +1,34 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+
+  // === Built-in Tools ===
+  // Make sure tools like webfetch (curl), bash, etc. are enabled
+  "tools": {
+    "bash": true,
+    "webfetch": true,
+    "write": true,
+    "read": true,
+    "edit": true,
+    "grep": true,
+    "list": true
+  },
+
+  // === MCP Servers ===
+  "mcp": {
+    "g-search": {
+      "type": "local",
+      "command": ["npx", "-y", "g-search-mcp"],
+      "enabled": true
+    },
+    "context7": {
+      "type": "local",
+      "command": ["npx", "-y", "@upstash/context7-mcp"],
+      "enabled": true
+    },
+    "playwright": {
+      "type": "local",
+      "command": ["npx", "@playwright/mcp@latest"],
+      "enabled": true
+    }
+  }
+}
