@@ -5,15 +5,26 @@ on:
     types: [published]
   workflow_dispatch:
     inputs:
-      version:
-        description: 'Version to publish (leave empty to use current package.json versions)'
+      publish_target:
+        description: 'Where to publish'
+        required: true
+        default: 'both'
+        type: choice
+        options:
+          - both
+          - npm
+          - github
+      dry_run:
+        description: 'Dry run (skip actual publish)'
         required: false
-        type: string
+        default: false
+        type: boolean
 
 jobs:
   publish-npm:
     name: Publish to npm
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'release' || inputs.publish_target == 'both' || inputs.publish_target == 'npm' }}
 
     steps:
       - name: Checkout repository
@@ -33,19 +44,32 @@ jobs:
 
       - name: Publish stack-tests to npm
         working-directory: stack-tests
-        run: npm publish --access public
+        run: |
+          if [ "${{ inputs.dry_run }}" == "true" ]; then
+            echo "DRY RUN: Would publish stack-tests to npm"
+            npm publish --access public --dry-run
+          else
+            npm publish --access public
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish create-stack-tests to npm
         working-directory: create-stack-tests
-        run: npm publish --access public
+        run: |
+          if [ "${{ inputs.dry_run }}" == "true" ]; then
+            echo "DRY RUN: Would publish create-stack-tests to npm"
+            npm publish --access public --dry-run
+          else
+            npm publish --access public
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   publish-github:
     name: Publish to GitHub Packages
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'release' || inputs.publish_target == 'both' || inputs.publish_target == 'github' }}
     permissions:
       contents: read
       packages: write
@@ -69,12 +93,24 @@ jobs:
 
       - name: Publish stack-tests to GitHub Packages
         working-directory: stack-tests
-        run: npm publish
+        run: |
+          if [ "${{ inputs.dry_run }}" == "true" ]; then
+            echo "DRY RUN: Would publish stack-tests to GitHub Packages"
+            npm publish --dry-run
+          else
+            npm publish
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish create-stack-tests to GitHub Packages
         working-directory: create-stack-tests
-        run: npm publish
+        run: |
+          if [ "${{ inputs.dry_run }}" == "true" ]; then
+            echo "DRY RUN: Would publish create-stack-tests to GitHub Packages"
+            npm publish --dry-run
+          else
+            npm publish
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
