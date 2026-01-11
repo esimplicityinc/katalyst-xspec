@@ -47,6 +47,8 @@ jobs:
       - name: Publish stack-tests to npm
         working-directory: stack-tests
         run: |
+          # Update package name for npm (uses @esimplicity scope)
+          sed -i 's/@esimplicityinc\//@esimplicity\//g' package.json
           if [ "${{ inputs.dry_run }}" == "true" ]; then
             echo "DRY RUN: Would publish stack-tests to npm"
             npm publish --access public --dry-run
@@ -59,6 +61,8 @@ jobs:
       - name: Publish create-stack-tests to npm
         working-directory: create-stack-tests
         run: |
+          # Update package name for npm (uses @esimplicity scope)
+          sed -i 's/@esimplicityinc\//@esimplicity\//g' package.json
           if [ "${{ inputs.dry_run }}" == "true" ]; then
             echo "DRY RUN: Would publish create-stack-tests to npm"
             npm publish --access public --dry-run
