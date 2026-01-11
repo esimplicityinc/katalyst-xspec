@@ -82,7 +82,7 @@ function templates(packageName) {
       clean: 'rm -rf .features-gen node_modules test-results storage cucumber-report playwright-report'
     },
     devDependencies: {
-      '@kata/stack-tests': '^0.1.0',
+      '@esimplicity/stack-tests': '^0.1.0',
       '@playwright/test': '^1.49.0',
       'playwright-bdd': '^8.3.0',
       dotenv: '^16.1.4',
@@ -108,7 +108,7 @@ function templates(packageName) {
   UniversalAuthAdapter,
   DefaultCleanupAdapter,
   TuiTesterAdapter,
-} from '@kata/stack-tests';
+} from '@esimplicity/stack-tests';
 
 export const test = createBddTest({
   createApi: ({ apiRequest }) => new PlaywrightApiAdapter(apiRequest),
@@ -132,7 +132,7 @@ import {
   registerSharedSteps,
   registerHybridSuite,
   registerTuiSteps,
-} from '@kata/stack-tests/steps';
+} from '@esimplicity/stack-tests/steps';
 
 registerApiSteps(test);
 registerUiSteps(test);
@@ -304,7 +304,7 @@ DEBUG=false
 
   const readme = `# stack-tests
 
-Generated Playwright + BDD test package powered by @kata/stack-tests.
+Generated Playwright + BDD test package powered by @esimplicity/stack-tests.
 
 ## Install
 - Install deps in this folder: (see commands printed by the generator)
@@ -317,13 +317,13 @@ Generated Playwright + BDD test package powered by @kata/stack-tests.
 
 ## Structure
 - \`features/api|ui|hybrid|tui\`: feature files
-- \`features/steps/steps.ts\`: registers steps from @kata/stack-tests
+- \`features/steps/steps.ts\`: registers steps from @esimplicity/stack-tests
 - \`features/steps/fixtures.ts\`: creates the Playwright-BDD test with adapters
 - \`playwright.config.ts\`: BDD-aware Playwright config with reporters
 
 ## Notes
 - Edit \`playwright.config.ts\` projects/tags to match your repo.
-- Keep @playwright/test and playwright-bdd versions aligned with @kata/stack-tests peer ranges.
+- Keep @playwright/test and playwright-bdd versions aligned with @esimplicity/stack-tests peer ranges.
 
 ## TUI Testing (Optional)
 To enable terminal user interface testing:
