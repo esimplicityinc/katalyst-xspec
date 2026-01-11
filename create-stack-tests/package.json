@@ -1,6 +1,6 @@
 {
   "name": "@esimplicityinc/create-stack-tests",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": false,
   "type": "commonjs",
   "bin": {
