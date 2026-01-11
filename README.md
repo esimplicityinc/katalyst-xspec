@@ -105,20 +105,20 @@ npm run lint --workspaces
 ### From npm (Recommended)
 
 ```bash
-npm install @esimplicityinc/stack-tests
+npm install @esimplicity/stack-tests
 
 # or scaffold a new project
-npx @esimplicityinc/create-stack-tests my-tests
+npx @esimplicity/create-stack-tests my-tests
 ```
 
 ### From GitHub Packages
 
-Alternatively, install from GitHub Packages:
+For internal use, install from GitHub Packages:
 
 1. Create or update `.npmrc` in your project root:
 
 ```
-@esimplicity:registry=https://npm.pkg.github.com
+@esimplicityinc:registry=https://npm.pkg.github.com
 //npm.pkg.github.com/:_authToken=${NPM_TOKEN}
 ```
 
@@ -135,6 +135,10 @@ export NPM_TOKEN=your_github_token
 ```bash
 npm install @esimplicityinc/stack-tests
 ```
+
+> **Note:** Packages are published with different scopes:
+> - **npm:** `@esimplicity/stack-tests`
+> - **GitHub Packages:** `@esimplicityinc/stack-tests`
 
 ## Publishing
 
