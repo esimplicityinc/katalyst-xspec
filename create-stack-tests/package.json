@@ -10,6 +10,9 @@
     "create-stack-tests": "bin/create-stack-tests.js"
   },
   "description": "Scaffold a Playwright-BDD stack-tests project",
+  "scripts": {
+    "build": "echo 'No build required'"
+  },
   "files": ["bin"],
   "engines": {
     "node": ">=18"
