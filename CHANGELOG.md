@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - 2026-01-10
+
+### Added
+
+- **`upgrade-stack-tests` CLI**: New command to check for and install updates to `@esimplicityinc/stack-tests`.
+  - `npx upgrade-stack-tests` - Upgrade to latest version
+  - `npx upgrade-stack-tests --check` - Check for updates without installing
+  - `npx upgrade-stack-tests -v 0.1.1` - Install a specific version
+
+### Changed
+
+- `create-stack-tests` package now includes both `create-stack-tests` and `upgrade-stack-tests` binaries.
+
 ## [0.1.1] - 2026-01-10
 
 ### Fixed
@@ -15,16 +28,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Updated `docs/concepts/tag-system.md` to document the step-level tag expression pattern.
-
-### Files Changed
-
-- `stack-tests/src/steps/api.http.ts`
-- `stack-tests/src/steps/api.auth.ts`
-- `stack-tests/src/steps/api.assertion.ts`
-- `stack-tests/src/steps/ui.basic.ts`
-- `stack-tests/src/steps/ui.wizard.ts`
-- `stack-tests/package.json`
-- `docs/concepts/tag-system.md`
 
 ## [0.1.0] - 2025-01-09
 
