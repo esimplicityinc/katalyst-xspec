@@ -4,12 +4,16 @@
   "version": "0.0.0",
   "workspaces": [
     "stack-tests",
-    "create-stack-tests"
+    "create-stack-tests",
+    "website"
   ],
   "scripts": {
     "build": "npm -ws run build",
     "lint": "echo 'no lint configured'",
-    "test": "npm -ws run test --if-present"
+    "test": "npm -ws run test --if-present",
+    "docs": "npm run start --workspace=website",
+    "docs:build": "npm run build --workspace=website",
+    "docs:serve": "npm run serve --workspace=website"
   },
   "devDependencies": {
     "typescript": "^5.9.3"

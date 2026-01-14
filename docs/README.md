@@ -50,7 +50,7 @@ A comprehensive BDD testing framework built on Playwright, providing reusable fi
 - [Release Process](./contributing/release-process.md) - Versioning & publishing
 
 ### Examples
-- [Runnable Examples](../examples/README.md) - Working test projects
+- [Runnable Examples](https://github.com/esimplicityinc/katalyst-bdd-test/tree/main/examples) - Working test projects
 
 ---
 
@@ -122,4 +122,4 @@ Feature: User Management API
 
 ## License
 
-See [LICENSE](../LICENSE) in the root of the repository.
+See [LICENSE](https://github.com/esimplicityinc/katalyst-bdd-test/blob/main/LICENSE) in the root of the repository.

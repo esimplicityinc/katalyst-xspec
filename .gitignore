@@ -21,6 +21,10 @@ out/
 coverage/
 *.tsbuildinfo
 
+# --- Docusaurus ---
+website/build/
+website/.docusaurus/
+
 # --- Local environment files ---
 .env
 .env.*
