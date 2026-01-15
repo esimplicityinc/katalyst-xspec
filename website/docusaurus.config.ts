@@ -3,9 +3,9 @@ import type { Config } from "@docusaurus/types";
 import type * as Preset from "@docusaurus/preset-classic";
 
 const config: Config = {
-  title: "@kata/stack-tests",
+  title: "Katalyst",
   tagline:
-    "A comprehensive BDD testing framework built on Playwright for API, UI, TUI, and hybrid testing",
+    "Domain-Driven Design meets BDD testing with AI Agent Swarms",
   favicon: "img/favicon.ico",
 
   // Set the production url of your site here
@@ -57,9 +57,9 @@ const config: Config = {
       theme: { light: "neutral", dark: "dark" },
     },
     navbar: {
-      title: "@kata/stack-tests",
+      title: "Katalyst",
       logo: {
-        alt: "Stack Tests Logo",
+        alt: "Katalyst Logo",
         src: "img/logo.svg",
         href: "/docs/",
       },
