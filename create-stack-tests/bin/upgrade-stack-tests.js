@@ -5,7 +5,7 @@ const { execSync, spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-const PACKAGE_NAME = '@esimplicityinc/stack-tests';
+const PACKAGE_NAME = '@esimplicity/stack-tests';
 const NPM_PACKAGE_NAME = '@esimplicity/stack-tests';
 
 function log(msg) {
@@ -101,7 +101,7 @@ function showHelp() {
   console.log(`
 Usage: npx upgrade-stack-tests [options]
 
-Upgrade @esimplicityinc/stack-tests to the latest version.
+Upgrade @esimplicity/stack-tests to the latest version.
 
 Options:
   -c, --check        Check for updates without installing

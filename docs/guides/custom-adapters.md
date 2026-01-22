@@ -48,7 +48,7 @@ classDiagram
 
 ```typescript
 // adapters/axios-api.adapter.ts
-import type { ApiPort, ApiMethod, ApiResult } from '@kata/stack-tests';
+import type { ApiPort, ApiMethod, ApiResult } from '@esimplicity/stack-tests';
 import axios, { AxiosInstance } from 'axios';
 
 export class AxiosApiAdapter implements ApiPort {
@@ -121,7 +121,7 @@ export class AxiosApiAdapter implements ApiPort {
 
 ```typescript
 // features/steps/fixtures.ts
-import { createBddTest } from '@kata/stack-tests';
+import { createBddTest } from '@esimplicity/stack-tests';
 import { AxiosApiAdapter } from './adapters/axios-api.adapter';
 
 export const test = createBddTest({
@@ -135,7 +135,7 @@ export const test = createBddTest({
 
 ```typescript
 // adapters/oauth-auth.adapter.ts
-import type { AuthPort, ApiPort, UiPort, World } from '@kata/stack-tests';
+import type { AuthPort, ApiPort, UiPort, World } from '@esimplicity/stack-tests';
 
 export class OAuthAuthAdapter implements AuthPort {
   constructor(
@@ -220,8 +220,8 @@ export const test = createBddTest({
 
 ```typescript
 // adapters/custom-cleanup.adapter.ts
-import type { CleanupPort, World } from '@kata/stack-tests';
-import { registerCleanup } from '@kata/stack-tests';
+import type { CleanupPort, World } from '@esimplicity/stack-tests';
+import { registerCleanup } from '@esimplicity/stack-tests';
 
 type CleanupRule = {
   varMatch: string | RegExp;
@@ -277,7 +277,7 @@ export const test = createBddTest({
 
 ```typescript
 // adapters/logging-api.adapter.ts
-import type { ApiPort, ApiMethod, ApiResult } from '@kata/stack-tests';
+import type { ApiPort, ApiMethod, ApiResult } from '@esimplicity/stack-tests';
 
 export class LoggingApiAdapter implements ApiPort {
   constructor(private delegate: ApiPort) {}
@@ -322,7 +322,7 @@ export class LoggingApiAdapter implements ApiPort {
 ### Use Logging Wrapper
 
 ```typescript
-import { PlaywrightApiAdapter } from '@kata/stack-tests';
+import { PlaywrightApiAdapter } from '@esimplicity/stack-tests';
 import { LoggingApiAdapter } from './adapters/logging-api.adapter';
 
 export const test = createBddTest({
@@ -339,7 +339,7 @@ export const test = createBddTest({
 
 ```typescript
 // adapters/retry-api.adapter.ts
-import type { ApiPort, ApiMethod, ApiResult } from '@kata/stack-tests';
+import type { ApiPort, ApiMethod, ApiResult } from '@esimplicity/stack-tests';
 
 export class RetryApiAdapter implements ApiPort {
   constructor(
@@ -401,7 +401,7 @@ export class RetryApiAdapter implements ApiPort {
 
 ```typescript
 // adapters/mock-api.adapter.ts
-import type { ApiPort, ApiMethod, ApiResult } from '@kata/stack-tests';
+import type { ApiPort, ApiMethod, ApiResult } from '@esimplicity/stack-tests';
 
 type MockResponse = {
   status: number;

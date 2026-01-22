@@ -1,6 +1,6 @@
 # Coding Standards
 
-Style guidelines and conventions for @kata/stack-tests development.
+Style guidelines and conventions for @esimplicity/stack-tests development.
 
 ## TypeScript Guidelines
 

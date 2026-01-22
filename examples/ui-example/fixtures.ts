@@ -1,5 +1,5 @@
-import { createBddTest, PlaywrightUiAdapter } from '@kata/stack-tests';
-import { registerUiSteps, registerSharedSteps } from '@kata/stack-tests/steps';
+import { createBddTest, PlaywrightUiAdapter } from '@esimplicity/stack-tests';
+import { registerUiSteps, registerSharedSteps } from '@esimplicity/stack-tests/steps';
 
 // Create test fixtures with UI adapter
 export const { test, expect } = createBddTest({

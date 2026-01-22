@@ -5,7 +5,7 @@ Complete reference for shared step definitions (variables and cleanup).
 ## Registration
 
 ```typescript
-import { registerSharedSteps } from '@kata/stack-tests/steps';
+import { registerSharedSteps } from '@esimplicity/stack-tests/steps';
 
 registerSharedSteps(test);
 ```

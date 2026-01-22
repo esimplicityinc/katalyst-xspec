@@ -78,7 +78,7 @@ function main() {
   }
 
   // Always show success message
-  console.log(`${GREEN}${BOLD}@esimplicityinc/stack-tests${RESET} installed successfully!`);
+  console.log(`${GREEN}${BOLD}@esimplicity/stack-tests${RESET} installed successfully!`);
   console.log('');
 }
 

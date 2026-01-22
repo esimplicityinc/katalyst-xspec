@@ -1,6 +1,6 @@
 # Development Setup
 
-Complete guide to setting up your local development environment for contributing to @kata/stack-tests.
+Complete guide to setting up your local development environment for contributing to @esimplicity/stack-tests.
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ Complete guide to setting up your local development environment for contributing
 
 ```
 testconvergence/
-├── stack-tests/              # Core library (@kata/stack-tests)
+├── stack-tests/              # Core library (@esimplicity/stack-tests)
 │   ├── src/
 │   │   ├── ports/            # Interface definitions
 │   │   ├── adapters/         # Adapter implementations
@@ -225,7 +225,7 @@ npm link
 
 # Use in test project
 cd ../my-test-project
-npm link @kata/stack-tests
+npm link @esimplicity/stack-tests
 
 # Make changes, rebuild, and test
 cd ../stack-tests

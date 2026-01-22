@@ -5,7 +5,7 @@ Complete reference for all `@ui` tagged step definitions.
 ## Registration
 
 ```typescript
-import { registerUiSteps } from '@kata/stack-tests/steps';
+import { registerUiSteps } from '@esimplicity/stack-tests/steps';
 
 registerUiSteps(test);
 ```

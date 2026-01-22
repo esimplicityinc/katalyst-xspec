@@ -1,6 +1,6 @@
 # TUI Testing Guide
 
-Comprehensive guide to terminal user interface testing with @kata/stack-tests.
+Comprehensive guide to terminal user interface testing with @esimplicity/stack-tests.
 
 ## Overview
 
@@ -49,7 +49,7 @@ npm install -D tui-tester
 import {
   createBddTest,
   TuiTesterAdapter,
-} from '@kata/stack-tests';
+} from '@esimplicity/stack-tests';
 
 export const test = createBddTest({
   createTui: () => new TuiTesterAdapter({
@@ -65,7 +65,7 @@ export const test = createBddTest({
 
 ```typescript
 // features/steps/steps.ts
-import { registerTuiSteps } from '@kata/stack-tests/steps';
+import { registerTuiSteps } from '@esimplicity/stack-tests/steps';
 
 registerTuiSteps(test);
 ```

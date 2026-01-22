@@ -1,6 +1,6 @@
 # Adapters Reference
 
-Complete reference for all adapter implementations in @kata/stack-tests.
+Complete reference for all adapter implementations in @esimplicity/stack-tests.
 
 ## Overview
 
@@ -34,7 +34,7 @@ HTTP API adapter using Playwright's request context.
 ### Import
 
 ```typescript
-import { PlaywrightApiAdapter } from '@kata/stack-tests';
+import { PlaywrightApiAdapter } from '@esimplicity/stack-tests';
 ```
 
 ### Constructor
@@ -50,7 +50,7 @@ new PlaywrightApiAdapter(request: APIRequestContext)
 ### Usage
 
 ```typescript
-import { createBddTest, PlaywrightApiAdapter } from '@kata/stack-tests';
+import { createBddTest, PlaywrightApiAdapter } from '@esimplicity/stack-tests';
 
 const test = createBddTest({
   createApi: ({ apiRequest }) => new PlaywrightApiAdapter(apiRequest),
@@ -73,7 +73,7 @@ Browser UI adapter using Playwright's Page.
 ### Import
 
 ```typescript
-import { PlaywrightUiAdapter } from '@kata/stack-tests';
+import { PlaywrightUiAdapter } from '@esimplicity/stack-tests';
 ```
 
 ### Constructor
@@ -89,7 +89,7 @@ new PlaywrightUiAdapter(page: Page)
 ### Usage
 
 ```typescript
-import { createBddTest, PlaywrightUiAdapter } from '@kata/stack-tests';
+import { createBddTest, PlaywrightUiAdapter } from '@esimplicity/stack-tests';
 
 const test = createBddTest({
   createUi: ({ page }) => new PlaywrightUiAdapter(page),
@@ -126,7 +126,7 @@ Terminal UI adapter using tui-tester library.
 ### Import
 
 ```typescript
-import { TuiTesterAdapter } from '@kata/stack-tests';
+import { TuiTesterAdapter } from '@esimplicity/stack-tests';
 ```
 
 ### Constructor
@@ -155,7 +155,7 @@ type TuiConfig = {
 ### Usage
 
 ```typescript
-import { createBddTest, TuiTesterAdapter } from '@kata/stack-tests';
+import { createBddTest, TuiTesterAdapter } from '@esimplicity/stack-tests';
 
 const test = createBddTest({
   createTui: () => new TuiTesterAdapter({
@@ -188,7 +188,7 @@ Authentication adapter supporting both API and UI login.
 ### Import
 
 ```typescript
-import { UniversalAuthAdapter } from '@kata/stack-tests';
+import { UniversalAuthAdapter } from '@esimplicity/stack-tests';
 ```
 
 ### Constructor
@@ -205,7 +205,7 @@ new UniversalAuthAdapter(deps: { api: ApiPort; ui: UiPort })
 ### Usage
 
 ```typescript
-import { createBddTest, UniversalAuthAdapter } from '@kata/stack-tests';
+import { createBddTest, UniversalAuthAdapter } from '@esimplicity/stack-tests';
 
 const test = createBddTest({
   createAuth: ({ api, ui }) => new UniversalAuthAdapter({ api, ui }),
@@ -243,7 +243,7 @@ Resource cleanup adapter with rule-based cleanup registration.
 ### Import
 
 ```typescript
-import { DefaultCleanupAdapter } from '@kata/stack-tests';
+import { DefaultCleanupAdapter } from '@esimplicity/stack-tests';
 ```
 
 ### Constructor
@@ -268,7 +268,7 @@ type CleanupRule = {
 ### Usage
 
 ```typescript
-import { createBddTest, DefaultCleanupAdapter } from '@kata/stack-tests';
+import { createBddTest, DefaultCleanupAdapter } from '@esimplicity/stack-tests';
 
 // With default rules
 const test = createBddTest({
@@ -321,7 +321,7 @@ When `allowHeuristic: true` (or `CLEANUP_ALLOW_ALL=true`), cleanup is registered
 ### Implement a Port Interface
 
 ```typescript
-import type { ApiPort, ApiResult, ApiMethod } from '@kata/stack-tests';
+import type { ApiPort, ApiResult, ApiMethod } from '@esimplicity/stack-tests';
 
 export class CustomApiAdapter implements ApiPort {
   async sendJson(

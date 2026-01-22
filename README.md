@@ -6,8 +6,8 @@ Internal monorepo for Playwright BDD testing utilities and scaffolding.
 
 | Package | Description |
 |---------|-------------|
-| **@esimplicityinc/stack-tests** (`stack-tests/`) | Reusable fixtures, ports, adapters, and step definitions for API/UI/TUI testing |
-| **@esimplicityinc/create-stack-tests** (`create-stack-tests/`) | CLI to scaffold a new Playwright-BDD test project |
+| **@esimplicity/stack-tests** (`stack-tests/`) | Reusable fixtures, ports, adapters, and step definitions for API/UI/TUI testing |
+| **@esimplicity/create-stack-tests** (`create-stack-tests/`) | CLI to scaffold a new Playwright-BDD test project |
 
 ## Quick Start
 
@@ -16,10 +16,10 @@ Internal monorepo for Playwright BDD testing utilities and scaffolding.
 npm install
 
 # Build the library
-npm run build -w @esimplicityinc/stack-tests
+npm run build -w @esimplicity/stack-tests
 
 # Scaffold a new test project
-npx @esimplicityinc/create-stack-tests my-tests
+npx @esimplicity/create-stack-tests my-tests
 ```
 
 ## Documentation

@@ -300,7 +300,7 @@ function initWorld(): World {
 Extend the world for domain-specific state:
 
 ```typescript
-import { World, initWorld, createBddTest } from '@kata/stack-tests';
+import { World, initWorld, createBddTest } from '@esimplicity/stack-tests';
 
 interface MyWorld extends World {
   currentUser?: { id: string; email: string };

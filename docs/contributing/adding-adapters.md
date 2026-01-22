@@ -1,6 +1,6 @@
 # Adding New Adapters
 
-Guide to implementing adapter classes for @kata/stack-tests ports.
+Guide to implementing adapter classes for @esimplicity/stack-tests ports.
 
 ## Overview
 

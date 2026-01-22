@@ -1,6 +1,6 @@
 # Ports Reference
 
-Complete reference for all port interfaces in @kata/stack-tests.
+Complete reference for all port interfaces in @esimplicity/stack-tests.
 
 ## Overview
 
@@ -21,7 +21,7 @@ HTTP API operations interface.
 ### Import
 
 ```typescript
-import type { ApiPort, ApiMethod, ApiResult } from '@kata/stack-tests';
+import type { ApiPort, ApiMethod, ApiResult } from '@esimplicity/stack-tests';
 ```
 
 ### Interface
@@ -124,7 +124,7 @@ import type {
   UiUrlAssertMode, 
   UiLocatorMethod, 
   UiElementState 
-} from '@kata/stack-tests';
+} from '@esimplicity/stack-tests';
 ```
 
 ### Interface
@@ -237,7 +237,7 @@ import type {
   TuiSnapshotResult,
   TuiMouseEvent,
   TuiMouseButton,
-} from '@kata/stack-tests';
+} from '@esimplicity/stack-tests';
 ```
 
 ### Interface
@@ -349,7 +349,7 @@ Authentication operations interface.
 ### Import
 
 ```typescript
-import type { AuthPort } from '@kata/stack-tests';
+import type { AuthPort } from '@esimplicity/stack-tests';
 ```
 
 ### Interface
@@ -395,7 +395,7 @@ Resource cleanup interface.
 ### Import
 
 ```typescript
-import type { CleanupPort } from '@kata/stack-tests';
+import type { CleanupPort } from '@esimplicity/stack-tests';
 ```
 
 ### Interface

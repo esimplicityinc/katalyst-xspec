@@ -1,6 +1,6 @@
 # Utilities Reference
 
-Helper functions exported by @kata/stack-tests.
+Helper functions exported by @esimplicity/stack-tests.
 
 ## Variable Interpolation
 
@@ -9,7 +9,7 @@ Helper functions exported by @kata/stack-tests.
 Replaces `{varName}` placeholders with values from a variables object.
 
 ```typescript
-import { interpolate } from '@kata/stack-tests';
+import { interpolate } from '@esimplicity/stack-tests';
 ```
 
 #### Signature
@@ -59,7 +59,7 @@ interpolate('Missing: {unknown}', vars);
 Safely parses a JSON string, returning undefined on failure.
 
 ```typescript
-import { tryParseJson } from '@kata/stack-tests';
+import { tryParseJson } from '@esimplicity/stack-tests';
 ```
 
 #### Signature
@@ -88,7 +88,7 @@ tryParseJson('');
 Accesses nested properties using JSONPath-like syntax.
 
 ```typescript
-import { selectPath } from '@kata/stack-tests';
+import { selectPath } from '@esimplicity/stack-tests';
 ```
 
 #### Signature
@@ -152,7 +152,7 @@ selectPath(data, 'nonexistent');
 Parses expected values with type coercion and variable interpolation.
 
 ```typescript
-import { parseExpected } from '@kata/stack-tests';
+import { parseExpected } from '@esimplicity/stack-tests';
 ```
 
 #### Signature
@@ -193,7 +193,7 @@ parseExpected('hello', world);    // 'hello'
 Asserts that a value equals `'****'` (masked value).
 
 ```typescript
-import { assertMasked } from '@kata/stack-tests';
+import { assertMasked } from '@esimplicity/stack-tests';
 ```
 
 #### Signature
@@ -218,7 +218,7 @@ assertMasked('secret'); // Throws error
 Adds an item to the world's cleanup queue.
 
 ```typescript
-import { registerCleanup } from '@kata/stack-tests';
+import { registerCleanup } from '@esimplicity/stack-tests';
 ```
 
 #### Signature
@@ -272,7 +272,7 @@ registerCleanup(world, {
 Creates a new initialized World object.
 
 ```typescript
-import { initWorld } from '@kata/stack-tests';
+import { initWorld } from '@esimplicity/stack-tests';
 ```
 
 #### Signature
@@ -308,7 +308,7 @@ world.headers['Authorization'] = 'Bearer token';
 The test state container type.
 
 ```typescript
-import type { World, CleanupItem } from '@kata/stack-tests';
+import type { World, CleanupItem } from '@esimplicity/stack-tests';
 ```
 
 #### Definition
@@ -345,7 +345,7 @@ type CleanupItem = {
 ```typescript
 import { createBdd } from 'playwright-bdd';
 import { test } from './fixtures';
-import { interpolate, selectPath, registerCleanup } from '@kata/stack-tests';
+import { interpolate, selectPath, registerCleanup } from '@esimplicity/stack-tests';
 
 const { When, Then } = createBdd(test);
 

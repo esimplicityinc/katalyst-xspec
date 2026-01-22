@@ -59,7 +59,7 @@ Environment variables and configuration helpers.
 Builds tag filter expressions with default excludes.
 
 ```typescript
-import { tagsForProject } from '@kata/stack-tests';
+import { tagsForProject } from '@esimplicity/stack-tests';
 ```
 
 #### Signature
@@ -114,7 +114,7 @@ tagsForProject({
 Normalizes tag filter input from environment or CLI.
 
 ```typescript
-import { resolveExtraTags } from '@kata/stack-tests';
+import { resolveExtraTags } from '@esimplicity/stack-tests';
 ```
 
 #### Signature
@@ -173,7 +173,7 @@ resolveExtraTags('@smoke')
 // playwright.config.ts
 import { defineConfig } from '@playwright/test';
 import { defineBddProject, cucumberReporter } from 'playwright-bdd';
-import { tagsForProject, resolveExtraTags } from '@kata/stack-tests';
+import { tagsForProject, resolveExtraTags } from '@esimplicity/stack-tests';
 import dotenv from 'dotenv';
 
 dotenv.config();

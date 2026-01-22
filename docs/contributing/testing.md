@@ -1,6 +1,6 @@
 # Testing the Framework
 
-Guide to writing and running tests for @kata/stack-tests itself.
+Guide to writing and running tests for @esimplicity/stack-tests itself.
 
 ## Test Architecture
 
@@ -445,7 +445,7 @@ describe('create-stack-tests CLI', () => {
     expect(existsSync(pkgPath)).toBe(true);
 
     const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
-    expect(pkg.dependencies).toHaveProperty('@kata/stack-tests');
+    expect(pkg.dependencies).toHaveProperty('@esimplicity/stack-tests');
     expect(pkg.dependencies).toHaveProperty('@playwright/test');
   });
 

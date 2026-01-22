@@ -111,7 +111,7 @@ const config: Config = {
             },
             {
               label: "npm",
-              href: "https://www.npmjs.com/package/@esimplicityinc/stack-tests",
+              href: "https://www.npmjs.com/package/@esimplicity/stack-tests",
             },
           ],
         },

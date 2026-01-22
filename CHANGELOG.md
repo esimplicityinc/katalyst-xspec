@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.6] - 2026-01-21
+
+### Added
+
+- **New UI step definitions**:
+  - `ui.form.ts` - Bulk form filling steps
+  - `ui.debug.ts` - Debugging utility steps
+  - `ui.layout.ts` - Panel, split view, and responsive layout assertions
+  - `ui.auth.ts` - Fetch intercept authentication steps
+- **Feature flag system**: Added `setFlag()` and `isFlagEnabled()` utilities with `shared.flags.ts` step definitions for conditional test logic.
+- **Fetch intercept auth adapter**: New `FetchInterceptAuthAdapter` for UI authentication via fetch request interception.
+- **TUI steps in registerAllSteps**: `registerAllSteps()` now includes TUI steps for complete test suite registration.
+
+### Changed
+
+- **Package name standardization**: Unified all package references to `@esimplicity/stack-tests` across documentation, examples, website, and tooling (previously mixed `@kata/stack-tests` and `@esimplicityinc/stack-tests`).
+
+### Fixed
+
+- **Unused import**: Removed unused `World` import from `fetch-intercept-auth.adapter.ts`.
+
 ## [0.1.4] - 2026-01-10
 
 ### Fixed
@@ -21,7 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **`upgrade-stack-tests` CLI**: New command to check for and install updates to `@esimplicityinc/stack-tests`.
+- **`upgrade-stack-tests` CLI**: New command to check for and install updates to `@esimplicity/stack-tests`.
   - `npx upgrade-stack-tests` - Upgrade to latest version
   - `npx upgrade-stack-tests --check` - Check for updates without installing
   - `npx upgrade-stack-tests -v 0.1.1` - Install a specific version

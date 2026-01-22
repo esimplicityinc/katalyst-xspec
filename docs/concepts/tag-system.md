@@ -126,7 +126,7 @@ Tag expressions filter which tests run.
 Builds tag expressions with default excludes:
 
 ```typescript
-import { tagsForProject } from '@kata/stack-tests';
+import { tagsForProject } from '@esimplicity/stack-tests';
 
 // Basic - adds default excludes
 tagsForProject({ projectTag: '@api' })
@@ -149,7 +149,7 @@ tagsForProject({
 Normalizes tag input from environment or CLI:
 
 ```typescript
-import { resolveExtraTags } from '@kata/stack-tests';
+import { resolveExtraTags } from '@esimplicity/stack-tests';
 
 // Tag expression (passed through)
 resolveExtraTags('@smoke or @critical')
@@ -175,7 +175,7 @@ resolveExtraTags('')
 ```typescript
 // playwright.config.ts
 import { defineBddProject } from 'playwright-bdd';
-import { tagsForProject, resolveExtraTags } from '@kata/stack-tests';
+import { tagsForProject, resolveExtraTags } from '@esimplicity/stack-tests';
 
 const extraTags = resolveExtraTags(process.env.TEST_TAGS);
 

@@ -5,14 +5,14 @@ import {
   TuiTesterAdapter,
   DefaultAuthAdapter,
   DefaultCleanupAdapter,
-} from '@kata/stack-tests';
+} from '@esimplicity/stack-tests';
 import {
   registerApiSteps,
   registerUiSteps,
   registerTuiSteps,
   registerSharedSteps,
   registerHybridSteps,
-} from '@kata/stack-tests/steps';
+} from '@esimplicity/stack-tests/steps';
 
 // Create test fixtures with all adapters
 export const { test, expect } = createBddTest({

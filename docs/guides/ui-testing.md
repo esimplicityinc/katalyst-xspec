@@ -1,6 +1,6 @@
 # UI Testing Guide
 
-Comprehensive guide to browser-based UI testing with @kata/stack-tests.
+Comprehensive guide to browser-based UI testing with @esimplicity/stack-tests.
 
 ## Overview
 

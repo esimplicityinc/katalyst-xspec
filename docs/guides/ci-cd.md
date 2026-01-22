@@ -1,6 +1,6 @@
 # CI/CD Integration Guide
 
-Run @kata/stack-tests in continuous integration pipelines.
+Run @esimplicity/stack-tests in continuous integration pipelines.
 
 ## GitHub Actions
 

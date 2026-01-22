@@ -1,4 +1,4 @@
-# @kata/stack-tests Documentation
+# @esimplicity/stack-tests Documentation
 
 A comprehensive BDD testing framework built on Playwright, providing reusable fixtures, adapters, and step definitions for API, UI, TUI, and hybrid testing.
 

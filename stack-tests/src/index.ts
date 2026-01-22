@@ -11,5 +11,6 @@ export * from './adapters/ui/playwright-ui.adapter';
 export * from './adapters/auth/universal-auth.adapter';
 export * from './adapters/cleanup/default-cleanup.adapter';
 export * from './adapters/tui/tui-tester.adapter';
+export * from './adapters/ui/fetch-intercept-auth.adapter';
 export * from './steps';
 export * from './config';

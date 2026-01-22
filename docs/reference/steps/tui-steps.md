@@ -5,7 +5,7 @@ Complete reference for all `@tui` tagged step definitions.
 ## Registration
 
 ```typescript
-import { registerTuiSteps } from '@kata/stack-tests/steps';
+import { registerTuiSteps } from '@esimplicity/stack-tests/steps';
 
 registerTuiSteps(test);
 ```

@@ -5,7 +5,7 @@ Complete reference for all `@api` tagged step definitions.
 ## Registration
 
 ```typescript
-import { registerApiSteps } from '@kata/stack-tests/steps';
+import { registerApiSteps } from '@esimplicity/stack-tests/steps';
 
 registerApiSteps(test);
 ```

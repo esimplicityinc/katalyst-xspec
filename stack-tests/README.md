@@ -1,4 +1,4 @@
-# @kata/stack-tests
+# @esimplicity/stack-tests
 
 Reusable Playwright-BDD fixtures, ports, adapters, and step registrations for API, UI, and hybrid testing. Designed to be consumed as a dev dependency across repos.
 
@@ -9,13 +9,13 @@ GitHub Packages (recommended for release builds):
 ```bash
 npm config set @kata:registry https://npm.pkg.github.com
 npm set //npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN
-npm install -D @kata/stack-tests @playwright/test playwright-bdd
+npm install -D @esimplicity/stack-tests @playwright/test playwright-bdd
 ```
 
 Workspace/local development (from this monorepo):
 
 ```bash
-bun add -d @kata/stack-tests@"file:../packages/stack-tests" @playwright/test playwright-bdd
+bun add -d @esimplicity/stack-tests@"file:../packages/stack-tests" @playwright/test playwright-bdd
 ```
 
 ## What’s included
@@ -37,7 +37,7 @@ import {
   PlaywrightUiAdapter,
   UniversalAuthAdapter,
   DefaultCleanupAdapter,
-} from '@kata/stack-tests';
+} from '@esimplicity/stack-tests';
 
 export const test = createBddTest({
   createApi: ({ apiRequest }) => new PlaywrightApiAdapter(apiRequest),
@@ -51,7 +51,7 @@ export const test = createBddTest({
 ```ts
 // features/steps/steps_api/index.ts
 import { test } from '../fixtures';
-import { registerApiSteps } from '@kata/stack-tests/steps';
+import { registerApiSteps } from '@esimplicity/stack-tests/steps';
 registerApiSteps(test);
 ```
 

@@ -5,7 +5,7 @@ Complete reference for `@hybrid` tagged step definitions.
 ## Registration
 
 ```typescript
-import { registerHybridSuite } from '@kata/stack-tests/steps';
+import { registerHybridSuite } from '@esimplicity/stack-tests/steps';
 
 registerHybridSuite(test);
 ```

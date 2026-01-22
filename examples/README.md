@@ -1,6 +1,6 @@
-# @kata/stack-tests Examples
+# @esimplicity/stack-tests Examples
 
-Runnable example projects demonstrating @kata/stack-tests usage.
+Runnable example projects demonstrating @esimplicity/stack-tests usage.
 
 ## Available Examples
 

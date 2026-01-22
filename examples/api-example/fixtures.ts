@@ -1,5 +1,5 @@
-import { createBddTest, PlaywrightApiAdapter } from '@kata/stack-tests';
-import { registerApiSteps, registerSharedSteps } from '@kata/stack-tests/steps';
+import { createBddTest, PlaywrightApiAdapter } from '@esimplicity/stack-tests';
+import { registerApiSteps, registerSharedSteps } from '@esimplicity/stack-tests/steps';
 
 // Create test fixtures with API adapter
 export const { test, expect } = createBddTest({

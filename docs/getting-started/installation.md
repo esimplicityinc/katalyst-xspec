@@ -1,6 +1,6 @@
 # Installation
 
-This guide covers installing @kata/stack-tests and its dependencies.
+This guide covers installing @esimplicity/stack-tests and its dependencies.
 
 ## Prerequisites
 
@@ -64,7 +64,7 @@ npm set //npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN
 3. Install the package:
 
 ```bash
-npm install -D @kata/stack-tests
+npm install -D @esimplicity/stack-tests
 ```
 
 4. Install peer dependencies:
@@ -88,12 +88,12 @@ If working within the monorepo:
 npm install
 
 # Or link directly
-npm install -D @kata/stack-tests@"file:../stack-tests"
+npm install -D @esimplicity/stack-tests@"file:../stack-tests"
 ```
 
 ## Peer Dependencies
 
-@kata/stack-tests requires these peer dependencies:
+@esimplicity/stack-tests requires these peer dependencies:
 
 | Package | Version | Required |
 |---------|---------|----------|
@@ -108,7 +108,7 @@ Create a simple test to verify everything works:
 
 ```typescript
 // test-setup.ts
-import { createBddTest } from '@kata/stack-tests';
+import { createBddTest } from '@esimplicity/stack-tests';
 
 const test = createBddTest();
 console.log('Installation successful!');
@@ -145,7 +145,7 @@ your-project/
 
 ## Troubleshooting
 
-### "Cannot find module '@kata/stack-tests'"
+### "Cannot find module '@esimplicity/stack-tests'"
 
 Ensure you've configured the GitHub Packages registry:
 

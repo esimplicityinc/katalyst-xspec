@@ -11,7 +11,7 @@ Complete reference for the `createBddTest` function and fixture system.
 ### Import
 
 ```typescript
-import { createBddTest, type CreateBddTestOptions } from '@kata/stack-tests';
+import { createBddTest, type CreateBddTestOptions } from '@esimplicity/stack-tests';
 ```
 
 ### Signature
@@ -56,7 +56,7 @@ When options are not provided, defaults are used:
 #### Minimal (All Defaults)
 
 ```typescript
-import { createBddTest } from '@kata/stack-tests';
+import { createBddTest } from '@esimplicity/stack-tests';
 
 export const test = createBddTest();
 ```
@@ -64,7 +64,7 @@ export const test = createBddTest();
 #### Custom API Adapter
 
 ```typescript
-import { createBddTest, PlaywrightApiAdapter } from '@kata/stack-tests';
+import { createBddTest, PlaywrightApiAdapter } from '@esimplicity/stack-tests';
 
 export const test = createBddTest({
   createApi: ({ apiRequest }) => {
@@ -77,7 +77,7 @@ export const test = createBddTest({
 #### With TUI Support
 
 ```typescript
-import { createBddTest, TuiTesterAdapter } from '@kata/stack-tests';
+import { createBddTest, TuiTesterAdapter } from '@esimplicity/stack-tests';
 
 export const test = createBddTest({
   createTui: () => new TuiTesterAdapter({
@@ -90,7 +90,7 @@ export const test = createBddTest({
 #### Custom Cleanup Rules
 
 ```typescript
-import { createBddTest, DefaultCleanupAdapter } from '@kata/stack-tests';
+import { createBddTest, DefaultCleanupAdapter } from '@esimplicity/stack-tests';
 
 export const test = createBddTest({
   createCleanup: () => new DefaultCleanupAdapter({
@@ -105,7 +105,7 @@ export const test = createBddTest({
 #### Extended World
 
 ```typescript
-import { createBddTest, initWorld, type World } from '@kata/stack-tests';
+import { createBddTest, initWorld, type World } from '@esimplicity/stack-tests';
 
 interface MyWorld extends World {
   currentUser?: { id: string; email: string };
@@ -243,7 +243,7 @@ After test completion:
 Re-exported base test from playwright-bdd for advanced use cases.
 
 ```typescript
-import { baseTest } from '@kata/stack-tests';
+import { baseTest } from '@esimplicity/stack-tests';
 
 // Extend with custom fixtures
 const customTest = baseTest.extend({
@@ -260,7 +260,7 @@ import type {
   CreateBddTestOptions,
   TuiFactory,
   TuiConfig,
-} from '@kata/stack-tests';
+} from '@esimplicity/stack-tests';
 ```
 
 ### TuiFactory

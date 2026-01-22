@@ -1,6 +1,6 @@
 # Adding New Ports
 
-Guide to creating new port interfaces for @kata/stack-tests.
+Guide to creating new port interfaces for @esimplicity/stack-tests.
 
 ## Overview
 

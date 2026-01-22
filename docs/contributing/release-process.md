@@ -1,6 +1,6 @@
 # Release Process
 
-Guide to versioning, releasing, and publishing @kata/stack-tests packages.
+Guide to versioning, releasing, and publishing @esimplicity/stack-tests packages.
 
 ## Overview
 
@@ -38,7 +38,7 @@ We follow [Semantic Versioning](https://semver.org/):
 
 | Package | Registry | Scope |
 |---------|----------|-------|
-| @kata/stack-tests | GitHub Packages | @kata |
+| @esimplicity/stack-tests | GitHub Packages | @kata |
 | create-stack-tests | GitHub Packages | @kata |
 
 ## Release Workflow
@@ -338,7 +338,7 @@ When introducing breaking changes:
 - [ ] GitHub Release created
 
 ### Post-release
-- [ ] Verify packages installable (`npm install @kata/stack-tests@0.2.0`)
+- [ ] Verify packages installable (`npm install @esimplicity/stack-tests@0.2.0`)
 - [ ] Announce release (Discord, email, etc.)
 - [ ] Update example projects
 - [ ] Monitor for issues
@@ -349,13 +349,13 @@ When introducing breaking changes:
 
 ```bash
 # Check package exists
-npm view @kata/stack-tests@0.2.0
+npm view @esimplicity/stack-tests@0.2.0
 
 # Clear npm cache
 npm cache clean --force
 
 # Try installing again
-npm install @kata/stack-tests@0.2.0
+npm install @esimplicity/stack-tests@0.2.0
 ```
 
 ### Authentication errors
@@ -372,10 +372,10 @@ cat ~/.npmrc | grep npm.pkg.github.com
 
 ```bash
 # Unpublish (within 72 hours)
-npm unpublish @kata/stack-tests@0.2.0
+npm unpublish @esimplicity/stack-tests@0.2.0
 
 # Or deprecate
-npm deprecate @kata/stack-tests@0.2.0 "Use 0.2.1 instead"
+npm deprecate @esimplicity/stack-tests@0.2.0 "Use 0.2.1 instead"
 ```
 
 ## Related Guides

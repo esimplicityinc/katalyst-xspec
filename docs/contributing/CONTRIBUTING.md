@@ -1,6 +1,6 @@
-# Contributing to @kata/stack-tests
+# Contributing to @esimplicity/stack-tests
 
-Welcome! We appreciate your interest in contributing to the @kata/stack-tests BDD testing framework.
+Welcome! We appreciate your interest in contributing to the @esimplicity/stack-tests BDD testing framework.
 
 ## Code of Conduct
 

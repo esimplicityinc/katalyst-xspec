@@ -4,8 +4,8 @@
 
 This is `katalyst-bdd-test`, a reusable Playwright-BDD testing framework providing:
 
-- **`@esimplicityinc/stack-tests`** - Core library with ports, adapters, fixtures, and pre-built step definitions for API, UI, TUI, and hybrid testing
-- **`@esimplicityinc/create-stack-tests`** - CLI scaffolding tool (`npx create-stack-tests`) and upgrade utility (`npx upgrade-stack-tests`)
+- **`@esimplicity/stack-tests`** - Core library with ports, adapters, fixtures, and pre-built step definitions for API, UI, TUI, and hybrid testing
+- **`@esimplicity/create-stack-tests`** - CLI scaffolding tool (`npx create-stack-tests`) and upgrade utility (`npx upgrade-stack-tests`)
 
 ### Key Directories
 

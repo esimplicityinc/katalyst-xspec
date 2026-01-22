@@ -1,6 +1,6 @@
 # Architecture
 
-@kata/stack-tests is built on the **Ports and Adapters** (Hexagonal) architecture pattern, enabling clean separation of concerns and easy extensibility.
+@esimplicity/stack-tests is built on the **Ports and Adapters** (Hexagonal) architecture pattern, enabling clean separation of concerns and easy extensibility.
 
 ## Overview
 
@@ -301,7 +301,7 @@ flowchart TD
 ### Configuration Example
 
 ```typescript
-import { createBddTest } from '@kata/stack-tests';
+import { createBddTest } from '@esimplicity/stack-tests';
 
 // Use all defaults
 const test = createBddTest();

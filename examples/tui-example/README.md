@@ -1,6 +1,6 @@
 # TUI Testing Example
 
-Demonstrates terminal UI testing with @kata/stack-tests using common Unix commands.
+Demonstrates terminal UI testing with @esimplicity/stack-tests using common Unix commands.
 
 ## What This Example Shows
 

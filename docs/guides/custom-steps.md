@@ -25,7 +25,7 @@ flowchart LR
 // features/steps/custom/user.steps.ts
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures';
-import { interpolate } from '@kata/stack-tests';
+import { interpolate } from '@esimplicity/stack-tests';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -71,7 +71,7 @@ Then('the user should see their dashboard', { tags: '@ui' },
 ```typescript
 // features/steps/steps.ts
 import { test } from './fixtures';
-import { registerApiSteps, registerUiSteps } from '@kata/stack-tests/steps';
+import { registerApiSteps, registerUiSteps } from '@esimplicity/stack-tests/steps';
 
 // Register built-in steps
 registerApiSteps(test);
@@ -261,7 +261,7 @@ Then('the response should have a valid user', async ({ world }) => {
 ### Reuse Existing Adapters
 
 ```typescript
-import { interpolate, selectPath, registerCleanup } from '@kata/stack-tests';
+import { interpolate, selectPath, registerCleanup } from '@esimplicity/stack-tests';
 
 When('I create and verify a user', { tags: '@api' }, 
   async ({ api, world }) => {

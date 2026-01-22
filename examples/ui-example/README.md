@@ -1,6 +1,6 @@
 # UI Testing Example
 
-Demonstrates browser UI testing with @kata/stack-tests using The Internet (Heroku) as a test application.
+Demonstrates browser UI testing with @esimplicity/stack-tests using The Internet (Heroku) as a test application.
 
 ## What This Example Shows
 

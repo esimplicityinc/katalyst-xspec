@@ -1,6 +1,6 @@
 # API Testing Guide
 
-Comprehensive guide to testing HTTP APIs with @kata/stack-tests.
+Comprehensive guide to testing HTTP APIs with @esimplicity/stack-tests.
 
 ## Overview
 
