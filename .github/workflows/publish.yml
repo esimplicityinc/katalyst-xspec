@@ -5,15 +5,6 @@ on:
     types: [published]
   workflow_dispatch:
     inputs:
-      publish_target:
-        description: 'Where to publish'
-        required: true
-        default: 'both'
-        type: choice
-        options:
-          - both
-          - npm
-          - github
       dry_run:
         description: 'Dry run (skip actual publish)'
         required: false
@@ -24,7 +15,6 @@ jobs:
   publish-npm:
     name: Publish to npm
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'release' || inputs.publish_target == 'both' || inputs.publish_target == 'npm' }}
 
     steps:
       - name: Checkout repository
@@ -47,9 +37,6 @@ jobs:
       - name: Publish stack-tests to npm
         working-directory: stack-tests
         run: |
-          # Update package name for npm (uses @esimplicity scope)
-          sed -i 's/@esimplicityinc\//@esimplicity\//g' package.json
-          
           PACKAGE_NAME=$(node -p "require('./package.json').name")
           PACKAGE_VERSION=$(node -p "require('./package.json').version")
           
@@ -69,9 +56,6 @@ jobs:
       - name: Publish create-stack-tests to npm
         working-directory: create-stack-tests
         run: |
-          # Update package name for npm (uses @esimplicity scope)
-          sed -i 's/@esimplicityinc\//@esimplicity\//g' package.json
-          
           PACKAGE_NAME=$(node -p "require('./package.json').name")
           PACKAGE_VERSION=$(node -p "require('./package.json').version")
           
@@ -87,68 +71,3 @@ jobs:
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-  publish-github:
-    name: Publish to GitHub Packages
-    runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'release' || inputs.publish_target == 'both' || inputs.publish_target == 'github' }}
-    permissions:
-      contents: read
-      packages: write
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@esimplicityinc'
-
-      - name: Install dependencies
-        run: |
-          rm -rf node_modules package-lock.json
-          npm install
-
-      - name: Build packages
-        run: npm run build
-
-      - name: Publish stack-tests to GitHub Packages
-        working-directory: stack-tests
-        run: |
-          PACKAGE_NAME=$(node -p "require('./package.json').name")
-          PACKAGE_VERSION=$(node -p "require('./package.json').version")
-          
-          # Check if version already exists on GitHub Packages
-          if npm view "${PACKAGE_NAME}@${PACKAGE_VERSION}" version 2>/dev/null; then
-            echo "Version ${PACKAGE_VERSION} already published to GitHub Packages, skipping."
-          elif [ "${{ inputs.dry_run }}" == "true" ]; then
-            echo "DRY RUN: Would publish ${PACKAGE_NAME}@${PACKAGE_VERSION} to GitHub Packages"
-            npm publish --dry-run
-          else
-            echo "Publishing ${PACKAGE_NAME}@${PACKAGE_VERSION} to GitHub Packages"
-            npm publish
-          fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish create-stack-tests to GitHub Packages
-        working-directory: create-stack-tests
-        run: |
-          PACKAGE_NAME=$(node -p "require('./package.json').name")
-          PACKAGE_VERSION=$(node -p "require('./package.json').version")
-          
-          # Check if version already exists on GitHub Packages
-          if npm view "${PACKAGE_NAME}@${PACKAGE_VERSION}" version 2>/dev/null; then
-            echo "Version ${PACKAGE_VERSION} already published to GitHub Packages, skipping."
-          elif [ "${{ inputs.dry_run }}" == "true" ]; then
-            echo "DRY RUN: Would publish ${PACKAGE_NAME}@${PACKAGE_VERSION} to GitHub Packages"
-            npm publish --dry-run
-          else
-            echo "Publishing ${PACKAGE_NAME}@${PACKAGE_VERSION} to GitHub Packages"
-            npm publish
-          fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
