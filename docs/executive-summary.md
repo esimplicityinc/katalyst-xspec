@@ -2,7 +2,7 @@
 
 ## Why This Matters for Your Contracts
 
-Government contracts live or die on three things: **compliance**, **risk mitigation**, and **demonstrable quality**. This framework directly addresses all three—giving you competitive advantages in proposals and protecting your CPARS ratings during performance.
+Government contracts live or die on three things: **compliance**, **risk mitigation**, and **demonstrable quality**. This framework directly addresses all three, giving you competitive advantages in proposals and protecting your CPARS ratings during performance.
 
 ---
 
@@ -25,7 +25,7 @@ Government contracts live or die on three things: **compliance**, **risk mitigat
 - Re-work that eats into margin
 - Strained government relationships
 
-Automated BDD testing catches issues early—when they cost hours to fix, not weeks.
+Automated BDD testing catches issues early, when they cost hours to fix, not weeks.
 
 ---
 
@@ -54,7 +54,7 @@ Manual testing doesn't scale. As systems grow, manual regression becomes:
 - More expensive (burning labor hours)
 - Less reliable (human error)
 
-This framework lets your team write tests once and run them thousands of times—overnight, on every code change, before every release.
+This framework lets your team write tests once and run them thousands of times: overnight, on every code change, before every release.
 
 ---
 
