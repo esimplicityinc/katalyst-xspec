@@ -60,7 +60,7 @@ const config: Config = {
       title: "Katalyst",
       logo: {
         alt: "Katalyst Logo",
-        src: "img/logo.svg",
+        src: "img/logo.png",
         href: "/docs/",
       },
       items: [

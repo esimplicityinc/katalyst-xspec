@@ -4,25 +4,27 @@
  */
 
 :root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
+  /* Teal color palette matching the Katalyst logo */
+  --ifm-color-primary: #2d9d92;
+  --ifm-color-primary-dark: #298d84;
+  --ifm-color-primary-darker: #27857c;
+  --ifm-color-primary-darkest: #206e66;
+  --ifm-color-primary-light: #31ada0;
+  --ifm-color-primary-lighter: #33b5a8;
+  --ifm-color-primary-lightest: #4fc4b8;
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
 }
 
 [data-theme="dark"] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
+  /* Lighter teal for dark mode - matches logo gradient */
+  --ifm-color-primary: #5ecfc3;
+  --ifm-color-primary-dark: #4ac9bc;
+  --ifm-color-primary-darker: #40c6b8;
+  --ifm-color-primary-darkest: #2db8a9;
+  --ifm-color-primary-light: #72d5ca;
+  --ifm-color-primary-lighter: #7cd8ce;
+  --ifm-color-primary-lightest: #a4e5dd;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
 
