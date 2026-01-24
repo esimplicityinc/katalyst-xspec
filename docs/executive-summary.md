@@ -6,6 +6,67 @@ Government contracts live or die on three things: **compliance**, **risk mitigat
 
 ---
 
+## Why BDD Matters in Government Contracting
+
+Behavior-Driven Development (BDD) bridges the gap between what the government *asked for* and what your team *delivers*. In gov con, that gap is where protests happen, where CPARS get dinged, and where margins disappear.
+
+**The core problem:** Government requirements are written by one group, interpreted by another, built by a third, and tested by a fourth. Each handoff introduces drift. By the time software ships, it often doesn't match what the contract actually required.
+
+**BDD fixes this** by expressing requirements as executable tests in plain English:
+
+```gherkin
+Scenario: Unauthorized users cannot access PII
+  Given I am not logged in
+  When I request the employee records endpoint
+  Then I should receive a 401 Unauthorized response
+```
+
+This scenario is:
+- **Readable by COs and auditors** who need to verify compliance
+- **Executable by machines** that run it on every build
+- **Traceable to contract requirements** for audit documentation
+
+When the government asks "does the system do what we paid for?", you have proof, not promises.
+
+---
+
+## BDD and Agentic Coding
+
+AI coding assistants are transforming how software gets built. Agentic coding tools can write features, refactor code, and ship changes with minimal human intervention. This creates a new problem: **how do you trust code you didn't write?**
+
+BDD is the answer.
+
+### The Trust Problem
+
+When an AI agent writes or modifies code:
+- Did it break existing functionality?
+- Does it still meet contract requirements?
+- How do you prove to the government that AI-generated code is compliant?
+
+Without automated tests, you're flying blind. Every AI-generated change becomes a liability.
+
+### BDD as the Guardrail
+
+With BDD in place, agentic coding becomes safe and auditable:
+
+| Without BDD | With BDD |
+|-------------|----------|
+| AI writes code, humans manually verify | AI writes code, BDD tests automatically verify |
+| No proof of correctness | Pass/fail evidence on every change |
+| Risky to let AI move fast | Safe to accelerate delivery |
+| Audit questions are hard to answer | Audit trail is automatic |
+
+### The Competitive Advantage
+
+Contractors who combine agentic coding with BDD can:
+- **Deliver faster** because AI handles implementation while tests ensure correctness
+- **Reduce labor costs** without sacrificing quality or compliance
+- **Scale without risk** because every change is verified against requirements
+
+This is the future of gov con delivery: AI speed with human-verifiable compliance. BDD makes it possible.
+
+---
+
 ## The Business Case
 
 ### Win More Contracts
