@@ -8,6 +8,11 @@ const sidebars: SidebarsConfig = {
       label: "Introduction",
     },
     {
+      type: "doc",
+      id: "executive-summary",
+      label: "Executive Summary",
+    },
+    {
       type: "category",
       label: "Getting Started",
       collapsed: false,
