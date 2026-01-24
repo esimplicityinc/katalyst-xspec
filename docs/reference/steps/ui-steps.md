@@ -111,6 +111,40 @@ When I click the button "{buttonName}"
 
 ---
 
+### When I click the {string} button
+
+Alias for `I click the button {string}` with reversed parameter order.
+
+**Tag:** `@ui`
+
+**Example:**
+```gherkin
+When I click the "Login" button
+When I click the "Submit" button
+```
+
+---
+
+### When I click the element {string}
+
+Clicks an element by CSS selector.
+
+**Tag:** `@ui`
+
+**Parameters:**
+| Name | Type | Description |
+|------|------|-------------|
+| selector | string | CSS selector |
+
+**Example:**
+```gherkin
+When I click the element "#submit-btn"
+When I click the element "input[type='checkbox']"
+When I click the element ".menu-item:first-child"
+```
+
+---
+
 ### When I click the link {string}
 
 Clicks a link by text.
@@ -241,6 +275,40 @@ Fills an input by label.
 ```gherkin
 When I fill the field "Email" with "test@example.com"
 When I fill the field "Password" with "{password}"
+```
+
+---
+
+### When I fill in {string} with {string}
+
+Alias for `I fill the field {string} with {string}`. Common Cucumber phrasing.
+
+**Tag:** `@ui`
+
+**Example:**
+```gherkin
+When I fill in "username" with "tomsmith"
+When I fill in "password" with "secret123"
+```
+
+---
+
+### When I select {string} from dropdown {string}
+
+Selects an option from a dropdown by CSS selector.
+
+**Tag:** `@ui`
+
+**Parameters:**
+| Name | Type | Description |
+|------|------|-------------|
+| option | string | Option label to select |
+| selector | string | CSS selector for dropdown |
+
+**Example:**
+```gherkin
+When I select "Option 1" from dropdown "#dropdown"
+When I select "United States" from dropdown "#country-select"
 ```
 
 ---
@@ -415,6 +483,107 @@ Asserts URL contains substring.
 ```gherkin
 Then the URL should contain "/dashboard"
 Then the URL should contain "{expectedPath}"
+```
+
+---
+
+### Then I should be on page {string}
+
+Alias for `the URL should contain {string}`.
+
+**Tag:** `@ui`
+
+**Example:**
+```gherkin
+Then I should be on page "/dashboard"
+Then I should be on page "/secure"
+```
+
+---
+
+### Then the element {string} should be visible
+
+Asserts an element is visible by CSS selector.
+
+**Tag:** `@ui`
+
+**Parameters:**
+| Name | Type | Description |
+|------|------|-------------|
+| selector | string | CSS selector |
+
+**Example:**
+```gherkin
+Then the element "#username" should be visible
+Then the element ".error-message" should be visible
+Then the element "button[type='submit']" should be visible
+```
+
+---
+
+### Then the element {string} should not be visible
+
+Asserts an element is not visible by CSS selector.
+
+**Tag:** `@ui`
+
+**Example:**
+```gherkin
+Then the element ".loading-spinner" should not be visible
+Then the element "#error" should not be visible
+```
+
+---
+
+### Then the element {string} should have value {string}
+
+Asserts an input element has a specific value.
+
+**Tag:** `@ui`
+
+**Parameters:**
+| Name | Type | Description |
+|------|------|-------------|
+| selector | string | CSS selector |
+| value | string | Expected value |
+
+**Example:**
+```gherkin
+Then the element "#dropdown" should have value "1"
+Then the element "input[name='email']" should have value "test@example.com"
+```
+
+---
+
+### Then the element {string} should be checked
+
+Asserts a checkbox or radio is checked.
+
+**Tag:** `@ui`
+
+**Parameters:**
+| Name | Type | Description |
+|------|------|-------------|
+| selector | string | CSS selector |
+
+**Example:**
+```gherkin
+Then the element "#terms-checkbox" should be checked
+Then the element "input[type='checkbox']:first-of-type" should be checked
+```
+
+---
+
+### Then the element {string} should not be checked
+
+Asserts a checkbox or radio is not checked.
+
+**Tag:** `@ui`
+
+**Example:**
+```gherkin
+Then the element "#newsletter" should not be checked
+Then the element "input[type='checkbox']:last-of-type" should not be checked
 ```
 
 ---

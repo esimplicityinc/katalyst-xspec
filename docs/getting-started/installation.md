@@ -33,10 +33,10 @@ The fastest way to get started is using the `create-stack-tests` CLI:
 
 ```bash
 # From your project root
-npx @kata/create-stack-tests
+npx @esimplicity/create-stack-tests
 
 # Or with a custom directory name
-npx @kata/create-stack-tests --dir e2e-tests
+npx @esimplicity/create-stack-tests --dir e2e-tests
 ```
 
 This creates a complete test package with:
@@ -47,39 +47,25 @@ This creates a complete test package with:
 
 ### Method 2: Manual Installation
 
-#### Via GitHub Packages
-
-1. Configure npm to use GitHub Packages for @kata scope:
-
-```bash
-npm config set @kata:registry https://npm.pkg.github.com
-```
-
-2. Authenticate with GitHub:
-
-```bash
-npm set //npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN
-```
-
-3. Install the package:
+1. Install the package:
 
 ```bash
 npm install -D @esimplicity/stack-tests
 ```
 
-4. Install peer dependencies:
+2. Install peer dependencies:
 
 ```bash
 npm install -D @playwright/test playwright-bdd typescript
 ```
 
-5. (Optional) Install TUI testing support:
+3. (Optional) Install TUI testing support:
 
 ```bash
 npm install -D tui-tester
 ```
 
-#### Local/Workspace Development
+### Local/Workspace Development
 
 If working within the monorepo:
 
@@ -147,11 +133,10 @@ your-project/
 
 ### "Cannot find module '@esimplicity/stack-tests'"
 
-Ensure you've configured the GitHub Packages registry:
+Ensure you've installed the package:
 
 ```bash
-npm config get @kata:registry
-# Should output: https://npm.pkg.github.com
+npm install -D @esimplicity/stack-tests
 ```
 
 ### "tui-tester is not installed"

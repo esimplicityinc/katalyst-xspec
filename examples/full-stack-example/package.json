@@ -5,13 +5,14 @@
   "type": "module",
   "description": "Example project demonstrating full-stack testing with @esimplicity/stack-tests",
   "scripts": {
-    "test": "playwright test",
-    "test:api": "playwright test --grep @api",
-    "test:ui": "playwright test --grep @ui",
-    "test:tui": "playwright test --grep @tui",
-    "test:hybrid": "playwright test --grep @hybrid",
-    "test:headed": "playwright test --headed",
-    "test:debug": "PWDEBUG=1 playwright test"
+    "gen": "bddgen",
+    "test": "bddgen && playwright test",
+    "test:api": "bddgen && playwright test --project=api",
+    "test:ui": "bddgen && playwright test --project=ui",
+    "test:tui": "bddgen && playwright test --project=tui",
+    "test:hybrid": "bddgen && playwright test --project=hybrid",
+    "test:headed": "bddgen && playwright test --headed",
+    "test:debug": "bddgen && PWDEBUG=1 playwright test"
   },
   "dependencies": {
     "@esimplicity/stack-tests": "^0.1.0",

@@ -1,4 +1,5 @@
 import { createBdd } from 'playwright-bdd';
+import { expect } from '@playwright/test';
 import { interpolate } from '../utils';
 
 export function registerUiBasicSteps(test: any): void {
@@ -9,6 +10,11 @@ export function registerUiBasicSteps(test: any): void {
   });
 
   When('I click the button {string}', { tags: '@ui or @hybrid' }, async ({ ui, world }: any, name: string) => {
+    await ui.clickButton(interpolate(name, world.vars));
+  });
+
+  // Alias: "I click the {string} button" (reversed parameter order)
+  When('I click the {string} button', { tags: '@ui or @hybrid' }, async ({ ui, world }: any, name: string) => {
     await ui.clickButton(interpolate(name, world.vars));
   });
 
@@ -24,6 +30,11 @@ export function registerUiBasicSteps(test: any): void {
     await ui.fillLabel(interpolate(label, world.vars), interpolate(value, world.vars));
   });
 
+  // Alias: "I fill in {string} with {string}" (common Cucumber phrasing)
+  When('I fill in {string} with {string}', { tags: '@ui or @hybrid' }, async ({ ui, world }: any, label: string, value: string) => {
+    await ui.fillLabel(interpolate(label, world.vars), interpolate(value, world.vars));
+  });
+
   When('I log in as admin in UI', { tags: '@ui or @hybrid' }, async ({ auth, world }: any) => {
     await auth.uiLoginAsAdmin(world);
   });
@@ -32,11 +43,49 @@ export function registerUiBasicSteps(test: any): void {
     await auth.uiLoginAsUser(world);
   });
 
+  // Element interaction by CSS selector
+  When('I click the element {string}', { tags: '@ui or @hybrid' }, async ({ page, world }: any, selector: string) => {
+    await page.locator(interpolate(selector, world.vars)).click();
+  });
+
+  // Dropdown selection by CSS selector
+  When('I select {string} from dropdown {string}', { tags: '@ui or @hybrid' }, async ({ page, world }: any, option: string, selector: string) => {
+    await page.locator(interpolate(selector, world.vars)).selectOption({ label: interpolate(option, world.vars) });
+  });
+
   Then('I should see text {string}', { tags: '@ui or @hybrid' }, async ({ ui, world }: any, text: string) => {
     await ui.expectText(interpolate(text, world.vars));
   });
 
   Then('the URL should contain {string}', { tags: '@ui or @hybrid' }, async ({ ui, world }: any, part: string) => {
     await ui.expectUrlContains(interpolate(part, world.vars));
+  });
+
+  // Alias: "I should be on page {string}"
+  Then('I should be on page {string}', { tags: '@ui or @hybrid' }, async ({ ui, world }: any, path: string) => {
+    await ui.expectUrlContains(interpolate(path, world.vars));
+  });
+
+  // Element visibility by CSS selector
+  Then('the element {string} should be visible', { tags: '@ui or @hybrid' }, async ({ page, world }: any, selector: string) => {
+    await expect(page.locator(interpolate(selector, world.vars))).toBeVisible();
+  });
+
+  Then('the element {string} should not be visible', { tags: '@ui or @hybrid' }, async ({ page, world }: any, selector: string) => {
+    await expect(page.locator(interpolate(selector, world.vars))).not.toBeVisible();
+  });
+
+  // Element value assertion by CSS selector
+  Then('the element {string} should have value {string}', { tags: '@ui or @hybrid' }, async ({ page, world }: any, selector: string, value: string) => {
+    await expect(page.locator(interpolate(selector, world.vars))).toHaveValue(interpolate(value, world.vars));
+  });
+
+  // Checkbox state assertions
+  Then('the element {string} should be checked', { tags: '@ui or @hybrid' }, async ({ page, world }: any, selector: string) => {
+    await expect(page.locator(interpolate(selector, world.vars))).toBeChecked();
+  });
+
+  Then('the element {string} should not be checked', { tags: '@ui or @hybrid' }, async ({ page, world }: any, selector: string) => {
+    await expect(page.locator(interpolate(selector, world.vars))).not.toBeChecked();
   });
 }

@@ -23,6 +23,11 @@ const sidebars: SidebarsConfig = {
       ],
     },
     {
+      type: "doc",
+      id: "troubleshooting",
+      label: "Troubleshooting",
+    },
+    {
       type: "category",
       label: "Core Concepts",
       items: [
@@ -64,6 +69,7 @@ const sidebars: SidebarsConfig = {
           type: "category",
           label: "Step Reference",
           items: [
+            "reference/steps/quick-reference",
             "reference/steps/api-steps",
             "reference/steps/ui-steps",
             "reference/steps/tui-steps",

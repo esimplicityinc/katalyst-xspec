@@ -5,7 +5,7 @@ Get your first BDD test running in 5 minutes.
 ## Step 1: Scaffold a Test Project
 
 ```bash
-npx @kata/create-stack-tests
+npx @esimplicity/create-stack-tests
 cd stack-tests
 npm install
 ```
@@ -69,10 +69,10 @@ Feature: Health Check API
 
 ## Step 5: Run Tests
 
-Generate and execute tests:
+**Important:** You must generate Playwright tests from feature files before running tests.
 
 ```bash
-# Generate Playwright tests from feature files
+# REQUIRED: Generate Playwright tests from feature files
 npm run gen
 
 # Run all tests
@@ -81,6 +81,8 @@ npm test
 # Or run specific project
 npx playwright test --project=api
 ```
+
+> **Note:** If you see "No tests found" errors, you likely forgot to run `npm run gen`. This step converts your `.feature` files into Playwright test files and must be run whenever you add or modify feature files.
 
 ## Step 6: View Results
 

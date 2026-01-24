@@ -36,10 +36,10 @@ We follow [Semantic Versioning](https://semver.org/):
 
 ## Packages
 
-| Package | Registry | Scope |
-|---------|----------|-------|
-| @esimplicity/stack-tests | GitHub Packages | @kata |
-| create-stack-tests | GitHub Packages | @kata |
+| Package | Registry |
+|---------|----------|
+| @esimplicity/stack-tests | npm |
+| @esimplicity/create-stack-tests | npm |
 
 ## Release Workflow
 
@@ -137,15 +137,11 @@ The CI pipeline automatically:
 
 ## Manual Publishing (if needed)
 
-### GitHub Packages Authentication
+### npm Authentication
 
 ```bash
-# Login to GitHub Packages
-npm login --registry=https://npm.pkg.github.com --scope=@kata
-
-# Or use .npmrc
-echo "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}" >> ~/.npmrc
-echo "@kata:registry=https://npm.pkg.github.com" >> ~/.npmrc
+# Login to npm
+npm login
 ```
 
 ### Publish
@@ -186,8 +182,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@kata'
+          registry-url: 'https://registry.npmjs.org'
       
       - name: Install dependencies
         run: npm ci

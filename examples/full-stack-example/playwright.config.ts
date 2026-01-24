@@ -1,25 +1,48 @@
 import { defineConfig, devices } from '@playwright/test';
-import { defineBddConfig } from 'playwright-bdd';
+import { defineBddProject, cucumberReporter } from 'playwright-bdd';
 
-const testDir = defineBddConfig({
-  features: 'features/**/*.feature',
+// Define separate BDD projects for each test type
+const apiBdd = defineBddProject({
+  name: 'api',
+  features: 'features/api/**/*.feature',
+  steps: 'fixtures.ts',
+});
+
+const uiBdd = defineBddProject({
+  name: 'ui',
+  features: 'features/ui/**/*.feature',
+  steps: 'fixtures.ts',
+});
+
+const tuiBdd = defineBddProject({
+  name: 'tui',
+  features: 'features/tui/**/*.feature',
+  steps: 'fixtures.ts',
+});
+
+const hybridBdd = defineBddProject({
+  name: 'hybrid',
+  features: 'features/hybrid/**/*.feature',
   steps: 'fixtures.ts',
 });
 
 export default defineConfig({
-  testDir,
   timeout: 60000,
   retries: 0,
-  reporter: [['html', { open: 'never' }]],
+  reporter: [
+    ['html', { open: 'never' }],
+    cucumberReporter('html', { outputFile: 'cucumber-report/index.html' }),
+    cucumberReporter('json', { outputFile: 'cucumber-report/report.json' }),
+  ],
   use: {
     baseURL: process.env.UI_BASE_URL || 'https://the-internet.herokuapp.com',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
   projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
+    { ...apiBdd, use: { ...devices['Desktop Chrome'] } },
+    { ...uiBdd, use: { ...devices['Desktop Chrome'] } },
+    { ...tuiBdd },
+    { ...hybridBdd, use: { ...devices['Desktop Chrome'] } },
   ],
 });
