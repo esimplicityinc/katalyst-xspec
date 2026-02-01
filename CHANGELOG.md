@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.8] - 2026-02-01
+
+### Added
+
+- **Agent Skills for AI-assisted development**: Added 5 comprehensive Agent Skills following the [agentskills.io](https://agentskills.io) specification:
+  - `katalyst-bdd-quickstart` - Getting started guide for new users
+  - `katalyst-bdd-step-reference` - Complete step definition reference with all API, UI, TUI, and shared steps
+  - `katalyst-bdd-create-test` - Test creation wizard with patterns for API, UI, TUI, and hybrid testing
+  - `katalyst-bdd-troubleshooting` - Debug and fix common issues
+  - `katalyst-bdd-architecture` - Framework internals and extension guide for custom adapters/steps
+
+- **Skills installation in scaffolder** (`create-stack-tests` v0.1.5):
+  - Interactive prompt to install skills during project scaffolding
+  - Support for multiple AI agent targets: OpenCode, Claude Code, Cursor, and generic
+  - New CLI flags: `--with-skills`, `--no-skills`, `--skills-agents <agents>`
+  - Skills bundled in npm package for offline installation
+
+- **Skills update command** (`upgrade-stack-tests`):
+  - New `--update-skills` flag to refresh installed Agent Skills to latest version
+
+### Changed
+
+- Skills are installed to agent-specific directories following the skills.sh convention:
+  - `.opencode/skills/` for OpenCode
+  - `.claude/skills/` for Claude Code
+  - `.cursor/skills/` for Cursor
+  - `skills/` for generic Agent Skills spec
+
+## [0.1.7] - 2026-01-28
+
+### Changed
+
+- Documentation improvements and troubleshooting section additions
+- Added common UI steps for improved developer experience
+
 ## [0.1.6] - 2026-01-21
 
 ### Added
