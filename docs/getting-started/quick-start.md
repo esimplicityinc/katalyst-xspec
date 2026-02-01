@@ -10,6 +10,8 @@ cd stack-tests
 npm install
 ```
 
+> **Tip:** During scaffolding, you can optionally install [Agent Skills](../guides/agent-skills.md) for AI-assisted development. Add `--with-skills` to enable, or follow the interactive prompts.
+
 ## Step 2: Understand the Structure
 
 The scaffold creates:

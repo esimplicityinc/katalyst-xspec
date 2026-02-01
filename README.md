@@ -29,6 +29,7 @@ Full documentation is available in the [`docs/`](./docs/) folder:
 - **[Getting Started](./docs/getting-started/)** - Installation, quick start, project setup
 - **[Concepts](./docs/concepts/)** - Architecture, world state, test lifecycle, tag system
 - **[Guides](./docs/guides/)** - API, UI, TUI, and hybrid testing guides
+- **[Agent Skills](./docs/guides/agent-skills.md)** - AI-assisted development with OpenCode, Claude Code, Cursor
 - **[Reference](./docs/reference/)** - API reference for ports, adapters, fixtures, and steps
 - **[Contributing](./docs/contributing/)** - How to contribute to the project
 
@@ -79,6 +80,18 @@ Feature Files (.feature)
 | `@ui` | Browser UI scenarios |
 | `@tui` | Terminal UI scenarios |
 | `@hybrid` | Cross-layer scenarios |
+
+## Agent Skills
+
+Katalyst BDD includes [Agent Skills](./docs/guides/agent-skills.md) for AI-assisted development. These help AI coding assistants (OpenCode, Claude Code, Cursor) understand the framework and generate better tests.
+
+```bash
+# Install with Agent Skills
+npx @esimplicity/create-stack-tests --with-skills
+
+# Update skills in existing project
+npx @esimplicity/upgrade-stack-tests --update-skills
+```
 
 ## Development
 

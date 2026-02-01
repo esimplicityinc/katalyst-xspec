@@ -45,6 +45,23 @@ This creates a complete test package with:
 - Step registration
 - Environment template
 
+#### Agent Skills (Optional)
+
+The CLI can also install [Agent Skills](../guides/agent-skills.md) for AI-assisted development:
+
+```bash
+# Install with Agent Skills (you'll be prompted to select agents)
+npx @esimplicity/create-stack-tests --with-skills
+
+# Install skills for specific agents
+npx @esimplicity/create-stack-tests --with-skills --skills-agents opencode,claude
+
+# Skip skills installation
+npx @esimplicity/create-stack-tests --no-skills
+```
+
+Available agent options: `opencode`, `claude`, `cursor`, `generic`
+
 ### Method 2: Manual Installation
 
 1. Install the package:

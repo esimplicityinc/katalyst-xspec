@@ -48,6 +48,7 @@ const sidebars: SidebarsConfig = {
         "guides/custom-adapters",
         "guides/custom-steps",
         "guides/ci-cd",
+        "guides/agent-skills",
       ],
     },
     {
