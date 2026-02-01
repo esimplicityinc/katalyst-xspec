@@ -108,6 +108,20 @@ This creates `features/steps/generated-stubs.ts` with stub implementations for a
 import './generated-stubs.js';
 ```
 
+5. **Use `@wip` tag** to exclude incomplete features from generation:
+```gherkin
+@api @wip
+Feature: Payment Processing
+  # Excluded until steps are implemented
+```
+
+Configure your project to exclude `@wip`:
+```typescript
+tags: '@api and not @wip'
+```
+
+See [Managing Work-in-Progress Features](./concepts/tag-system.md#managing-work-in-progress-features) for details.
+
 ---
 
 ### Steps work in one scenario but not another

@@ -364,6 +364,70 @@ Feature: External Integration
 npx playwright test --grep "not @external"
 ```
 
+### Managing Work-in-Progress Features
+
+When writing features incrementally, you may have scenarios with missing step definitions. Instead of blocking all test generation, use tags to exclude incomplete work:
+
+**Pattern 1: Use `@wip` to exclude incomplete features**
+
+```gherkin
+@api @wip
+Feature: Payment Processing
+  # Step definitions not yet implemented
+  
+  Scenario: Process credit card payment
+    Given the payment gateway is configured
+    When I process payment for "order-123"
+    Then the transaction should be recorded
+```
+
+Configure your project to exclude `@wip`:
+
+```typescript
+// playwright.config.ts
+const apiBdd = defineBddProject({
+  name: 'api',
+  features: 'features/api/**/*.feature',
+  steps: 'features/steps/**/*.ts',
+  tags: '@api and not @wip',  // Exclude work-in-progress
+});
+```
+
+**Pattern 2: Use `@ready` to include only complete features**
+
+```gherkin
+@api @ready
+Feature: User Management
+  # All step definitions implemented
+  
+  Scenario: Create a new user
+    When I POST "/users" with JSON body:
+      """
+      { "email": "test@example.com" }
+      """
+    Then the response status should be 201
+```
+
+```typescript
+// playwright.config.ts
+const apiBdd = defineBddProject({
+  name: 'api',
+  features: 'features/api/**/*.feature',
+  steps: 'features/steps/**/*.ts',
+  tags: '@api and @ready',  // Only generate ready features
+});
+```
+
+**Workflow:**
+
+1. Write feature file with `@wip` tag (or without `@ready`)
+2. Run `npm run gen:stubs` to generate step stubs
+3. Implement step definitions
+4. Remove `@wip` (or add `@ready`) when complete
+5. Run `npm run gen` and `npm test`
+
+This approach lets you develop features incrementally while keeping your test suite runnable.
+
 ## Best Practices
 
 ### Consistent Tagging

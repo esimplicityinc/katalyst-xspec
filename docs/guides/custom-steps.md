@@ -57,6 +57,8 @@ Then:
 3. Move implemented steps to appropriate files
 4. Run `npm run gen` and `npm test`
 
+> **Tip:** While implementing steps incrementally, tag your feature with `@wip` and configure your project to exclude it with `tags: '@api and not @wip'`. This lets you run tests for completed features while working on new ones. See [Managing Work-in-Progress Features](../concepts/tag-system.md#managing-work-in-progress-features).
+
 ## Creating Custom Steps
 
 ### Basic Step File

@@ -51,7 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated Quick Start with new commands
 - Updated Troubleshooting guide with upgrade-related issues
 - Updated Custom Steps guide with step stub generator workflow
-- Detailed specification for future Partial Test Generation feature (`docs/improvements/5.md`)
+- Added "Managing Work-in-Progress Features" section to [Tag System](./docs/concepts/tag-system.md) documenting `@wip`/`@ready` patterns for incremental development
 
 ## [0.1.8] - 2026-02-01
 
