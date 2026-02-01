@@ -8,6 +8,14 @@ const path = require('path');
 const PACKAGE_NAME = '@esimplicity/stack-tests';
 const NPM_PACKAGE_NAME = '@esimplicity/stack-tests';
 
+// Agent skill directories configuration
+const SKILL_AGENTS = {
+  'opencode': '.opencode/skills',
+  'claude-code': '.claude/skills',
+  'cursor': '.cursor/skills',
+  'generic': 'skills',
+};
+
 function log(msg) {
   console.log(`[upgrade-stack-tests] ${msg}`);
 }
@@ -81,6 +89,7 @@ function parseArgs(args) {
     check: false,
     version: null,
     help: false,
+    updateSkills: false,
   };
   
   for (let i = 0; i < args.length; i++) {
@@ -91,6 +100,8 @@ function parseArgs(args) {
       options.version = args[++i];
     } else if (arg === '--help' || arg === '-h') {
       options.help = true;
+    } else if (arg === '--update-skills' || arg === '--skills') {
+      options.updateSkills = true;
     }
   }
   
@@ -106,13 +117,95 @@ Upgrade @esimplicity/stack-tests to the latest version.
 Options:
   -c, --check        Check for updates without installing
   -v, --version VER  Install a specific version
+  --update-skills    Update installed Agent Skills to latest version
   -h, --help         Show this help message
 
 Examples:
   npx upgrade-stack-tests              # Upgrade to latest
   npx upgrade-stack-tests --check      # Check for updates only
   npx upgrade-stack-tests -v 0.1.1     # Install specific version
+  npx upgrade-stack-tests --update-skills  # Update skills only
 `);
+}
+
+function copyDirSync(src, dest) {
+  fs.mkdirSync(dest, { recursive: true });
+  const entries = fs.readdirSync(src, { withFileTypes: true });
+  
+  for (const entry of entries) {
+    const srcPath = path.join(src, entry.name);
+    const destPath = path.join(dest, entry.name);
+    
+    if (entry.isDirectory()) {
+      copyDirSync(srcPath, destPath);
+    } else {
+      fs.copyFileSync(srcPath, destPath);
+    }
+  }
+}
+
+function findInstalledSkillDirs(cwd) {
+  const foundDirs = [];
+  
+  for (const [agent, relPath] of Object.entries(SKILL_AGENTS)) {
+    const fullPath = path.join(cwd, relPath);
+    if (fs.existsSync(fullPath)) {
+      // Check if it contains katalyst skills
+      const entries = fs.readdirSync(fullPath, { withFileTypes: true });
+      const hasKatalystSkills = entries.some(e => 
+        e.isDirectory() && e.name.startsWith('katalyst-bdd-')
+      );
+      if (hasKatalystSkills) {
+        foundDirs.push({ agent, path: fullPath, relPath });
+      }
+    }
+  }
+  
+  return foundDirs;
+}
+
+function updateSkills(cwd) {
+  const skillsSourceDir = path.join(__dirname, '..', 'skills');
+  
+  if (!fs.existsSync(skillsSourceDir)) {
+    error('Skills source directory not found in package');
+    return false;
+  }
+  
+  const installedDirs = findInstalledSkillDirs(cwd);
+  
+  if (installedDirs.length === 0) {
+    log('No Katalyst BDD skills found in current directory.');
+    log('Skills can be installed with: npx create-stack-tests --with-skills');
+    return true;
+  }
+  
+  log(`Found skills in ${installedDirs.length} location(s):`);
+  installedDirs.forEach(d => log(`  - ${d.relPath}`));
+  
+  const skillDirs = fs.readdirSync(skillsSourceDir, { withFileTypes: true })
+    .filter(d => d.isDirectory())
+    .map(d => d.name);
+  
+  let updated = 0;
+  for (const { agent, path: agentSkillsPath, relPath } of installedDirs) {
+    log(`Updating skills in ${relPath}...`);
+    
+    for (const skill of skillDirs) {
+      const srcSkillDir = path.join(skillsSourceDir, skill);
+      const destSkillDir = path.join(agentSkillsPath, skill);
+      
+      // Remove existing and copy fresh
+      if (fs.existsSync(destSkillDir)) {
+        fs.rmSync(destSkillDir, { recursive: true, force: true });
+      }
+      copyDirSync(srcSkillDir, destSkillDir);
+      updated++;
+    }
+  }
+  
+  log(`Updated ${updated} skill(s) across ${installedDirs.length} agent(s).`);
+  return true;
 }
 
 async function main() {
@@ -125,6 +218,14 @@ async function main() {
   }
   
   const cwd = process.cwd();
+  
+  // Handle --update-skills separately
+  if (options.updateSkills) {
+    log('Updating Katalyst BDD Agent Skills...');
+    const success = updateSkills(cwd);
+    process.exit(success ? 0 : 1);
+  }
+  
   const pm = detectPackageManager(cwd);
   
   log(`Detected package manager: ${pm}`);

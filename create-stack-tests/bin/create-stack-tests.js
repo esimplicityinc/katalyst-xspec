@@ -3,6 +3,22 @@
 
 const fs = require('fs/promises');
 const path = require('path');
+const readline = require('readline');
+
+// Agent skill directories configuration
+const SKILL_AGENTS = {
+  'opencode': '.opencode/skills',
+  'claude-code': '.claude/skills',
+  'cursor': '.cursor/skills',
+  'generic': 'skills',
+};
+
+const SKILL_AGENT_LABELS = {
+  'opencode': 'OpenCode (.opencode/skills/)',
+  'claude-code': 'Claude Code (.claude/skills/)',
+  'cursor': 'Cursor (.cursor/skills/)',
+  'generic': 'Generic (skills/)',
+};
 
 async function pathExists(p) {
   try {
@@ -10,6 +26,84 @@ async function pathExists(p) {
     return true;
   } catch {
     return false;
+  }
+}
+
+async function promptYesNo(question) {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+  return new Promise((resolve) => {
+    rl.question(`${question} (y/n) `, (answer) => {
+      rl.close();
+      resolve(answer.toLowerCase().startsWith('y'));
+    });
+  });
+}
+
+async function promptMultiSelect(question, options) {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+  
+  console.log(`\n${question}`);
+  options.forEach((opt, i) => {
+    console.log(`  ${i + 1}. ${opt.label}`);
+  });
+  
+  return new Promise((resolve) => {
+    rl.question('Enter numbers (comma-separated, e.g., 1,2,3): ', (answer) => {
+      rl.close();
+      const indices = answer.split(',')
+        .map(s => parseInt(s.trim(), 10) - 1)
+        .filter(i => i >= 0 && i < options.length);
+      const selected = indices.map(i => options[i].key);
+      resolve(selected.length > 0 ? selected : ['generic']); // Default to generic if none selected
+    });
+  });
+}
+
+async function copyDir(src, dest) {
+  await fs.mkdir(dest, { recursive: true });
+  const entries = await fs.readdir(src, { withFileTypes: true });
+  
+  for (const entry of entries) {
+    const srcPath = path.join(src, entry.name);
+    const destPath = path.join(dest, entry.name);
+    
+    if (entry.isDirectory()) {
+      await copyDir(srcPath, destPath);
+    } else {
+      await fs.copyFile(srcPath, destPath);
+    }
+  }
+}
+
+async function copySkillsToAgents(targetDir, agents, results) {
+  const skillsSourceDir = path.join(__dirname, '..', 'skills');
+  
+  // Check if skills source exists
+  if (!(await pathExists(skillsSourceDir))) {
+    console.log('  Warning: Skills source directory not found, skipping skills installation');
+    return;
+  }
+  
+  // Get list of skill directories
+  const skillDirs = await fs.readdir(skillsSourceDir, { withFileTypes: true });
+  const skills = skillDirs.filter(d => d.isDirectory()).map(d => d.name);
+  
+  for (const agent of agents) {
+    const agentSkillsDir = path.join(targetDir, SKILL_AGENTS[agent]);
+    
+    for (const skill of skills) {
+      const srcSkillDir = path.join(skillsSourceDir, skill);
+      const destSkillDir = path.join(agentSkillsDir, skill);
+      
+      await copyDir(srcSkillDir, destSkillDir);
+      results.skills.push(path.relative(process.cwd(), destSkillDir));
+    }
   }
 }
 
@@ -57,13 +151,26 @@ function commandsFor(pm) {
 }
 
 function parseArgs(argv) {
-  const args = { dir: 'stack-tests', force: false };
+  const args = { 
+    dir: 'stack-tests', 
+    force: false,
+    withSkills: undefined,  // undefined = ask, true = install, false = skip
+    skillsAgents: null,     // null = ask, array = use these agents
+  };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === '--dir' && argv[i + 1]) {
       args.dir = argv[++i];
     } else if (arg === '--force') {
       args.force = true;
+    } else if (arg === '--with-skills') {
+      args.withSkills = true;
+    } else if (arg === '--no-skills') {
+      args.withSkills = false;
+    } else if (arg === '--skills-agents' && argv[i + 1]) {
+      const agentList = argv[++i].split(',').map(s => s.trim()).filter(Boolean);
+      const validAgents = agentList.filter(a => SKILL_AGENTS[a]);
+      args.skillsAgents = validAgents.length > 0 ? validAgents : null;
     }
   }
   return args;
@@ -372,7 +479,7 @@ async function main() {
   const pm = commandsFor(await detectPackageManager(process.cwd()));
   const files = templates('stack-tests');
 
-  const results = { created: [], skipped: [] };
+  const results = { created: [], skipped: [], skills: [] };
   await ensureDir(targetDir);
 
   for (const [rel, content] of Object.entries(files)) {
@@ -390,10 +497,52 @@ async function main() {
     results.skipped.forEach((f) => console.log(`  ~ ${path.relative(process.cwd(), f)}`));
   }
 
+  // Skills installation
+  let installSkills = args.withSkills;
+  if (installSkills === undefined) {
+    // Interactive mode - ask user
+    installSkills = await promptYesNo('\nWould you like to install Katalyst BDD Agent Skills?');
+  }
+
+  if (installSkills) {
+    let agents = args.skillsAgents;
+    if (!agents) {
+      // Interactive mode - ask which agents
+      const agentOptions = Object.entries(SKILL_AGENT_LABELS).map(([key, label]) => ({ key, label }));
+      agents = await promptMultiSelect('Select agents to install skills to:', agentOptions);
+    }
+
+    console.log('\nInstalling skills...');
+    await copySkillsToAgents(targetDir, agents, results);
+
+    if (results.skills.length) {
+      console.log('Installed skills to:');
+      // Group by agent directory
+      const byAgent = {};
+      for (const skillPath of results.skills) {
+        const parts = skillPath.split(path.sep);
+        const agentDir = parts.slice(0, -1).join(path.sep);
+        if (!byAgent[agentDir]) byAgent[agentDir] = [];
+        byAgent[agentDir].push(parts[parts.length - 1]);
+      }
+      for (const [agentDir, skillNames] of Object.entries(byAgent)) {
+        console.log(`  ${agentDir}/`);
+        skillNames.forEach(name => console.log(`    + ${name}/`));
+      }
+    }
+  }
+
   console.log('\nNext steps:');
   console.log(`  1) cd ${path.relative(process.cwd(), targetDir) || '.'}`);
   console.log(`  2) ${pm.install}`);
   console.log(`  3) ${pm.test}`);
+  
+  if (results.skills.length) {
+    console.log('\nSkills installed! Your AI agent can now help you:');
+    console.log('  - Create BDD tests with katalyst-bdd-create-test');
+    console.log('  - Look up step definitions with katalyst-bdd-step-reference');
+    console.log('  - Debug issues with katalyst-bdd-troubleshooting');
+  }
 }
 
 main().catch((err) => {

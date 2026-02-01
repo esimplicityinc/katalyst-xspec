@@ -1,6 +1,6 @@
 {
   "name": "@esimplicityinc/create-stack-tests",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "private": false,
   "type": "commonjs",
   "bin": {
@@ -11,7 +11,7 @@
   "scripts": {
     "build": "echo 'No build required'"
   },
-  "files": ["bin"],
+  "files": ["bin", "skills"],
   "engines": {
     "node": ">=18"
   }
