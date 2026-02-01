@@ -90,8 +90,31 @@ Katalyst BDD includes [Agent Skills](./docs/guides/agent-skills.md) for AI-assis
 npx @esimplicity/create-stack-tests --with-skills
 
 # Update skills in existing project
-npx @esimplicity/upgrade-stack-tests --update-skills
+npx upgrade-stack-tests --update-skills
 ```
+
+## Upgrading
+
+The framework includes powerful upgrade and migration tools:
+
+```bash
+# Check for updates
+npm run check-updates
+
+# Simple package upgrade
+npm run upgrade
+
+# Full scaffolding migration (preserves custom files)
+npm run upgrade:migrate
+
+# Interactive upgrade mode
+npx upgrade-stack-tests -i
+
+# Generate step stubs for missing steps
+npm run gen:stubs
+```
+
+See the [Upgrading Guide](./docs/guides/upgrading.md) for details.
 
 ## Development
 

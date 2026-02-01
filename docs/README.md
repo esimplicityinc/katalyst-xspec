@@ -24,6 +24,7 @@ A comprehensive BDD testing framework built on Playwright, providing reusable fi
 - [Custom Steps](./guides/custom-steps.md) - Domain-specific steps
 - [CI/CD Integration](./guides/ci-cd.md) - GitHub Actions, pipelines
 - [Agent Skills](./guides/agent-skills.md) - AI-assisted development
+- [Upgrading](./guides/upgrading.md) - Version upgrades and migration
 
 ### Reference
 #### API Reference

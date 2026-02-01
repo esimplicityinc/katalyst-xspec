@@ -1,11 +1,12 @@
 {
   "name": "@esimplicityinc/create-stack-tests",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "private": false,
   "type": "commonjs",
   "bin": {
     "create-stack-tests": "bin/create-stack-tests.js",
-    "upgrade-stack-tests": "bin/upgrade-stack-tests.js"
+    "upgrade-stack-tests": "bin/upgrade-stack-tests.js",
+    "generate-step-stubs": "bin/generate-step-stubs.js"
   },
   "description": "Scaffold and manage Playwright-BDD stack-tests projects",
   "scripts": {

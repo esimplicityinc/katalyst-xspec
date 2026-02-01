@@ -99,6 +99,15 @@ registerUiSteps(test);
 
 3. Ensure your scenario has the correct tag (`@api`, `@ui`, `@tui`, `@hybrid`)
 
+4. **Generate step stubs** for missing steps:
+```bash
+npm run gen:stubs
+```
+This creates `features/steps/generated-stubs.ts` with stub implementations for all missing steps. Then add the import to your `steps.ts`:
+```typescript
+import './generated-stubs.js';
+```
+
 ---
 
 ### Steps work in one scenario but not another
@@ -335,6 +344,49 @@ npx playwright show-trace trace.zip
 
 ---
 
+## Upgrade Issues
+
+### "Old version of scaffolding"
+
+After upgrading `@esimplicity/stack-tests`, your scaffolding files may be outdated.
+
+**Solution:**
+
+Use the migration feature to update scaffolding while preserving your customizations:
+
+```bash
+# Preview changes first
+npx upgrade-stack-tests --migrate --dry-run
+
+# Apply migration
+npx upgrade-stack-tests --migrate
+```
+
+See [Upgrading Guide](./guides/upgrading.md) for details.
+
+---
+
+### Custom files lost after update
+
+If you ran the scaffolder again and lost custom files:
+
+1. Check the backup directory (shown during migration)
+2. Restore from backup:
+```bash
+cp /tmp/stack-tests-backup-<timestamp>/steps/my-steps.ts ./features/steps/
+```
+
+**Prevention:** Always use `--migrate` instead of re-running the scaffolder:
+```bash
+# WRONG - overwrites custom files
+npx @esimplicity/create-stack-tests --force
+
+# RIGHT - preserves custom files  
+npx upgrade-stack-tests --migrate
+```
+
+---
+
 ## Getting Help
 
 If your issue isn't covered here:
@@ -354,5 +406,6 @@ If your issue isn't covered here:
 
 - [Installation](./getting-started/installation.md)
 - [Quick Start](./getting-started/quick-start.md)
+- [Upgrading](./guides/upgrading.md)
 - [Tag System](./concepts/tag-system.md)
 - [CI/CD Guide](./guides/ci-cd.md)

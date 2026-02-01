@@ -185,6 +185,9 @@ Scenario: Use generated data
 # Generate tests from features
 npm run gen
 
+# Generate step stubs for missing steps
+npm run gen:stubs
+
 # Run all tests
 npm test
 
@@ -203,4 +206,13 @@ npx playwright test --ui
 
 # Show report
 npx playwright show-report
+
+# Check for framework updates
+npm run check-updates
+
+# Upgrade framework
+npm run upgrade
+
+# Full scaffolding migration
+npm run upgrade:migrate
 ```

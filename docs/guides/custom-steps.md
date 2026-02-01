@@ -17,6 +17,46 @@ flowchart LR
     end
 ```
 
+## Generating Step Stubs
+
+When you have feature files with undefined steps, use the step stub generator to create a starting point:
+
+```bash
+npm run gen:stubs
+```
+
+This creates `features/steps/generated-stubs.ts` with stub implementations:
+
+```typescript
+/**
+ * Generated Step Stubs
+ * Generated: 2024-01-15T10:30:00.000Z
+ * Total stubs: 15
+ */
+
+import { createBdd } from 'playwright-bdd';
+import { test } from './fixtures.js';
+
+const { Given, When, Then } = createBdd(test);
+
+// ============================================================================
+// GIVEN STEPS (5)
+// ============================================================================
+
+// TODO: Implement this step
+Given('a user exists with email {string}', async ({ world }, str0: string) => {
+  throw new Error('Step not implemented: a user exists with email {string}');
+});
+
+// ... more stubs
+```
+
+Then:
+1. Add the import to `steps.ts`: `import './generated-stubs.js';`
+2. Implement each stub (replace `throw` with actual logic)
+3. Move implemented steps to appropriate files
+4. Run `npm run gen` and `npm test`
+
 ## Creating Custom Steps
 
 ### Basic Step File

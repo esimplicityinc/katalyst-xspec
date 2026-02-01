@@ -44,6 +44,7 @@ This creates a complete test package with:
 - Example feature files
 - Step registration
 - Environment template
+- Utility scripts for upgrading and step generation
 
 #### Agent Skills (Optional)
 
@@ -141,10 +142,25 @@ your-project/
 └── .env (optional)
 ```
 
+## Included Scripts
+
+The scaffolded project includes these npm scripts:
+
+| Script | Description |
+|--------|-------------|
+| `npm run gen` | Generate Playwright tests from feature files |
+| `npm run gen:stubs` | Generate step stubs for undefined steps |
+| `npm test` | Generate tests and run them |
+| `npm run check-updates` | Check for framework updates |
+| `npm run upgrade` | Upgrade framework to latest version |
+| `npm run upgrade:migrate` | Full scaffolding migration |
+| `npm run clean` | Remove generated files and node_modules |
+
 ## Next Steps
 
 - [Quick Start](./quick-start.md) - Write your first test
 - [Project Setup](./project-setup.md) - Configure Playwright projects
+- [Upgrading](../guides/upgrading.md) - Keep your framework up to date
 
 ## Troubleshooting
 

@@ -5,6 +5,54 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-02-01
+
+### Added
+
+- **Migration Mode** (`upgrade-stack-tests --migrate`): Full scaffolding migration that preserves custom files while updating templates.
+  - Automatic backup of custom step files, feature files, and environment files
+  - Smart merging of `steps.ts` preserving custom imports
+  - Smart merging of `fixtures.ts` preserving cleanup rules
+  - Smart merging of `package.json` preserving custom scripts and dependencies
+  - Dry-run mode (`--dry-run`) to preview changes before applying
+  - Custom backup directory support (`--backup-dir`)
+
+- **Interactive Upgrade Mode** (`upgrade-stack-tests -i`): Guided step-by-step upgrade process with prompts for:
+  - Package version upgrade
+  - Scaffolding migration
+  - Agent Skills update
+
+- **Step Stub Generator** (`generate-step-stubs`): New CLI tool to generate step definition stubs for missing steps.
+  - Parses bddgen output to detect undefined steps
+  - Generates TypeScript stubs with proper parameter typing
+  - Outputs to `features/steps/generated-stubs.ts`
+  - Dry-run mode to preview generated code
+
+- **Environment File Preservation**: `.env.example` files are now merged instead of overwritten during scaffolding.
+  - Existing custom variables are preserved
+  - New template variables are appended with a comment header
+  - `.env` files are never overwritten
+
+- **Update Notification Scripts**: New npm scripts in scaffolded projects:
+  - `npm run check-updates` - Check for framework updates
+  - `npm run upgrade` - Upgrade to latest version
+  - `npm run upgrade:migrate` - Full scaffolding migration
+  - `npm run gen:stubs` - Generate step stubs
+
+### Changed
+
+- **Package Manager Detection**: Scaffolder now displays detected package manager during scaffolding.
+- **TypeScript Import Fix**: Generated `steps.ts` now uses correct `.js` extension for imports (`./fixtures.js`), fixing NodeNext module resolution errors.
+- **Version Bump**: Both `@esimplicity/stack-tests` and `@esimplicityinc/create-stack-tests` bumped to 0.2.0.
+
+### Documentation
+
+- New [Upgrading Guide](./docs/guides/upgrading.md) covering all upgrade and migration features
+- Updated Quick Start with new commands
+- Updated Troubleshooting guide with upgrade-related issues
+- Updated Custom Steps guide with step stub generator workflow
+- Detailed specification for future Partial Test Generation feature (`docs/improvements/5.md`)
+
 ## [0.1.8] - 2026-02-01
 
 ### Added

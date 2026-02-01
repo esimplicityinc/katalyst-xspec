@@ -111,8 +111,103 @@ async function ensureDir(dir) {
   await fs.mkdir(dir, { recursive: true });
 }
 
-async function writeFileSafe(filePath, content, { force, results }) {
+/**
+ * Parse .env file content into key-value pairs
+ * Preserves comments as separate entries
+ */
+function parseEnvFile(content) {
+  const lines = content.split('\n');
+  const entries = [];
+  
+  for (const line of lines) {
+    const trimmed = line.trim();
+    
+    // Empty line
+    if (trimmed === '') {
+      entries.push({ type: 'empty' });
+      continue;
+    }
+    
+    // Comment line
+    if (trimmed.startsWith('#')) {
+      entries.push({ type: 'comment', value: line });
+      continue;
+    }
+    
+    // Key=value line
+    const eqIndex = line.indexOf('=');
+    if (eqIndex > 0) {
+      const key = line.substring(0, eqIndex).trim();
+      const value = line.substring(eqIndex + 1);
+      entries.push({ type: 'var', key, value, line });
+    }
+  }
+  
+  return entries;
+}
+
+/**
+ * Merge two .env files, preserving existing variables and adding new ones
+ */
+function mergeEnvFiles(existing, template) {
+  const existingEntries = parseEnvFile(existing);
+  const templateEntries = parseEnvFile(template);
+  
+  // Get existing keys
+  const existingKeys = new Set(
+    existingEntries.filter(e => e.type === 'var').map(e => e.key)
+  );
+  
+  // Find new variables from template that don't exist
+  const newVars = templateEntries.filter(e => 
+    e.type === 'var' && !existingKeys.has(e.key)
+  );
+  
+  // If no new vars, return existing as-is
+  if (newVars.length === 0) {
+    return existing;
+  }
+  
+  // Build merged content
+  let merged = existing;
+  
+  // Add new variables at the end
+  if (!merged.endsWith('\n')) {
+    merged += '\n';
+  }
+  merged += '\n# New variables added by scaffolder update\n';
+  
+  for (const entry of newVars) {
+    merged += `${entry.line}\n`;
+  }
+  
+  return merged;
+}
+
+async function writeFileSafe(filePath, content, { force, results, merge }) {
   const exists = await pathExists(filePath);
+  
+  // Handle .env.example merging
+  if (exists && merge && filePath.endsWith('.env.example')) {
+    const existingContent = await fs.readFile(filePath, 'utf8');
+    const mergedContent = mergeEnvFiles(existingContent, content);
+    
+    if (mergedContent !== existingContent) {
+      await fs.writeFile(filePath, mergedContent, 'utf8');
+      results.merged = results.merged || [];
+      results.merged.push(filePath);
+    } else {
+      results.skipped.push(filePath);
+    }
+    return;
+  }
+  
+  // Never overwrite .env (user's actual config)
+  if (exists && filePath.endsWith('.env') && !filePath.endsWith('.env.example')) {
+    results.skipped.push(filePath);
+    return;
+  }
+  
   if (exists && !force) {
     results.skipped.push(filePath);
     return;
@@ -184,12 +279,16 @@ function templates(packageName) {
     type: 'module',
     scripts: {
       gen: 'bddgen',
+      'gen:stubs': 'generate-step-stubs',
       test: 'bddgen && playwright test',
+      'check-updates': 'npx upgrade-stack-tests --check',
+      upgrade: 'npx upgrade-stack-tests',
+      'upgrade:migrate': 'npx upgrade-stack-tests --migrate',
       'clean:gen': 'rm -rf .features-gen',
       clean: 'rm -rf .features-gen node_modules test-results storage cucumber-report playwright-report'
     },
     devDependencies: {
-      '@esimplicity/stack-tests': '^0.1.0',
+      '@esimplicity/stack-tests': '^0.2.0',
       '@playwright/test': '^1.49.0',
       'playwright-bdd': '^8.3.0',
       dotenv: '^16.1.4',
@@ -232,7 +331,7 @@ export const test = createBddTest({
 });
 `;
 
-  const stepsTs = `import { test } from './fixtures';
+  const stepsTs = `import { test } from './fixtures.js';
 import {
   registerApiSteps,
   registerUiSteps,
@@ -476,21 +575,30 @@ To enable terminal user interface testing:
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const targetDir = path.resolve(process.cwd(), args.dir);
-  const pm = commandsFor(await detectPackageManager(process.cwd()));
+  const detectedPm = await detectPackageManager(process.cwd());
+  const pm = commandsFor(detectedPm);
   const files = templates('stack-tests');
+  
+  console.log(`Detected package manager: ${detectedPm}`);
 
-  const results = { created: [], skipped: [], skills: [] };
+  const results = { created: [], skipped: [], merged: [], skills: [] };
   await ensureDir(targetDir);
 
   for (const [rel, content] of Object.entries(files)) {
     const filePath = path.join(targetDir, rel);
-    await writeFileSafe(filePath, content, { force: args.force, results });
+    // Enable merging for .env.example files
+    const merge = rel.endsWith('.env.example');
+    await writeFileSafe(filePath, content, { force: args.force, results, merge });
   }
 
   console.log(`\nScaffold complete at ${targetDir}`);
   if (results.created.length) {
     console.log('Created files:');
     results.created.forEach((f) => console.log(`  + ${path.relative(process.cwd(), f)}`));
+  }
+  if (results.merged && results.merged.length) {
+    console.log('Merged files (new variables added):');
+    results.merged.forEach((f) => console.log(`  M ${path.relative(process.cwd(), f)}`));
   }
   if (results.skipped.length) {
     console.log('Skipped existing files (use --force to overwrite):');
