@@ -78,8 +78,8 @@ export function assertMasked(val: unknown): void {
   expect(val).toBe('****');
 }
 
-export function registerCleanup(world: World, item: { method?: 'DELETE' | 'POST' | 'PATCH' | 'PUT'; path: string }): void {
+export function registerCleanup(world: World, item: { method?: 'DELETE' | 'POST' | 'PATCH' | 'PUT'; path: string; body?: unknown }): void {
   const method = item.method ?? 'DELETE';
   if (world.cleanup.some((c) => c.method === method && c.path === item.path)) return;
-  world.cleanup.push({ method, path: item.path });
+  world.cleanup.push({ method, path: item.path, body: item.body });
 }

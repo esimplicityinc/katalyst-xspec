@@ -28,7 +28,7 @@ const test = createBddTest({
 ### Environment Variables
 
 ```bash
-API_BASE_URL=http://localhost:4000
+API_BASE_URL=http://localhost:3000
 ```
 
 ### Features
@@ -181,11 +181,15 @@ API_AUTH_LOGIN_PATH=/auth/login
 **API Authentication:**
 1. POSTs to `API_AUTH_LOGIN_PATH`
 2. Stores token in `world.headers['Authorization']`
+3. If credentials not set, skips silently with `console.warn`
 
 **UI Authentication:**
-1. Navigates to `/login`
-2. Fills username/password fields
-3. Clicks sign-in button
+1. Navigates to `UI_LOGIN_PATH` (default: `/login`)
+2. Fills fields by placeholder (configurable via `UI_USERNAME_FIELD`, `UI_PASSWORD_FIELD`)
+3. Clicks login button (configurable via `UI_LOGIN_BUTTON`)
+4. If credentials not set, skips silently with `console.warn`
+
+> **Note:** No hardcoded default credentials are used. All credentials must be set via env vars.
 
 ## DefaultCleanupAdapter
 
@@ -203,7 +207,9 @@ class DefaultCleanupAdapter implements CleanupPort {
 
 type CleanupRule = {
   varMatch: string;  // Variable name pattern
-  path: string;      // DELETE path (with {id} placeholder)
+  method?: 'DELETE' | 'POST' | 'PATCH' | 'PUT';  // Default: DELETE
+  path: string;      // Cleanup path (with {id} placeholder)
+  body?: unknown;    // Optional request body
 };
 ```
 
@@ -226,18 +232,22 @@ const test = createBddTest({
 ### Environment Variables
 
 ```bash
-# JSON array of cleanup rules
-CLEANUP_RULES='[{"varMatch":"userId","path":"/admin/users/{id}"}]'
+# JSON array of cleanup rules (no built-in rules -- consumers must define their own)
+CLEANUP_RULES='[{"varMatch":"userId","path":"/api/users/{id}"}]'
 
 # Allow heuristic matching
 CLEANUP_ALLOW_ALL=false
+
+# Static auth token for cleanup (alternative to login-based auth)
+CLEANUP_AUTH_TOKEN=your-admin-token
 ```
 
 ### Behavior
 
-1. Matches variable names against rules
-2. At test teardown, executes DELETE requests
-3. Uses `world.headers` for authentication
+1. Matches variable names against rules (from `CLEANUP_RULES` env var or constructor)
+2. At test teardown, executes cleanup requests (DELETE by default)
+3. Authenticates via `getCleanupAuth` (configurable on `createBddTest`)
+4. Recognizes UUIDs, prefixed IDs, numeric IDs, MongoDB ObjectIDs, CUIDs, and ULIDs
 
 ### Heuristic Matching
 

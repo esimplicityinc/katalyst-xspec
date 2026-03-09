@@ -16,14 +16,22 @@ export class UniversalAuthAdapter implements AuthPort {
   }
 
   async apiLoginAsAdmin(world: World): Promise<void> {
-    const username = process.env.DEFAULT_ADMIN_USERNAME || process.env.DEFAULT_ADMIN_EMAIL || 'admin@prima.com';
-    const password = process.env.DEFAULT_ADMIN_PASSWORD || 'admin1234';
+    const username = process.env.DEFAULT_ADMIN_USERNAME || process.env.DEFAULT_ADMIN_EMAIL;
+    const password = process.env.DEFAULT_ADMIN_PASSWORD;
+    if (!username || !password) {
+      console.warn('apiLoginAsAdmin skipped: DEFAULT_ADMIN_USERNAME and DEFAULT_ADMIN_PASSWORD are not set');
+      return;
+    }
     await this.apiLogin(world, username, password);
   }
 
   async apiLoginAsUser(world: World): Promise<void> {
-    const username = process.env.DEFAULT_USER_USERNAME || process.env.NON_ADMIN_USERNAME || 'bob@bob.com';
-    const password = process.env.DEFAULT_USER_PASSWORD || process.env.NON_ADMIN_PASSWORD || 'bob1234';
+    const username = process.env.DEFAULT_USER_USERNAME || process.env.NON_ADMIN_USERNAME;
+    const password = process.env.DEFAULT_USER_PASSWORD || process.env.NON_ADMIN_PASSWORD;
+    if (!username || !password) {
+      console.warn('apiLoginAsUser skipped: DEFAULT_USER_USERNAME and DEFAULT_USER_PASSWORD are not set');
+      return;
+    }
     await this.apiLogin(world, username, password);
   }
 
@@ -44,21 +52,34 @@ export class UniversalAuthAdapter implements AuthPort {
   }
 
   async uiLoginAsAdmin(world: World): Promise<void> {
-    const username = process.env.DEFAULT_ADMIN_USERNAME || process.env.DEFAULT_ADMIN_EMAIL || 'admin@prima.com';
-    const password = process.env.DEFAULT_ADMIN_PASSWORD || 'admin1234';
+    const username = process.env.DEFAULT_ADMIN_USERNAME || process.env.DEFAULT_ADMIN_EMAIL;
+    const password = process.env.DEFAULT_ADMIN_PASSWORD;
+    if (!username || !password) {
+      console.warn('uiLoginAsAdmin skipped: DEFAULT_ADMIN_USERNAME and DEFAULT_ADMIN_PASSWORD are not set');
+      return;
+    }
     await this.uiLogin(world, username, password);
   }
 
   async uiLoginAsUser(world: World): Promise<void> {
-    const username = process.env.DEFAULT_USER_USERNAME || process.env.NON_ADMIN_USERNAME || 'bob@bob.com';
-    const password = process.env.DEFAULT_USER_PASSWORD || process.env.NON_ADMIN_PASSWORD || 'bob1234';
+    const username = process.env.DEFAULT_USER_USERNAME || process.env.NON_ADMIN_USERNAME;
+    const password = process.env.DEFAULT_USER_PASSWORD || process.env.NON_ADMIN_PASSWORD;
+    if (!username || !password) {
+      console.warn('uiLoginAsUser skipped: DEFAULT_USER_USERNAME and DEFAULT_USER_PASSWORD are not set');
+      return;
+    }
     await this.uiLogin(world, username, password);
   }
 
   private async uiLogin(_world: World, username: string, password: string): Promise<void> {
-    await this.deps.ui.goto('/login');
-    await this.deps.ui.fillPlaceholder('Username', username);
-    await this.deps.ui.fillPlaceholder('Password', password);
-    await this.deps.ui.clickButton('Login');
+    const loginPath = process.env.UI_LOGIN_PATH || '/login';
+    const usernameField = process.env.UI_USERNAME_FIELD || 'Username';
+    const passwordField = process.env.UI_PASSWORD_FIELD || 'Password';
+    const loginButton = process.env.UI_LOGIN_BUTTON || 'Login';
+
+    await this.deps.ui.goto(loginPath);
+    await this.deps.ui.fillPlaceholder(usernameField, username);
+    await this.deps.ui.fillPlaceholder(passwordField, password);
+    await this.deps.ui.clickButton(loginButton);
   }
 }

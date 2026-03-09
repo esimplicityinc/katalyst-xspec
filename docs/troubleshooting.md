@@ -171,12 +171,29 @@ Check test output for cleanup warnings. Enable verbose logging:
 DEBUG=cleanup npm test
 ```
 
-Ensure cleanup auth is configured:
+Ensure cleanup auth is configured. Set the admin credentials in `.env`:
+
+```bash
+DEFAULT_ADMIN_USERNAME=admin@example.com
+DEFAULT_ADMIN_PASSWORD=changeme
+API_AUTH_LOGIN_PATH=/auth/login
+```
+
+Or use a static token:
+
+```bash
+CLEANUP_AUTH_TOKEN=your-admin-token-here
+```
+
+For OIDC providers (Keycloak, Auth0, etc.), use the OIDC helper in your fixtures:
 
 ```typescript
-createBddTest({
-  cleanupAuthPath: '/auth/login',
-  cleanupAuthBody: { email: 'admin@test.com', password: 'secret' },
+import { createBddTest, createOidcCleanupAuth } from '@esimplicity/stack-tests';
+
+export const test = createBddTest({
+  getCleanupAuth: createOidcCleanupAuth({
+    grantType: 'password',
+  }),
 });
 ```
 
@@ -271,7 +288,7 @@ Create environment-specific `.env` files:
 
 ```bash
 # .env.development
-API_BASE_URL=http://localhost:4000
+API_BASE_URL=http://localhost:3000
 FRONTEND_URL=http://localhost:3000
 
 # .env.staging

@@ -8,24 +8,25 @@ Environment variables and configuration helpers.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `API_BASE_URL` | `'http://localhost:4000'` | Base URL for API requests |
-| `CONTROL_TOWER_BASE_URL` | - | Alternative API base URL |
-| `CONTROL_TOWER_PORT` | - | Port for localhost URL construction |
+| `API_BASE_URL` | `'http://localhost:3000'` | Base URL for API requests |
+| `TARGET_BASE_URL` | - | Alternative API base URL |
+| `TARGET_PORT` | - | Port for localhost URL construction |
 
-**Priority:** `API_BASE_URL` > `CONTROL_TOWER_BASE_URL` > project baseURL > `CONTROL_TOWER_PORT` > default
+**Priority:** `API_BASE_URL` > `TARGET_BASE_URL` > project baseURL > `TARGET_PORT` > default
 
 ### Authentication
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `DEFAULT_ADMIN_USERNAME` | `'admin@prima.com'` | Admin login username |
+| `DEFAULT_ADMIN_USERNAME` | - | Admin login username (required for auth) |
 | `DEFAULT_ADMIN_EMAIL` | - | Alternative admin username |
-| `DEFAULT_ADMIN_PASSWORD` | `'admin1234'` | Admin login password |
-| `DEFAULT_USER_USERNAME` | `'bob@bob.com'` | Standard user username |
+| `DEFAULT_ADMIN_PASSWORD` | - | Admin login password (required for auth) |
+| `DEFAULT_USER_USERNAME` | - | Standard user username |
 | `NON_ADMIN_USERNAME` | - | Alternative user username |
-| `DEFAULT_USER_PASSWORD` | `'bob1234'` | Standard user password |
+| `DEFAULT_USER_PASSWORD` | - | Standard user password |
 | `NON_ADMIN_PASSWORD` | - | Alternative user password |
 | `API_AUTH_LOGIN_PATH` | `'/auth/login'` | Login endpoint path |
+| `CLEANUP_AUTH_TOKEN` | - | Static bearer token for cleanup (skips login) |
 
 ### UI Configuration
 
@@ -34,6 +35,10 @@ Environment variables and configuration helpers.
 | `FRONTEND_URL` | `'http://localhost:3000'` | Frontend base URL |
 | `BASE_URL` | - | Alternative frontend URL |
 | `HEADLESS` | `'true'` | Run browser headless |
+| `UI_LOGIN_PATH` | `'/login'` | UI login page path |
+| `UI_USERNAME_FIELD` | `'Username'` | Login form username field placeholder |
+| `UI_PASSWORD_FIELD` | `'Password'` | Login form password field placeholder |
+| `UI_LOGIN_BUTTON` | `'Login'` | Login form submit button text |
 
 ### Cleanup Configuration
 
@@ -43,6 +48,30 @@ Environment variables and configuration helpers.
 | `CLEANUP_ALLOW_ALL` | `'false'` | Enable heuristic cleanup |
 
 **CLEANUP_ALLOW_ALL values:** `'1'`, `'true'`, `'yes'`, `'on'` (case-insensitive)
+
+**CLEANUP_RULES example:**
+```json
+[
+  {"varMatch": "user", "path": "/api/users/{id}"},
+  {"varMatch": "org", "path": "/api/orgs/{id}"},
+  {"varMatch": "/^item_/", "method": "POST", "path": "/api/items/{id}/deactivate", "body": {"active": false}}
+]
+```
+
+### OIDC Cleanup Auth (Optional)
+
+For consumers using `createOidcCleanupAuth()` in their fixture setup:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OIDC_TOKEN_URL` | - | Full OIDC token endpoint URL |
+| `OIDC_CLIENT_ID` | - | OAuth2 client ID |
+| `OIDC_CLIENT_SECRET` | - | OAuth2 client secret (confidential clients) |
+| `OIDC_GRANT_TYPE` | `'client_credentials'` | OAuth2 grant type |
+| `OIDC_SCOPE` | - | Requested scopes |
+| `OIDC_USERNAME` | - | Username for password grant |
+| `OIDC_PASSWORD` | - | Password for password grant |
+| `OIDC_EXTRA_HEADERS` | - | JSON object of extra headers to include |
 
 ### TUI Configuration
 
@@ -243,16 +272,16 @@ export default defineConfig({
 
 ```bash
 # API Configuration
-API_BASE_URL=http://localhost:4000
+API_BASE_URL=http://localhost:3000
 API_AUTH_LOGIN_PATH=/auth/login
 
 # Authentication - Admin
 DEFAULT_ADMIN_USERNAME=admin@example.com
-DEFAULT_ADMIN_PASSWORD=AdminPass123
+DEFAULT_ADMIN_PASSWORD=changeme
 
 # Authentication - User
 DEFAULT_USER_USERNAME=user@example.com
-DEFAULT_USER_PASSWORD=UserPass123
+DEFAULT_USER_PASSWORD=changeme
 
 # UI Configuration
 FRONTEND_URL=http://localhost:3000
@@ -260,6 +289,7 @@ HEADLESS=true
 
 # Cleanup
 CLEANUP_ALLOW_ALL=false
+# CLEANUP_RULES=[{"varMatch":"user","path":"/api/users/{id}"}]
 
 # Tag Filtering
 TEST_TAGS=
@@ -272,7 +302,7 @@ DEBUG=false
 
 ```bash
 # .env.development
-API_BASE_URL=http://localhost:4000
+API_BASE_URL=http://localhost:3000
 FRONTEND_URL=http://localhost:3000
 
 # .env.staging

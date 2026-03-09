@@ -13,13 +13,46 @@ import { DefaultCleanupAdapter } from './adapters/cleanup/default-cleanup.adapte
 
 let cachedAdminToken: string | undefined;
 
-async function getAdminHeaders(request: APIRequestContext): Promise<Record<string, string>> {
-  if (cachedAdminToken) return { Authorization: `Bearer ${cachedAdminToken}` };
+/**
+ * Callback type for obtaining admin auth headers for cleanup operations.
+ * Consumers can provide their own implementation (e.g., Keycloak, Auth0, Okta)
+ * via the `getCleanupAuth` option in createBddTest().
+ */
+export type CleanupAuthProvider = (request: APIRequestContext) => Promise<Record<string, string>>;
 
-  const username = process.env.DEFAULT_ADMIN_USERNAME || process.env.DEFAULT_ADMIN_EMAIL || 'admin@prima.com';
-  const password = process.env.DEFAULT_ADMIN_PASSWORD || 'admin1234';
+/**
+ * Default cleanup auth: attempts a form-based login to the API.
+ *
+ * Reads credentials from env vars:
+ * - DEFAULT_ADMIN_USERNAME / DEFAULT_ADMIN_EMAIL
+ * - DEFAULT_ADMIN_PASSWORD
+ * - API_AUTH_LOGIN_PATH (default: '/auth/login')
+ *
+ * If a static CLEANUP_AUTH_TOKEN is set, uses that directly (no login needed).
+ * If credentials are not configured, returns empty headers (cleanup runs unauthenticated).
+ */
+async function defaultGetAdminHeaders(request: APIRequestContext): Promise<Record<string, string>> {
+  // Fast path: reuse cached token
+  if (cachedAdminToken) {
+    return { Authorization: `Bearer ${cachedAdminToken}` };
+  }
+
+  // Static token override -- no login required
+  const staticToken = process.env.CLEANUP_AUTH_TOKEN;
+  if (staticToken) {
+    cachedAdminToken = staticToken;
+    return { Authorization: `Bearer ${staticToken}` };
+  }
+
+  const username = process.env.DEFAULT_ADMIN_USERNAME || process.env.DEFAULT_ADMIN_EMAIL;
+  const password = process.env.DEFAULT_ADMIN_PASSWORD;
+
+  if (!username || !password) {
+    // No credentials configured -- skip auth silently
+    return {};
+  }
+
   const loginPath = process.env.API_AUTH_LOGIN_PATH || '/auth/login';
-
   const body = new URLSearchParams({ username, password }).toString();
   const resp = await request.post(loginPath, {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' },
@@ -39,7 +72,7 @@ async function getAdminHeaders(request: APIRequestContext): Promise<Record<strin
     return { Authorization: `Bearer ${token}` };
   }
 
-  console.warn('cleanup auth missing access_token in response');
+  console.warn('cleanup auth: no access_token in response');
   cachedAdminToken = undefined;
   return {};
 }
@@ -57,6 +90,20 @@ export type CreateBddTestOptions = {
   createUi?: (ctx: CreateContext) => UiPort;
   createAuth?: (ctx: CreateContext & { api: ApiPort; ui: UiPort }) => AuthPort;
   createCleanup?: (ctx: CreateContext) => CleanupPort;
+  /**
+   * Custom auth provider for cleanup operations.
+   * Return a record of headers (e.g., { Authorization: 'Bearer ...' }) to
+   * authenticate cleanup API calls.
+   *
+   * Use this to integrate with any auth provider (Keycloak, Auth0, Okta, etc.)
+   * without coupling the framework to a specific identity provider.
+   *
+   * If not provided, the default provider attempts a form-based login using
+   * DEFAULT_ADMIN_USERNAME / DEFAULT_ADMIN_PASSWORD env vars, or uses
+   * CLEANUP_AUTH_TOKEN if set. If no credentials are configured, cleanup
+   * runs unauthenticated.
+   */
+  getCleanupAuth?: CleanupAuthProvider;
   /**
    * Factory function for creating a TUI adapter.
    * Unlike other adapters, this is a simple factory that doesn't receive context,
@@ -80,6 +127,7 @@ export function createBddTest(options: CreateBddTestOptions = {}) {
     createUi = ({ page }) => new PlaywrightUiAdapter(page),
     createAuth = ({ api, ui }) => new UniversalAuthAdapter({ api, ui }),
     createCleanup = () => new DefaultCleanupAdapter(),
+    getCleanupAuth = defaultGetAdminHeaders,
     createTui,
     worldFactory = initWorld,
   } = options;
@@ -101,12 +149,17 @@ export function createBddTest(options: CreateBddTestOptions = {}) {
       if (!w.cleanup.length) return;
 
       for (const item of [...w.cleanup].reverse()) {
-        const adminHeaders = await getAdminHeaders(apiRequest);
+        const adminHeaders = await getCleanupAuth(apiRequest);
         const headers = { ...adminHeaders, ...(item.headers || {}) };
+        // Add Content-Type for JSON body
+        if (item.body !== undefined) {
+          headers['Content-Type'] = 'application/json';
+        }
         try {
           const resp = await apiRequest.fetch(item.path, {
             method: item.method,
             headers,
+            data: item.body,
           });
           const status = resp.status();
           if (status === 401 || status === 403) {
@@ -129,10 +182,10 @@ export function createBddTest(options: CreateBddTestOptions = {}) {
 
       const baseURL =
         process.env.API_BASE_URL ||
-        process.env.CONTROL_TOWER_BASE_URL ||
+        process.env.TARGET_BASE_URL ||
         (projectName.includes('api') ? baseURLFromProject : undefined) ||
-        (process.env.CONTROL_TOWER_PORT ? `http://localhost:${process.env.CONTROL_TOWER_PORT}` : undefined) ||
-        'http://localhost:4000';
+        (process.env.TARGET_PORT ? `http://localhost:${process.env.TARGET_PORT}` : undefined) ||
+        'http://localhost:3000';
 
       const ctx = await playwright.request.newContext({ baseURL });
       try {

@@ -1,4 +1,4 @@
-export { createBddTest, type CreateBddTestOptions, type TuiFactory, baseTest } from './fixtures';
+export { createBddTest, type CreateBddTestOptions, type CleanupAuthProvider, type TuiFactory, baseTest } from './fixtures';
 export * from './world';
 export * from './utils';
 export * from './ports/api.port';
@@ -12,5 +12,6 @@ export * from './adapters/auth/universal-auth.adapter';
 export * from './adapters/cleanup/default-cleanup.adapter';
 export * from './adapters/tui/tui-tester.adapter';
 export * from './adapters/ui/fetch-intercept-auth.adapter';
+export * from './helpers/oidc-cleanup-auth';
 export * from './steps';
 export * from './config';

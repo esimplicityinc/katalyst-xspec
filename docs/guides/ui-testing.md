@@ -382,6 +382,12 @@ Scenario: Handle optional modal
 # .env
 FRONTEND_URL=http://localhost:3000
 HEADLESS=true
+
+# UI login customization (optional -- these are the defaults)
+# UI_LOGIN_PATH=/login
+# UI_USERNAME_FIELD=Username
+# UI_PASSWORD_FIELD=Password
+# UI_LOGIN_BUTTON=Login
 ```
 
 ## Best Practices

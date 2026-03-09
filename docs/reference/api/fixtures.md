@@ -28,9 +28,12 @@ type CreateBddTestOptions = {
   createUi?: (ctx: CreateContext) => UiPort;
   createAuth?: (ctx: CreateContext & { api: ApiPort; ui: UiPort }) => AuthPort;
   createCleanup?: (ctx: CreateContext) => CleanupPort;
+  getCleanupAuth?: CleanupAuthProvider;
   createTui?: () => TuiPort | undefined;
   worldFactory?: () => World;
 };
+
+type CleanupAuthProvider = (request: APIRequestContext) => Promise<Record<string, string>>;
 
 type CreateContext = PlaywrightTestArgs & PlaywrightWorkerArgs & {
   apiRequest: APIRequestContext;
@@ -48,6 +51,7 @@ When options are not provided, defaults are used:
 | `createUi` | `PlaywrightUiAdapter` |
 | `createAuth` | `UniversalAuthAdapter` |
 | `createCleanup` | `DefaultCleanupAdapter` |
+| `getCleanupAuth` | Form-based login using `DEFAULT_ADMIN_*` env vars |
 | `createTui` | `undefined` (disabled) |
 | `worldFactory` | `initWorld()` |
 
@@ -99,6 +103,27 @@ export const test = createBddTest({
       { varMatch: 'order', path: '/api/orders/{id}' },
     ],
   }),
+});
+```
+
+#### Custom Cleanup Authentication
+
+```typescript
+import { createBddTest, createOidcCleanupAuth } from '@esimplicity/stack-tests';
+
+// Use OIDC provider (Keycloak, Auth0, Okta, etc.)
+export const test = createBddTest({
+  getCleanupAuth: createOidcCleanupAuth({
+    grantType: 'password',
+    extraHeaders: { 'x-user-roles': 'admin' },
+  }),
+});
+
+// Or provide a fully custom auth provider
+export const test2 = createBddTest({
+  getCleanupAuth: async (request) => {
+    return { Authorization: 'Bearer my-static-token' };
+  },
 });
 ```
 
@@ -258,6 +283,7 @@ const customTest = baseTest.extend({
 ```typescript
 import type {
   CreateBddTestOptions,
+  CleanupAuthProvider,
   TuiFactory,
   TuiConfig,
 } from '@esimplicity/stack-tests';

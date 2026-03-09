@@ -103,7 +103,7 @@ export { test };
 
 ### API Auth Fails (401)
 
-**Check `.env` variables:**
+**Check `.env` variables (all required -- no hardcoded defaults):**
 ```bash
 # Required for admin auth
 DEFAULT_ADMIN_USERNAME=admin@example.com
@@ -116,6 +116,8 @@ DEFAULT_USER_PASSWORD=user123
 # Auth endpoint path
 API_AUTH_LOGIN_PATH=/auth/login
 ```
+
+> **Important:** If these env vars are not set, auth methods will skip silently with a `console.warn`. Check your test output for messages like `apiLoginAsAdmin skipped: DEFAULT_ADMIN_USERNAME and DEFAULT_ADMIN_PASSWORD are not set`.
 
 **Debug:** Add logging to see what's being sent:
 ```gherkin
@@ -277,7 +279,7 @@ Given I disable cleanup
 Cleanup uses the API base URL:
 ```bash
 # In .env
-API_BASE_URL=http://localhost:4000
+API_BASE_URL=http://localhost:3000
 ```
 
 ## Issue 7: JSON Body Errors
@@ -411,22 +413,31 @@ npx playwright test --ui
 
 ```bash
 # API Testing
-API_BASE_URL=http://localhost:4000
+API_BASE_URL=http://localhost:3000
 
 # UI Testing
 FRONTEND_URL=http://localhost:3000
 BASE_URL=http://localhost:3000
 HEADLESS=true
 
-# Authentication
+# Authentication (required -- no hardcoded defaults)
 DEFAULT_ADMIN_USERNAME=admin@example.com
 DEFAULT_ADMIN_PASSWORD=admin123
 DEFAULT_USER_USERNAME=user@example.com
 DEFAULT_USER_PASSWORD=user123
 API_AUTH_LOGIN_PATH=/auth/login
 
-# Optional
-CLEANUP_RULES='[{"varMatch":"user","path":"/admin/users/{id}"}]'
+# UI Login Customization (optional)
+# UI_LOGIN_PATH=/login
+# UI_USERNAME_FIELD=Username
+# UI_PASSWORD_FIELD=Password
+# UI_LOGIN_BUTTON=Login
+
+# Cleanup Auth (optional -- alternative to login-based auth)
+# CLEANUP_AUTH_TOKEN=your-admin-token
+
+# Cleanup Rules (required -- no built-in rules)
+CLEANUP_RULES='[{"varMatch":"user","path":"/api/users/{id}"}]'
 DEBUG=false
 ```
 

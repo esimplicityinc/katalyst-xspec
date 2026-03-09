@@ -494,14 +494,17 @@ storage
 `; 
 
   const envExample = `# API defaults used by the auth and cleanup helpers
-DEFAULT_ADMIN_USERNAME=admin@prima.com
-DEFAULT_ADMIN_PASSWORD=admin1234
+DEFAULT_ADMIN_USERNAME=admin@example.com
+DEFAULT_ADMIN_PASSWORD=changeme
 API_AUTH_LOGIN_PATH=/auth/login
-API_BASE_URL=http://localhost:4000
+API_BASE_URL=http://localhost:3000
 
 # UI defaults
 FRONTEND_URL=http://localhost:3000
 HEADLESS=true
+
+# Cleanup rules (JSON array)
+# CLEANUP_RULES=[{"varMatch":"user","path":"/api/users/{id}"}]
 
 # TUI testing (optional)
 # Set DEBUG=true to see TUI tester output

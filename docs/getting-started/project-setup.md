@@ -304,10 +304,10 @@ export { test };
 
 ```bash
 # API Configuration
-API_BASE_URL=http://localhost:4000
+API_BASE_URL=http://localhost:3000
 API_AUTH_LOGIN_PATH=/auth/login
 
-# Authentication
+# Authentication (required -- no hardcoded defaults)
 DEFAULT_ADMIN_USERNAME=admin@example.com
 DEFAULT_ADMIN_PASSWORD=admin123
 DEFAULT_USER_USERNAME=user@example.com
@@ -319,6 +319,7 @@ HEADLESS=true
 
 # Cleanup Configuration
 CLEANUP_ALLOW_ALL=false
+# CLEANUP_RULES=[{"varMatch":"user","path":"/api/users/{id}"}]
 
 # Tag Filtering
 TEST_TAGS=

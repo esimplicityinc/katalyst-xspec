@@ -20,6 +20,7 @@ build/
 out/
 coverage/
 *.tsbuildinfo
+*.tgz
 
 # --- Docusaurus ---
 website/build/

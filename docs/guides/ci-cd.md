@@ -259,11 +259,11 @@ services:
   api:
     image: your-api:latest
     ports:
-      - "4000:4000"
+      - "3000:3000"
     environment:
       - DATABASE_URL=postgres://...
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -271,7 +271,7 @@ services:
   frontend:
     image: your-frontend:latest
     ports:
-      - "3000:3000"
+      - "8080:8080"
     depends_on:
       api:
         condition: service_healthy
@@ -284,8 +284,8 @@ services:
       - api
       - frontend
     environment:
-      - API_BASE_URL=http://api:4000
-      - FRONTEND_URL=http://frontend:3000
+      - API_BASE_URL=http://api:3000
+      - FRONTEND_URL=http://frontend:8080
     volumes:
       - ./test-results:/app/test-results
       - ./cucumber-report:/app/cucumber-report

@@ -351,7 +351,7 @@ Scenario Outline: Create users with different roles
 
 ```bash
 # .env
-API_BASE_URL=http://localhost:4000
+API_BASE_URL=http://localhost:3000
 API_AUTH_LOGIN_PATH=/auth/login
 
 DEFAULT_ADMIN_USERNAME=admin@example.com
@@ -360,6 +360,8 @@ DEFAULT_ADMIN_PASSWORD=admin123
 DEFAULT_USER_USERNAME=user@example.com
 DEFAULT_USER_PASSWORD=user123
 ```
+
+> **Note:** All credentials must be explicitly set. If env vars are missing, auth methods skip silently with a `console.warn`.
 
 ### Multiple Environments
 

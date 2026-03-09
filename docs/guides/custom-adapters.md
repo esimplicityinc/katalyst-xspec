@@ -453,7 +453,7 @@ import { CustomApiAdapter } from '../custom-api.adapter';
 
 describe('CustomApiAdapter', () => {
   it('should send JSON request', async () => {
-    const adapter = new CustomApiAdapter('http://localhost:4000');
+    const adapter = new CustomApiAdapter('http://localhost:3000');
     
     const result = await adapter.sendJson('GET', '/health');
     
@@ -461,7 +461,7 @@ describe('CustomApiAdapter', () => {
   });
 
   it('should handle errors', async () => {
-    const adapter = new CustomApiAdapter('http://localhost:4000');
+    const adapter = new CustomApiAdapter('http://localhost:3000');
     
     const result = await adapter.sendJson('GET', '/not-found');
     

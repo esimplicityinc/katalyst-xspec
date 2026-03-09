@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] - 2026-03-09
+
+### Breaking Changes
+
+- **No hardcoded default credentials.** Auth methods (`apiLoginAsAdmin`, `uiLoginAsAdmin`, etc.) now **skip silently** with a `console.warn` when `DEFAULT_ADMIN_USERNAME` / `DEFAULT_ADMIN_PASSWORD` env vars are not set. Previously, the framework fell back to hardcoded credentials. **Action required:** Ensure your `.env` file sets `DEFAULT_ADMIN_USERNAME`, `DEFAULT_ADMIN_PASSWORD`, `DEFAULT_USER_USERNAME`, and `DEFAULT_USER_PASSWORD`.
+
+- **No built-in cleanup rules.** The `DefaultCleanupAdapter` now ships with an empty `defaultRules` array. Previously, 13 application-specific rules were built in. **Action required:** Define your cleanup rules via the `CLEANUP_RULES` env var (JSON array) or pass `rules` to the `DefaultCleanupAdapter` constructor.
+
+- **`CONTROL_TOWER_BASE_URL` / `CONTROL_TOWER_PORT` removed.** Replaced with `TARGET_BASE_URL` / `TARGET_PORT`. **Action required:** Update your `.env` files if you used these variables.
+
+- **Default API port changed** from `4000` to `3000`. If no `API_BASE_URL` or `TARGET_BASE_URL` is set, the framework now falls back to `http://localhost:3000`.
+
+### Added
+
+- **`getCleanupAuth` option** on `createBddTest()`: Plug in any auth provider for cleanup operations (Keycloak, Auth0, Okta, etc.) without coupling the framework to a specific identity provider.
+
+- **`createOidcCleanupAuth()` helper**: Exported utility for OIDC-based cleanup auth. Works with any OIDC-compliant provider via generic `OIDC_*` env vars (`OIDC_TOKEN_URL`, `OIDC_CLIENT_ID`, `OIDC_GRANT_TYPE`, etc.).
+
+- **`CLEANUP_AUTH_TOKEN` env var**: Set a static bearer token for cleanup operations (no login flow needed).
+
+- **Configurable UI login selectors**: `UI_LOGIN_PATH`, `UI_USERNAME_FIELD`, `UI_PASSWORD_FIELD`, `UI_LOGIN_BUTTON` env vars let consumers customize the `UniversalAuthAdapter` UI login flow without writing a custom adapter.
+
+- **Broader ID format support** in cleanup: `isIdLike` now recognizes UUIDs, prefixed nanoid IDs, numeric IDs, MongoDB ObjectIDs, CUIDs, and ULIDs.
+
+- **Cleanup rules support request bodies**: `CleanupRule` and `CleanupItem` now accept an optional `body` field for cleanup operations that require a JSON payload.
+
+### Removed
+
+- All Keycloak-specific code from core fixtures (`KEYCLOAK_URL`, `KEYCLOAK_REALM`, `KEYCLOAK_CLIENT_ID`, `AUTH_MODE`, `DEFAULT_ADMIN_ROLES`, `x-user-roles` header injection). Use `createOidcCleanupAuth()` with `extraHeaders` instead.
+- Application-specific cleanup rules (13 rules referencing `/admin/tool/`, `/admin/llm/`, `/admin/users/`, etc.).
+- Hardcoded credentials (`admin@prima.com`, `bob@bob.com`, `admin1234`, `bob1234`).
+
 ## [0.2.0] - 2026-02-01
 
 ### Added

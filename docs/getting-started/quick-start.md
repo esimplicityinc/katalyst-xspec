@@ -47,7 +47,7 @@ Edit `.env` with your API/UI URLs:
 
 ```bash
 # API Configuration
-API_BASE_URL=http://localhost:4000
+API_BASE_URL=http://localhost:3000
 DEFAULT_ADMIN_USERNAME=admin@example.com
 DEFAULT_ADMIN_PASSWORD=admin123
 

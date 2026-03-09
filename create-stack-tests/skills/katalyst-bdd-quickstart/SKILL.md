@@ -95,9 +95,9 @@ Edit `.env` with your settings:
 
 ```bash
 # API Configuration
-API_BASE_URL=http://localhost:4000
+API_BASE_URL=http://localhost:3000
 
-# Authentication (for admin/user auth steps)
+# Authentication (required -- no hardcoded defaults)
 DEFAULT_ADMIN_USERNAME=admin@example.com
 DEFAULT_ADMIN_PASSWORD=admin123
 DEFAULT_USER_USERNAME=user@example.com
@@ -109,8 +109,8 @@ FRONTEND_URL=http://localhost:3000
 BASE_URL=http://localhost:3000
 HEADLESS=true
 
-# Cleanup Rules (optional)
-# CLEANUP_RULES='[{"varMatch":"user","path":"/admin/users/{id}"}]'
+# Cleanup Rules (required -- no built-in rules)
+# CLEANUP_RULES='[{"varMatch":"user","path":"/api/users/{id}"}]'
 ```
 
 ### Required Variables by Test Type

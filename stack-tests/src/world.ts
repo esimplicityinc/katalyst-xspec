@@ -4,6 +4,7 @@ export type CleanupItem = {
   method: 'DELETE' | 'POST' | 'PATCH' | 'PUT';
   path: string;
   headers?: Record<string, string>;
+  body?: unknown;
 };
 
 export type World = {

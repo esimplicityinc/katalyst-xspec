@@ -6,15 +6,35 @@ export type CleanupRule = {
   varMatch: string;
   method?: 'DELETE' | 'POST' | 'PATCH' | 'PUT';
   path: string;
+  body?: unknown;
 };
 
 function looksTesty(meta: unknown): boolean {
   const s = typeof meta === 'string' ? meta : JSON.stringify(meta ?? '');
-  return /__|run[0-9a-fA-F]{4,}|test/i.test(s);
+  return /__|test/i.test(s);
 }
 
-function isUuidLike(value: string): boolean {
-  return /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(value);
+function isIdLike(value: string): boolean {
+  // UUID: 123e4567-e89b-12d3-a456-426614174000
+  const uuidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+  // Prefixed ID (nanoid/Stripe style): org_xxx, team_xxx
+  const prefixedIdPattern = /^[a-z]+_[a-zA-Z0-9_-]+$/;
+  // Numeric ID: 1, 42, 99999
+  const numericPattern = /^\d+$/;
+  // MongoDB ObjectID: 24-char hex
+  const objectIdPattern = /^[0-9a-fA-F]{24}$/;
+  // CUID: starts with 'c', 25+ chars
+  const cuidPattern = /^c[a-z0-9]{24,}$/;
+  // ULID: 26-char Crockford base32
+  const ulidPattern = /^[0-9A-HJKMNP-TV-Z]{26}$/;
+  return (
+    uuidPattern.test(value) ||
+    prefixedIdPattern.test(value) ||
+    numericPattern.test(value) ||
+    objectIdPattern.test(value) ||
+    cuidPattern.test(value) ||
+    ulidPattern.test(value)
+  );
 }
 
 function matchVar(rule: CleanupRule, varNameLower: string): boolean {
@@ -38,6 +58,7 @@ function loadRulesFromEnv(): CleanupRule[] {
           varMatch: String(x.varMatch ?? ''),
           method: (x.method ? String(x.method).toUpperCase() : undefined) as any,
           path: String(x.path ?? ''),
+          body: x.body,
         }))
         .filter((r) => r.varMatch && r.path);
     }
@@ -47,21 +68,14 @@ function loadRulesFromEnv(): CleanupRule[] {
   return [];
 }
 
-const defaultRules: CleanupRule[] = [
-  { varMatch: 'tool_provider', path: '/admin/tool/providers/{id}' },
-  { varMatch: 'extsvc', path: '/admin/tool/external-services/{id}' },
-  { varMatch: 'external_service', path: '/admin/tool/external-services/{id}' },
-  { varMatch: 'workspace', path: '/admin/workspaces/{id}' },
-  { varMatch: 'team', path: '/admin/teams/{id}' },
-  { varMatch: 'prima_model', path: '/admin/llm/prima-models/{id}' },
-  { varMatch: 'pm', path: '/admin/llm/prima-models/{id}' },
-  { varMatch: 'cred', path: '/admin/llm/provider-credentials/{id}' },
-  { varMatch: 'user', path: '/admin/users/{id}' },
-  { varMatch: 'manager', path: '/admin/users/{id}' },
-  { varMatch: 'member', path: '/admin/users/{id}' },
-  { varMatch: 'creator', path: '/admin/users/{id}' },
-  { varMatch: 'rule', path: '/admin/llm/guardrail-rules/{id}' },
-];
+/**
+ * No built-in cleanup rules. Consumers define rules via the CLEANUP_RULES env var
+ * (JSON array) or by passing `rules` to the DefaultCleanupAdapter constructor.
+ *
+ * Example CLEANUP_RULES:
+ * [{"varMatch":"user","path":"/api/users/{id}"},{"varMatch":"org","path":"/api/orgs/{id}"}]
+ */
+const defaultRules: CleanupRule[] = [];
 
 export class DefaultCleanupAdapter implements CleanupPort {
   private readonly rules: CleanupRule[];
@@ -77,7 +91,7 @@ export class DefaultCleanupAdapter implements CleanupPort {
     if (!id) return;
 
     const idStr = String(id);
-    if (!isUuidLike(idStr)) return;
+    if (!isIdLike(idStr)) return;
 
     if (!this.allowHeuristic) {
       if (!looksTesty(meta) && !looksTesty(varName)) return;
@@ -88,6 +102,6 @@ export class DefaultCleanupAdapter implements CleanupPort {
     if (!rule) return;
 
     const path = rule.path.replace(/\{id\}/g, idStr);
-    registerCleanup(world, { method: rule.method ?? 'DELETE', path });
+    registerCleanup(world, { method: rule.method ?? 'DELETE', path, body: rule.body });
   }
 }

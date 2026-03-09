@@ -184,13 +184,20 @@ flowchart TD
 // In world fixture teardown
 if (!world.skipCleanup && world.cleanup.length > 0) {
   for (const item of [...world.cleanup].reverse()) {
-    const adminHeaders = await getAdminHeaders(apiRequest);
+    // getCleanupAuth is configurable via createBddTest({ getCleanupAuth })
+    // Default: form-based login using DEFAULT_ADMIN_* env vars
+    // Also supports: CLEANUP_AUTH_TOKEN, createOidcCleanupAuth(), or custom callback
+    const adminHeaders = await getCleanupAuth(apiRequest);
     const headers = { ...adminHeaders, ...(item.headers || {}) };
+    if (item.body !== undefined) {
+      headers['Content-Type'] = 'application/json';
+    }
     
     try {
       const resp = await apiRequest.fetch(item.path, {
         method: item.method,
         headers,
+        data: item.body,
       });
       
       const status = resp.status();
