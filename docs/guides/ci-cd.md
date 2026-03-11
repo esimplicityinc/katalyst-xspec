@@ -422,13 +422,15 @@ steps:
 ```typescript
 // playwright.config.ts
 import { defineConfig } from '@playwright/test';
+import { resolveWorkers } from '@esimplicity/stack-tests';
 
 export default defineConfig({
   // Fail fast in CI
   maxFailures: process.env.CI ? 10 : undefined,
   
-  // Single worker in CI for stability
-  workers: process.env.CI ? 1 : undefined,
+  // Smart worker resolution (1 in CI, Playwright default locally)
+  // Override with WORKERS env var: WORKERS=4 npm test
+  workers: resolveWorkers(),
   
   // Retries in CI
   retries: process.env.CI ? 2 : 0,
@@ -473,6 +475,10 @@ DEFAULT_USER_PASSWORD=TestUser123
 # CI-specific
 CI=true
 HEADLESS=true
+
+# Worker override (optional)
+# Defaults to 1 in CI; set explicitly to use more workers
+# WORKERS=2
 ```
 
 ### Secrets Management

@@ -212,6 +212,22 @@ npx upgrade-stack-tests --migrate --backup-dir ./backups/pre-migration
 
 ## Version History
 
+### 0.2.3
+
+New features:
+- `resolveWorkers()` utility for smart Playwright worker configuration
+- `getCpuCount()` helper for CPU core detection
+- `WORKERS` env var support for explicit worker count override
+- TUI tests auto-forced to sequential execution via `resolveWorkers({ testType: 'tui' })`
+
+**Migration note:** Replace `workers: process.env.CI ? 1 : undefined` in your `playwright.config.ts` with:
+```typescript
+import { resolveWorkers } from '@esimplicity/stack-tests';
+
+// In defineConfig:
+workers: resolveWorkers(),
+```
+
 ### 0.2.0 (Current)
 
 New features:

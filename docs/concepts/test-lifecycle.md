@@ -390,11 +390,19 @@ Configure parallelism:
 
 ```typescript
 // playwright.config.ts
+import { resolveWorkers } from '@esimplicity/stack-tests';
+
 export default defineConfig({
   fullyParallel: true,
-  workers: process.env.CI ? 1 : undefined,
+  workers: resolveWorkers(),
 });
 ```
+
+`resolveWorkers()` automatically selects the right worker count:
+- **Local development:** `undefined` (Playwright default -- 50% of CPU cores)
+- **CI (`CI=true`):** `1` worker for stability
+- **Explicit override:** Set `WORKERS=4` to use exactly 4 workers
+- **TUI tests:** `resolveWorkers({ testType: 'tui' })` always returns `1` (sequential)
 
 ## Best Practices
 

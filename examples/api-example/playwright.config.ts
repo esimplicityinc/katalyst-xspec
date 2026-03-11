@@ -1,5 +1,6 @@
 import { defineConfig } from '@playwright/test';
 import { defineBddConfig } from 'playwright-bdd';
+import { resolveWorkers } from '@esimplicity/stack-tests';
 
 const testDir = defineBddConfig({
   features: 'features/**/*.feature',
@@ -10,6 +11,7 @@ export default defineConfig({
   testDir,
   timeout: 30000,
   retries: 0,
+  workers: resolveWorkers(),
   reporter: [['html', { open: 'never' }]],
   use: {
     trace: 'on-first-retry',

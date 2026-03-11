@@ -74,6 +74,8 @@ registerTuiSteps(test);
 
 ```typescript
 // playwright.config.ts
+import { resolveWorkers } from '@esimplicity/stack-tests';
+
 const tuiBdd = defineBddProject({
   name: 'tui',
   features: 'features/tui/**/*.feature',
@@ -82,7 +84,12 @@ const tuiBdd = defineBddProject({
 });
 
 export default defineConfig({
-  projects: [apiBdd, uiBdd, tuiBdd],
+  projects: [
+    apiBdd,
+    uiBdd,
+    // TUI tests must run sequentially -- resolveWorkers enforces workers: 1
+    { ...tuiBdd, workers: resolveWorkers({ testType: 'tui' }) },
+  ],
 });
 ```
 

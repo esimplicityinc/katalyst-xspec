@@ -66,6 +66,9 @@ npm test -- --verbose
 
 # Single worker for sequential execution
 npm test -- --workers=1
+
+# Or use the WORKERS env var (respected by resolveWorkers in config)
+WORKERS=1 npm test
 ```
 
 ## Unit Tests

@@ -324,6 +324,9 @@ npm test -- --verbose
 
 # Run single test in isolation
 npm test -- --grep "specific test name" --workers=1
+
+# Or use the WORKERS env var (respected by resolveWorkers)
+WORKERS=1 npm test
 ```
 
 ## Related Guides

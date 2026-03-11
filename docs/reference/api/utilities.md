@@ -338,6 +338,90 @@ type CleanupItem = {
 
 ---
 
+## Worker Configuration
+
+### resolveWorkers
+
+Resolves the number of Playwright workers based on environment variables, test type, and CI detection.
+
+```typescript
+import { resolveWorkers } from '@esimplicity/stack-tests';
+```
+
+#### Signature
+
+```typescript
+function resolveWorkers(options?: {
+  testType?: 'api' | 'ui' | 'tui' | 'hybrid';
+  ciWorkers?: number;
+  defaultWorkers?: number;
+}): number | undefined
+```
+
+#### Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `testType` | `string` | `undefined` | Test type. `'tui'` forces 1 worker (sequential). |
+| `ciWorkers` | `number` | `1` | Workers to use in CI when `WORKERS` env is not set |
+| `defaultWorkers` | `number` | `undefined` | Workers locally when `WORKERS` env is not set. `undefined` lets Playwright decide (50% of CPU cores). |
+
+#### Precedence
+
+1. `testType: 'tui'` -- always returns `1`
+2. `WORKERS` env var set to a positive integer -- returns that number
+3. `WORKERS` env var set to `'auto'` or empty -- treated as unset
+4. `CI` env var is truthy -- returns `ciWorkers` (default: `1`)
+5. Otherwise -- returns `defaultWorkers` (default: `undefined`)
+
+#### Example
+
+```typescript
+import { resolveWorkers } from '@esimplicity/stack-tests';
+
+// playwright.config.ts
+export default defineConfig({
+  workers: resolveWorkers(),
+  projects: [
+    { ...apiBdd },
+    { ...uiBdd },
+    { ...tuiBdd, workers: resolveWorkers({ testType: 'tui' }) },
+  ],
+});
+```
+
+```bash
+# Override via environment
+WORKERS=4 npm test
+WORKERS=auto npm test  # same as unset
+```
+
+---
+
+### getCpuCount
+
+Returns the number of available CPU cores on the current machine.
+
+```typescript
+import { getCpuCount } from '@esimplicity/stack-tests';
+```
+
+#### Signature
+
+```typescript
+function getCpuCount(): number
+```
+
+#### Example
+
+```typescript
+import { getCpuCount } from '@esimplicity/stack-tests';
+
+console.log(`Available CPU cores: ${getCpuCount()}`);
+```
+
+---
+
 ## Usage in Step Definitions
 
 ### Complete Example

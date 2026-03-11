@@ -79,6 +79,13 @@ For consumers using `createOidcCleanupAuth()` in their fixture setup:
 |----------|---------|-------------|
 | `DEBUG` | `'false'` | Enable TUI debug output |
 
+### Execution Configuration
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `WORKERS` | `undefined` | Worker count override. Set to a positive integer for explicit count, or `'auto'` to let Playwright decide. |
+| `CI` | `undefined` | When truthy, `resolveWorkers()` defaults to 1 worker for stability |
+
 ---
 
 ## Configuration Helpers
@@ -194,6 +201,93 @@ resolveExtraTags('@smoke')
 
 ---
 
+### resolveWorkers
+
+Resolves the Playwright worker count based on environment variables, test type, and CI detection.
+
+```typescript
+import { resolveWorkers } from '@esimplicity/stack-tests';
+```
+
+#### Signature
+
+```typescript
+function resolveWorkers(options?: ResolveWorkersOptions): number | undefined
+```
+
+#### Options
+
+```typescript
+type ResolveWorkersOptions = {
+  testType?: 'api' | 'ui' | 'tui' | 'hybrid';
+  ciWorkers?: number;       // default: 1
+  defaultWorkers?: number;  // default: undefined (Playwright decides)
+};
+```
+
+#### Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `testType` | `string` | `undefined` | Test type. `'tui'` forces 1 worker. |
+| `ciWorkers` | `number` | `1` | Workers in CI when `WORKERS` is not set |
+| `defaultWorkers` | `number` | `undefined` | Workers locally when `WORKERS` is not set |
+
+#### Precedence
+
+1. `testType: 'tui'` -- always returns `1`
+2. `WORKERS` env var with valid positive integer -- returns that number
+3. `CI` env var is truthy -- returns `ciWorkers` (default: `1`)
+4. Otherwise -- returns `defaultWorkers` (default: `undefined`, letting Playwright decide)
+
+#### Examples
+
+```typescript
+// Basic usage - auto-detects CI, respects WORKERS env var
+workers: resolveWorkers(),
+
+// TUI tests - always sequential
+workers: resolveWorkers({ testType: 'tui' }),
+
+// Custom CI workers
+workers: resolveWorkers({ ciWorkers: 2 }),
+
+// Explicit local default
+workers: resolveWorkers({ defaultWorkers: 4 }),
+```
+
+```bash
+# Override via environment variable
+WORKERS=4 npm test
+
+# Let Playwright decide (same as default)
+WORKERS=auto npm test
+```
+
+---
+
+### getCpuCount
+
+Returns the number of available CPU cores. Useful for logging or diagnostics.
+
+```typescript
+import { getCpuCount } from '@esimplicity/stack-tests';
+```
+
+#### Signature
+
+```typescript
+function getCpuCount(): number
+```
+
+#### Example
+
+```typescript
+console.log(`Running on ${getCpuCount()} CPU cores`);
+```
+
+---
+
 ## Playwright Configuration
 
 ### Example Configuration
@@ -202,7 +296,7 @@ resolveExtraTags('@smoke')
 // playwright.config.ts
 import { defineConfig } from '@playwright/test';
 import { defineBddProject, cucumberReporter } from 'playwright-bdd';
-import { tagsForProject, resolveExtraTags } from '@esimplicity/stack-tests';
+import { tagsForProject, resolveExtraTags, resolveWorkers } from '@esimplicity/stack-tests';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -243,7 +337,7 @@ export default defineConfig({
   testDir: '.features-gen',
   timeout: 60_000,
   fullyParallel: true,
-  workers: process.env.CI ? 1 : undefined,
+  workers: resolveWorkers(),
   retries: process.env.CI ? 2 : 0,
   
   reporter: [
@@ -293,6 +387,9 @@ CLEANUP_ALLOW_ALL=false
 
 # Tag Filtering
 TEST_TAGS=
+
+# Worker Configuration
+# WORKERS=auto
 
 # Debug
 DEBUG=false

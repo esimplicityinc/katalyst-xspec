@@ -1,5 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 import { defineBddProject, cucumberReporter } from 'playwright-bdd';
+import { resolveWorkers } from '@esimplicity/stack-tests';
 
 // Define separate BDD projects for each test type
 const apiBdd = defineBddProject({
@@ -29,6 +30,7 @@ const hybridBdd = defineBddProject({
 export default defineConfig({
   timeout: 60000,
   retries: 0,
+  workers: resolveWorkers(),
   reporter: [
     ['html', { open: 'never' }],
     cucumberReporter('html', { outputFile: 'cucumber-report/index.html' }),
@@ -42,7 +44,7 @@ export default defineConfig({
   projects: [
     { ...apiBdd, use: { ...devices['Desktop Chrome'] } },
     { ...uiBdd, use: { ...devices['Desktop Chrome'] } },
-    { ...tuiBdd },
+    { ...tuiBdd, workers: resolveWorkers({ testType: 'tui' }) },
     { ...hybridBdd, use: { ...devices['Desktop Chrome'] } },
   ],
 });

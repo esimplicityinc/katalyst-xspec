@@ -48,7 +48,7 @@ export default defineConfig({
 // playwright.config.ts
 import { defineConfig, devices } from '@playwright/test';
 import { defineBddProject, cucumberReporter } from 'playwright-bdd';
-import { tagsForProject, resolveExtraTags } from '@esimplicity/stack-tests';
+import { tagsForProject, resolveExtraTags, resolveWorkers } from '@esimplicity/stack-tests';
 import dotenv from 'dotenv';
 import path from 'node:path';
 import fs from 'node:fs';
@@ -107,7 +107,7 @@ export default defineConfig({
   
   // Parallelism
   fullyParallel: true,
-  workers: process.env.CI ? 1 : undefined,
+  workers: resolveWorkers(),
   
   // Retries
   retries: process.env.CI ? 2 : 0,
@@ -137,7 +137,7 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
     hybridBdd,
-    tuiBdd,
+    { ...tuiBdd, workers: resolveWorkers({ testType: 'tui' }) },
   ],
   
   // Output
@@ -323,6 +323,11 @@ CLEANUP_ALLOW_ALL=false
 
 # Tag Filtering
 TEST_TAGS=
+
+# Worker Configuration
+# Set to a number for explicit worker count, or "auto" to let Playwright decide
+# In CI, defaults to 1 for stability unless explicitly overridden
+# WORKERS=auto
 
 # Debug
 DEBUG=false

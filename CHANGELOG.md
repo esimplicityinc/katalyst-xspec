@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.3] - 2026-03-11
+
+### Added
+
+- **`resolveWorkers()` utility**: Smart Playwright worker resolution based on environment variables, test type, and CI detection. Replaces the manual `workers: process.env.CI ? 1 : undefined` pattern.
+  - `WORKERS` env var: Set to a positive integer for explicit worker count, or `'auto'` to let Playwright decide
+  - CI detection: Defaults to 1 worker when `CI` env var is truthy (overridable via `WORKERS`)
+  - TUI enforcement: `resolveWorkers({ testType: 'tui' })` always returns 1 (sequential execution)
+  - Configurable via `ciWorkers` and `defaultWorkers` options
+
+- **`getCpuCount()` helper**: Returns the number of available CPU cores for diagnostics and logging.
+
+- **`WORKERS` environment variable**: New env var for controlling Playwright worker count across all projects. Documented in scaffolded `.env.example`.
+
+### Changed
+
+- Updated all example project configs (`api-example`, `ui-example`, `tui-example`, `full-stack-example`) to use `resolveWorkers()`.
+- Updated `create-stack-tests` scaffolder template to include `resolveWorkers()` in generated `playwright.config.ts`.
+- Updated documentation to replace `workers: process.env.CI ? 1 : undefined` with `resolveWorkers()`.
+
 ## [0.2.2] - 2026-03-09
 
 ### Breaking Changes

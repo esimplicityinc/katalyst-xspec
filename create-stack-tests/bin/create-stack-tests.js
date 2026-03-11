@@ -354,6 +354,7 @@ export { test };
 
   const playwrightConfig = `import { defineConfig } from '@playwright/test';
 import { defineBddProject, cucumberReporter } from 'playwright-bdd';
+import { resolveWorkers } from '@esimplicity/stack-tests';
 import dotenv from 'dotenv';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -401,6 +402,7 @@ const hybridBdd = defineBddProject({
 // });
 
 export default defineConfig({
+  workers: resolveWorkers(),
   reporter: [
     cucumberReporter('html', { outputFile: 'cucumber-report/index.html' }),
     cucumberReporter('json', { outputFile: 'cucumber-report/report.json' }),
@@ -509,6 +511,11 @@ HEADLESS=true
 # TUI testing (optional)
 # Set DEBUG=true to see TUI tester output
 DEBUG=false
+
+# Worker configuration
+# Set to a number for explicit worker count, or "auto" to let Playwright decide
+# In CI, defaults to 1 for stability unless explicitly overridden
+# WORKERS=auto
 `;
 
   const readme = `# stack-tests

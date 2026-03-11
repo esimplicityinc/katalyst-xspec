@@ -1,5 +1,6 @@
 import { defineConfig } from '@playwright/test';
 import { defineBddConfig } from 'playwright-bdd';
+import { resolveWorkers } from '@esimplicity/stack-tests';
 
 const testDir = defineBddConfig({
   features: 'features/**/*.feature',
@@ -11,5 +12,5 @@ export default defineConfig({
   timeout: 60000, // TUI tests may need longer timeout
   retries: 0,
   reporter: [['html', { open: 'never' }]],
-  workers: 1, // Run TUI tests sequentially
+  workers: resolveWorkers({ testType: 'tui' }), // TUI tests always run sequentially
 });

@@ -15,3 +15,4 @@ export * from './adapters/ui/fetch-intercept-auth.adapter';
 export * from './helpers/oidc-cleanup-auth';
 export * from './steps';
 export * from './config';
+export * from './workers';

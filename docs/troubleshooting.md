@@ -199,6 +199,36 @@ export const test = createBddTest({
 
 ---
 
+### Tests running slowly in CI
+
+By default, `resolveWorkers()` uses 1 worker in CI for stability. If your CI environment has multiple cores and your tests are isolated, increase the worker count:
+
+```bash
+# In your CI config
+WORKERS=4 npm test
+```
+
+Or configure in your `playwright.config.ts`:
+
+```typescript
+workers: resolveWorkers({ ciWorkers: 4 }),
+```
+
+---
+
+### TUI tests failing with parallel execution
+
+TUI tests require sequential execution (1 worker) because they use tmux sessions. Use `resolveWorkers({ testType: 'tui' })` to enforce this:
+
+```typescript
+// playwright.config.ts
+projects: [
+  { ...tuiBdd, workers: resolveWorkers({ testType: 'tui' }) },
+],
+```
+
+---
+
 ## Variable and State Issues
 
 ### Variable interpolation not working
