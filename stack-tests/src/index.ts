@@ -16,3 +16,4 @@ export * from './helpers/oidc-cleanup-auth';
 export * from './steps';
 export * from './config';
 export * from './workers';
+export * from './paths';
