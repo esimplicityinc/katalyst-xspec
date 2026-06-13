@@ -288,7 +288,7 @@ function templates(packageName) {
       clean: 'rm -rf .features-gen node_modules test-results storage cucumber-report playwright-report'
     },
     devDependencies: {
-      '@esimplicity/stack-tests': '^0.2.0',
+      '@esimplicity/stack-tests': '^0.3.0',
       '@playwright/test': '^1.49.0',
       'playwright-bdd': '^8.3.0',
       dotenv: '^16.1.4',
