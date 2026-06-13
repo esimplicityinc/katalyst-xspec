@@ -1,4 +1,5 @@
 import { test as base } from 'playwright-bdd';
+import { expect } from '@playwright/test';
 import type { APIRequestContext, Page, PlaywrightTestArgs, PlaywrightWorkerArgs } from '@playwright/test';
 import { initWorld, type World } from './world';
 import type { ApiPort } from './ports/api.port';
@@ -132,7 +133,7 @@ export function createBddTest(options: CreateBddTestOptions = {}) {
     worldFactory = initWorld,
   } = options;
 
-  return base.extend<{
+  const test = base.extend<{
     world: World;
     api: ApiPort;
     ui: UiPort;
@@ -230,6 +231,8 @@ export function createBddTest(options: CreateBddTestOptions = {}) {
       }
     },
   });
+
+  return { test, expect };
 }
 
 export { base as baseTest };

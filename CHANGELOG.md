@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-06-13
+
+### Fixed
+
+- **`createBddTest` now returns `{ test, expect }`** (previously returned a bare Playwright test function). The documented and scaffolded usage is `export const { test, expect } = createBddTest(...)`; destructuring `.test`/`.expect` off a bare function yielded `undefined`, so `registerXSteps(test)` registered steps on `undefined`/the base test. playwright-bdd's codegen then imported the **base** test (without `api`/`ui`/`world` fixtures) and runtime failed with `Test has unknown parameter "ui"`/`"world"`. All four example projects and the forge `tests-bdd` bundle use the destructure form and were affected. The scaffolder template and README, which used the bare `export const test = ...` form, are updated to the `{ test, expect }` form for consistency.
+
+### Added
+
+- **`resolveFeatures()`, `resolveSteps()`, `resolveBddPaths()`** path helpers for configurable per-environment feature/step locations (multi-layer repos via `FEATURES_DIR`/`CUSTOM_STEPS_DIR`).
+
 ## [0.2.3] - 2026-03-11
 
 ### Added

@@ -316,7 +316,7 @@ function templates(packageName) {
   TuiTesterAdapter,
 } from '@esimplicity/stack-tests';
 
-export const test = createBddTest({
+export const { test, expect } = createBddTest({
   createApi: ({ apiRequest }) => new PlaywrightApiAdapter(apiRequest),
   createUi: ({ page }) => new PlaywrightUiAdapter(page),
   createAuth: ({ api, ui }) => new UniversalAuthAdapter({ api, ui }),
