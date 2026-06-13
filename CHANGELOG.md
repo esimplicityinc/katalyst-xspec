@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - **`createBddTest` now returns `{ test, expect }`** (previously returned a bare Playwright test function). The documented and scaffolded usage is `export const { test, expect } = createBddTest(...)`; destructuring `.test`/`.expect` off a bare function yielded `undefined`, so `registerXSteps(test)` registered steps on `undefined`/the base test. playwright-bdd's codegen then imported the **base** test (without `api`/`ui`/`world` fixtures) and runtime failed with `Test has unknown parameter "ui"`/`"world"`. All four example projects and the forge `tests-bdd` bundle use the destructure form and were affected. The scaffolder template and README, which used the bare `export const test = ...` form, are updated to the `{ test, expect }` form for consistency.
+- **`create-stack-tests` published under the correct npm scope** — the package was named `@esimplicityinc/create-stack-tests` (a scope that 404s) instead of `@esimplicity/create-stack-tests`. Corrected the scope and bumped the scaffolded `@esimplicity/stack-tests` devDependency to `^0.3.0`.
 
 ### Added
 
