@@ -53,6 +53,31 @@ export function registerUiBasicSteps(test: any): void {
     await page.locator(interpolate(selector, world.vars)).selectOption({ label: interpolate(option, world.vars) });
   });
 
+  // File upload by CSS selector — attaches an in-memory file to a
+  // <input type="file"> so a real upload can be exercised without a fixture on
+  // disk. Content-type is inferred from the file name's extension.
+  When(
+    'I set the file input {string} to a file named {string} with content {string}',
+    { tags: '@ui or @hybrid' },
+    async ({ page, world }: any, selector: string, fileName: string, content: string) => {
+      const name = interpolate(fileName, world.vars);
+      const ext = name.slice(name.lastIndexOf('.') + 1).toLowerCase();
+      const mimeType =
+        ext === 'csv'
+          ? 'text/csv'
+          : ext === 'json'
+            ? 'application/json'
+            : ext === 'xml'
+              ? 'application/xml'
+              : 'text/plain';
+      await page.locator(interpolate(selector, world.vars)).setInputFiles({
+        name,
+        mimeType,
+        buffer: Buffer.from(interpolate(content, world.vars)),
+      });
+    },
+  );
+
   Then('I should see text {string}', { tags: '@ui or @hybrid' }, async ({ ui, world }: any, text: string) => {
     await ui.expectText(interpolate(text, world.vars));
   });
