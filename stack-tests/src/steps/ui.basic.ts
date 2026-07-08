@@ -105,6 +105,15 @@ export function registerUiBasicSteps(test: any): void {
     await expect(page.locator(interpolate(selector, world.vars))).toHaveValue(interpolate(value, world.vars));
   });
 
+  // Arbitrary attribute assertion by CSS selector — e.g. assert a component's
+  // data-state ("expanded"/"collapsed"), aria-*, or any HTML attribute value.
+  Then('the element {string} should have attribute {string} equal to {string}', { tags: '@ui or @hybrid' }, async ({ page, world }: any, selector: string, attribute: string, value: string) => {
+    await expect(page.locator(interpolate(selector, world.vars))).toHaveAttribute(
+      interpolate(attribute, world.vars),
+      interpolate(value, world.vars),
+    );
+  });
+
   // Checkbox state assertions
   Then('the element {string} should be checked', { tags: '@ui or @hybrid' }, async ({ page, world }: any, selector: string) => {
     await expect(page.locator(interpolate(selector, world.vars))).toBeChecked();
