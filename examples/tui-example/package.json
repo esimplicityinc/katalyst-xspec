@@ -9,9 +9,9 @@
     "test:debug": "DEBUG=tui-tester playwright test"
   },
   "dependencies": {
-    "@esimplicity/stack-tests": "^0.1.0",
+    "@esimplicity/stack-tests": "^0.3.0",
     "@playwright/test": "^1.49.0",
-    "playwright-bdd": "^8.3.0",
+    "playwright-bdd": "^9.1.0",
     "tui-tester": "^1.0.0"
   },
   "devDependencies": {

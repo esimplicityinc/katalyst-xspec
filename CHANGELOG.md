@@ -7,9 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.0] - 2026-06-13
 
+### Breaking Changes
+
+- **`createBddTest()` returns `{ test, expect }`, not a bare test function.** The documented and scaffolded usage has always been the destructured form, but the function returned the bare Playwright test. Destructuring `.test`/`.expect` off a function yields `undefined`, so `registerXSteps(test)` registered steps on `undefined`/the base test. playwright-bdd's codegen then imported the **base** test (without `api`/`ui`/`world` fixtures) and runtime failed with `Test has unknown parameter "ui"`/`"world"`. All four example projects and the forge `tests-bdd` bundle use the destructured form and were affected. **Action required:** in `features/steps/fixtures.ts`, change `export const test = createBddTest({ ... })` to `export const { test } = createBddTest({ ... })`. That single line is the entire migration.
+
+- **`playwright-bdd` peer range is now `^9.1.0`, which excludes the whole v8 line.** 9.1.0 is the floor because this package declares `@playwright/test: ^1.49.0`, a caret range that resolves to Playwright 1.61.1 on a clean install, and 9.1.0 is the playwright-bdd release that added Playwright 1.61 support. **Action required:** bump `playwright-bdd` to `^9.1.0` in your project's devDependencies and re-run `npm install`. Installing this release alongside playwright-bdd v8 fails with `ERESOLVE`.
+
+- **Node 20 is now the minimum.** `engines.node` is declared as `>=20` (previously undeclared). **Action required:** upgrade any Node 18 runners; the published CI workflow already uses Node 20.
+
+### Changed
+
+- **Upgraded to playwright-bdd v9.** v9 moves to `@cucumber/messages@32.3.1`, which depends only on `class-transformer` and `reflect-metadata`. This removes `uuid` from the dependency tree entirely instead of upgrading it, clearing a transitive advisory that had no fix available anywhere on the playwright-bdd v8 line.
+- **JUnit reporter default test case naming is now Cucumber-compatible** (playwright-bdd v9 behavior change; it was Playwright style on v8). Restore the previous naming with `nameFormat: 'playwright'`. No package or example in this repository configures a JUnit reporter, and the scaffolder does not emit one, so nothing here is affected. Downstream projects that configure their own JUnit reporter should check what parses the XML before upgrading, since test case names will change.
+- **Cucumber JSON reporter now defaults `skipAttachments` to `true`** (playwright-bdd v9 behavior change; the default was `false` on v8, so screenshots and traces were embedded). The `@esimplicity/stack-tests` library itself configures no reporters, so importing it changes nothing. **This one does reach generated projects, though:** `create-stack-tests` scaffolds `cucumberReporter('json', ...)` into `playwright.config.ts` and sets no `skipAttachments`, as does `examples/full-stack-example`. On v9 those Cucumber JSON reports stop embedding attachments. **Action required** if anything consumes attachments out of `cucumber-report/report.json`: pass `skipAttachments: false` to the `cucumberReporter('json', ...)` call in your `playwright.config.ts`. The scaffolder template is left on the new upstream default deliberately; it is not overridden here.
+- **`stack-tests` now has a runnable `test` script.** The three existing suites (`fixtures`, `paths`, `workers`) previously had no runner wired up and never executed. They now run via `node --import tsx --test`, and are picked up by the root `npm test`.
+
 ### Fixed
 
-- **`createBddTest` now returns `{ test, expect }`** (previously returned a bare Playwright test function). The documented and scaffolded usage is `export const { test, expect } = createBddTest(...)`; destructuring `.test`/`.expect` off a bare function yielded `undefined`, so `registerXSteps(test)` registered steps on `undefined`/the base test. playwright-bdd's codegen then imported the **base** test (without `api`/`ui`/`world` fixtures) and runtime failed with `Test has unknown parameter "ui"`/`"world"`. All four example projects and the forge `tests-bdd` bundle use the destructure form and were affected. The scaffolder template and README, which used the bare `export const test = ...` form, are updated to the `{ test, expect }` form for consistency.
 - **`create-stack-tests` published under the correct npm scope** — the package was named `@esimplicityinc/create-stack-tests` (a scope that 404s) instead of `@esimplicity/create-stack-tests`. Corrected the scope and bumped the scaffolded `@esimplicity/stack-tests` devDependency to `^0.3.0`.
 
 ### Added

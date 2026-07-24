@@ -57,19 +57,15 @@ registerApiSteps(test);
 
 3) Configure Playwright projects with your features/steps globs and tag expressions. Keep `@playwright/test` and `playwright-bdd` aligned with peer ranges.
 
-## Publishing (GitHub Packages)
+## Publishing (npm)
 
-- Ensure `.npmrc` includes:
-  ```
-  @kata:registry=https://npm.pkg.github.com
-  //npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}
-  ```
-- Build then publish:
-  ```bash
-  npm run build
-  npm publish --access public
-  ```
-  (Adjust access per your org policy.)
+Publishing is automated. The `.github/workflows/publish.yml` workflow builds the package and publishes it to the
+public npm registry, authenticating via `actions/setup-node` with `registry-url: https://registry.npmjs.org` and the
+`NODE_AUTH_TOKEN` secret. There is no `.npmrc` in this package and none is needed.
+
+To release: bump `version` in `stack-tests/package.json`, land the change, and the workflow publishes it. The
+workflow skips any version already present on npm, so a change without a version bump merges green and never
+reaches the registry.
 
 ## Notes
 - Peer dependencies: `@playwright/test`, `playwright-bdd`, `typescript` must be installed in the consuming repo.

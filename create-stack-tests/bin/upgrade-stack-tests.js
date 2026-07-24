@@ -301,37 +301,37 @@ function extractCleanupRules(fixturesContent) {
   return null;
 }
 
+// The project owns these; the template only supplies a fallback.
+const PKG_IDENTITY_KEYS = ['name', 'version', 'description'];
+
+// Object-valued keys merged entry-by-entry so project-specific entries survive
+// while the template wins on collision, which is how version bumps land.
+const PKG_MERGED_MAPS = ['scripts', 'dependencies', 'devDependencies', 'engines'];
+
 /**
  * Merge package.json - preserve user's custom dependencies/scripts
  */
 function mergePackageJson(existing, template) {
   const existingPkg = JSON.parse(existing);
   const templatePkg = JSON.parse(template);
-  
-  // Keep user's name, version, description
-  const merged = {
-    ...templatePkg,
-    name: existingPkg.name || templatePkg.name,
-    version: existingPkg.version || templatePkg.version,
-    description: existingPkg.description || templatePkg.description,
-  };
-  
-  // Merge scripts - keep custom scripts, update standard ones
-  merged.scripts = {
-    ...existingPkg.scripts,
-    ...templatePkg.scripts,
-  };
-  
-  // Merge dependencies - update template deps, keep custom ones
-  merged.devDependencies = {
-    ...existingPkg.devDependencies,
-    ...templatePkg.devDependencies,
-  };
-  
-  if (existingPkg.dependencies) {
-    merged.dependencies = existingPkg.dependencies;
-  }
-  
+
+  // Existing-first spread. A template-first spread dropped every top-level key
+  // the template does not declare, so an upgrade silently deleted `overrides` /
+  // `resolutions` security pins, `workspaces` monorepo wiring and
+  // `packageManager` from the very project it was meant to remediate.
+  const merged = { ...existingPkg, ...templatePkg };
+
+  PKG_IDENTITY_KEYS.forEach((key) => {
+    merged[key] = existingPkg[key] || templatePkg[key];
+  });
+
+  PKG_MERGED_MAPS.forEach((key) => {
+    const combined = { ...existingPkg[key], ...templatePkg[key] };
+    if (Object.keys(combined).length > 0) {
+      merged[key] = combined;
+    }
+  });
+
   return JSON.stringify(merged, null, 2) + '\n';
 }
 
@@ -388,11 +388,14 @@ function getTemplates() {
       clean: 'rm -rf .features-gen node_modules test-results storage cucumber-report playwright-report'
     },
     devDependencies: {
-      '@esimplicity/stack-tests': '^0.2.0',
+      '@esimplicity/stack-tests': '^0.3.0',
       '@playwright/test': '^1.49.0',
-      'playwright-bdd': '^8.3.0',
+      'playwright-bdd': '^9.1.0',
       dotenv: '^16.1.4',
       typescript: '^5.6.3'
+    },
+    engines: {
+      node: '>=20'
     }
   };
 
@@ -405,7 +408,7 @@ function getTemplates() {
   TuiTesterAdapter,
 } from '@esimplicity/stack-tests';
 
-export const test = createBddTest({
+export const { test } = createBddTest({
   createApi: ({ apiRequest }) => new PlaywrightApiAdapter(apiRequest),
   createUi: ({ page }) => new PlaywrightUiAdapter(page),
   createAuth: ({ api, ui }) => new UniversalAuthAdapter({ api, ui }),
