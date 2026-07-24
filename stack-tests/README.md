@@ -39,7 +39,7 @@ import {
   DefaultCleanupAdapter,
 } from '@esimplicity/stack-tests';
 
-export const { test, expect } = createBddTest({
+export const { test } = createBddTest({
   createApi: ({ apiRequest }) => new PlaywrightApiAdapter(apiRequest),
   createUi: ({ page }) => new PlaywrightUiAdapter(page),
   createAuth: ({ api, ui }) => new UniversalAuthAdapter({ api, ui }),
