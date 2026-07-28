@@ -290,9 +290,12 @@ function templates(packageName) {
     devDependencies: {
       '@esimplicity/stack-tests': '^0.3.0',
       '@playwright/test': '^1.49.0',
-      'playwright-bdd': '^8.3.0',
+      'playwright-bdd': '^9.1.0',
       dotenv: '^16.1.4',
       typescript: '^5.6.3'
+    },
+    engines: {
+      node: '>=20'
     }
   };
 
@@ -316,7 +319,7 @@ function templates(packageName) {
   TuiTesterAdapter,
 } from '@esimplicity/stack-tests';
 
-export const { test, expect } = createBddTest({
+export const { test } = createBddTest({
   createApi: ({ apiRequest }) => new PlaywrightApiAdapter(apiRequest),
   createUi: ({ page }) => new PlaywrightUiAdapter(page),
   createAuth: ({ api, ui }) => new UniversalAuthAdapter({ api, ui }),

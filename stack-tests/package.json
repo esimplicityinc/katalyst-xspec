@@ -41,14 +41,18 @@
     "dist",
     "scripts"
   ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build": "tsup",
     "clean": "rm -rf dist",
+    "test": "node --import tsx --test src/__tests__/*.test.ts",
     "postinstall": "node scripts/postinstall.cjs"
   },
   "peerDependencies": {
     "@playwright/test": "^1.49.0",
-    "playwright-bdd": "^8.3.0",
+    "playwright-bdd": "^9.1.0",
     "tui-tester": "^1.0.0",
     "typescript": "^5.6.0"
   },
@@ -59,6 +63,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
-    "tsup": "^8.3.0"
+    "tsup": "^8.3.0",
+    "tsx": "^4.19.2"
   }
 }
