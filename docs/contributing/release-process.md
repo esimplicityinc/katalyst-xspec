@@ -38,8 +38,7 @@ We follow [Semantic Versioning](https://semver.org/):
 
 | Package | Registry |
 |---------|----------|
-| @esimplicityinc/katalyst-xspec | npm |
-| @esimplicityinc/create-katalyst-xspec | npm |
+| @esimplicityinc/katalyst-xspec | GitHub Packages |
 
 ## Release Workflow
 
@@ -56,15 +55,11 @@ git checkout -b release/v0.2.0
 
 ### 2. Update Version Numbers
 
-Update `package.json` in each package:
+Update `package.json`:
 
 ```bash
 # Update katalyst-xspec
 cd katalyst-xspec
-npm version 0.2.0 --no-git-tag-version
-
-# Update create-katalyst-xspec
-cd ../create-katalyst-xspec
 npm version 0.2.0 --no-git-tag-version
 ```
 
@@ -132,8 +127,7 @@ git push origin v0.2.0
 Publishing a GitHub Release (`gh release create vX.Y.Z --target main ...`) triggers
 `.github/workflows/publish.yml`, which:
 1. Installs, builds and tests all workspaces
-2. Publishes `@esimplicityinc/katalyst-xspec` and `@esimplicityinc/create-katalyst-xspec`
-   to GitHub Packages using the built-in `GITHUB_TOKEN` (versions already published are skipped)
+2. Publishes `@esimplicityinc/katalyst-xspec` to GitHub Packages using the built-in `GITHUB_TOKEN` (versions already published are skipped)
 
 The workflow can also be run manually from the Actions tab, with an optional dry run.
 
@@ -150,7 +144,6 @@ Then publish (each package's `publishConfig.registry` already points at GitHub P
 ```bash
 npm run build
 (cd katalyst-xspec && npm publish)
-(cd create-katalyst-xspec && npm publish)
 ```
 
 ## Release Checklist

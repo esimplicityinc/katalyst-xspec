@@ -27,7 +27,7 @@ tmux -V
 
 ## Registry Setup (GitHub Packages)
 
-`@esimplicityinc/katalyst-xspec` and `@esimplicityinc/create-katalyst-xspec` are published to GitHub Packages. Before installing, map the scope in your project's `.npmrc`:
+`@esimplicityinc/katalyst-xspec` is published to GitHub Packages. Before installing, map the scope in your project's `.npmrc`:
 
 ```
 @esimplicityinc:registry=https://npm.pkg.github.com
@@ -43,14 +43,14 @@ and authenticate with a GitHub token that has `read:packages` in your user `~/.n
 
 ### Method 1: Using the Scaffold CLI (Recommended)
 
-The fastest way to get started is using the `create-katalyst-xspec` CLI:
+The fastest way to get started is using the `katalyst-xspec init` command:
 
 ```bash
 # From your project root
-npx @esimplicityinc/create-katalyst-xspec
+npx @esimplicityinc/katalyst-xspec init
 
 # Or with a custom directory name
-npx @esimplicityinc/create-katalyst-xspec --dir e2e-tests
+npx @esimplicityinc/katalyst-xspec init --dir e2e-tests
 ```
 
 This creates a complete test package with:
@@ -66,13 +66,13 @@ The CLI can also install [Agent Skills](../guides/agent-skills.md) for AI-assist
 
 ```bash
 # Install with Agent Skills (you'll be prompted to select agents)
-npx @esimplicityinc/create-katalyst-xspec --with-skills
+npx @esimplicityinc/katalyst-xspec init --with-skills
 
 # Install skills for specific agents
-npx @esimplicityinc/create-katalyst-xspec --with-skills --skills-agents opencode,claude
+npx @esimplicityinc/katalyst-xspec init --with-skills --skills-agents opencode,claude
 
 # Skip skills installation
-npx @esimplicityinc/create-katalyst-xspec --no-skills
+npx @esimplicityinc/katalyst-xspec init --no-skills
 ```
 
 Available agent options: `opencode`, `claude`, `cursor`, `generic`

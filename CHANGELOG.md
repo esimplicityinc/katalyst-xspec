@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-10-02
+
+### Breaking Changes
+
+- **There's now a single package.** `@esimplicityinc/create-katalyst-xspec` has been merged into `@esimplicityinc/katalyst-xspec`, which ships one `katalyst-xspec` command:
+
+  | Before | Now |
+  |---|---|
+  | `npx @esimplicityinc/create-katalyst-xspec` | `npx @esimplicityinc/katalyst-xspec init` |
+  | `upgrade-katalyst-xspec` | `katalyst-xspec upgrade` |
+  | `generate-step-stubs` | `katalyst-xspec stubs` |
+
+  Flags are unchanged. `@esimplicityinc/create-katalyst-xspec@0.4.0` stays on GitHub Packages but won't be updated.
+- **Action required:** in an existing project, run `npx katalyst-xspec upgrade`. Besides upgrading, it rewrites `package.json` scripts that call the old command names (including `generate-step-stubs`). Projects still on `@esimplicity/stack-tests` are migrated in the same run. If you have `@esimplicityinc/create-katalyst-xspec` as a dependency, remove it.
+
+### Added
+
+- **`katalyst-xspec init <dir>`** accepts the target directory as a positional argument, as well as `--dir <dir>`.
+- **`katalyst-xspec --help` and `--version`.**
+
+### Removed
+
+- **The duplicate root `skills/` directory.** The skills bundled in the package (`katalyst-xspec/skills/`) are the only copy, and they were already the more up-to-date one.
+
 ## [0.4.0] - 2026-10-02
 
 ### Breaking Changes

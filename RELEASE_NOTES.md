@@ -6,10 +6,10 @@ Initial release of the Katalyst BDD Test framework.
 
 | Registry | Package | Version |
 |----------|---------|---------|
-| npm | `@esimplicityinc/katalyst-xspec` | 0.1.0 |
-| npm | `@esimplicityinc/create-katalyst-xspec` | 0.1.0 |
-| GitHub Packages | `@esimplicityinc/katalyst-xspec` | 0.1.0 |
-| GitHub Packages | `@esimplicityinc/create-katalyst-xspec` | 0.1.0 |
+| npm | `@esimplicity/stack-tests` | 0.1.0 |
+| npm | `@esimplicity/create-stack-tests` | 0.1.0 |
+| GitHub Packages | `@esimplicityinc/stack-tests` | 0.1.0 |
+| GitHub Packages | `@esimplicityinc/create-stack-tests` | 0.1.0 |
 
 ## Highlights
 
@@ -62,11 +62,11 @@ Four complete example projects demonstrating real-world usage:
 
 ```bash
 # From npm (public)
-npm install @esimplicityinc/katalyst-xspec
-npx @esimplicityinc/create-katalyst-xspec my-tests
+npm install @esimplicity/stack-tests
+npx @esimplicity/create-stack-tests my-tests
 
 # From GitHub Packages (internal)
-npm install @esimplicityinc/katalyst-xspec
+npm install @esimplicityinc/stack-tests
 ```
 
 ## Requirements

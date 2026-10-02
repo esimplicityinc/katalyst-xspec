@@ -11,16 +11,16 @@ From your katalyst-xspec directory:
 npm run check-updates
 
 # Or directly
-npx upgrade-katalyst-xspec --check
+npx katalyst-xspec upgrade --check
 ```
 
 Output:
 ```
-[upgrade-katalyst-xspec] Detected package manager: npm
-[upgrade-katalyst-xspec] Installed: @esimplicityinc/katalyst-xspec@0.1.8
-[upgrade-katalyst-xspec] Latest available: 0.2.0
-[upgrade-katalyst-xspec] Update available: 0.1.8 -> 0.2.0
-[upgrade-katalyst-xspec] Run without --check to upgrade.
+[katalyst-xspec upgrade] Detected package manager: npm
+[katalyst-xspec upgrade] Installed: @esimplicityinc/katalyst-xspec@0.1.8
+[katalyst-xspec upgrade] Latest available: 0.2.0
+[katalyst-xspec upgrade] Update available: 0.1.8 -> 0.2.0
+[katalyst-xspec upgrade] Run without --check to upgrade.
 ```
 
 ## Simple Package Upgrade
@@ -32,10 +32,10 @@ To upgrade just the `@esimplicityinc/katalyst-xspec` package:
 npm run upgrade
 
 # Or directly
-npx upgrade-katalyst-xspec
+npx katalyst-xspec upgrade
 
 # Or specify a version
-npx upgrade-katalyst-xspec -v 0.2.0
+npx katalyst-xspec upgrade -v 0.2.0
 ```
 
 This updates the package in `node_modules` but doesn't touch your scaffolding files.
@@ -46,10 +46,10 @@ When significant changes are made to scaffolding templates (like new step regist
 
 ```bash
 # Preview what will change (dry run)
-npx upgrade-katalyst-xspec --migrate --dry-run
+npx katalyst-xspec upgrade --migrate --dry-run
 
 # Perform the migration
-npx upgrade-katalyst-xspec --migrate
+npx katalyst-xspec upgrade --migrate
 ```
 
 ### What Migration Does
@@ -73,28 +73,28 @@ npx upgrade-katalyst-xspec --migrate
 ### Migration Example
 
 ```bash
-$ npx upgrade-katalyst-xspec --migrate --dry-run
+$ npx katalyst-xspec upgrade --migrate --dry-run
 
-[upgrade-katalyst-xspec] Starting scaffolding migration...
-[upgrade-katalyst-xspec] Backup directory: /tmp/katalyst-xspec-backup-1234567890
+[katalyst-xspec upgrade] Starting scaffolding migration...
+[katalyst-xspec upgrade] Backup directory: /tmp/katalyst-xspec-backup-1234567890
 
-[upgrade-katalyst-xspec] Phase 1: Detecting custom files...
+[katalyst-xspec upgrade] Phase 1: Detecting custom files...
   Custom step files found: clawmarket-steps.ts, escrow-steps.ts
   Feature files found: 47
   Custom imports in steps.ts: 2
   Custom cleanup rules: yes
   Environment files: .env, .env.example
 
-[upgrade-katalyst-xspec] Phase 2: Backing up custom files...
+[katalyst-xspec upgrade] Phase 2: Backing up custom files...
   Backed up 51 files
   (dry run - no files actually backed up)
 
-[upgrade-katalyst-xspec] Phase 3: Merging configurations...
+[katalyst-xspec upgrade] Phase 3: Merging configurations...
   package.json: merged (preserving custom scripts/dependencies)
   steps.ts: merged (2 custom imports preserved)
   fixtures.ts: merged (cleanup rules preserved)
 
-[upgrade-katalyst-xspec] Phase 4: Writing updated files...
+[katalyst-xspec upgrade] Phase 4: Writing updated files...
   Updated 3 files
   (dry run - no files actually written)
 
@@ -129,9 +129,9 @@ npm test
 For a guided upgrade experience:
 
 ```bash
-npx upgrade-katalyst-xspec --interactive
+npx katalyst-xspec upgrade --interactive
 # or
-npx upgrade-katalyst-xspec -i
+npx katalyst-xspec upgrade -i
 ```
 
 This walks you through:
@@ -149,7 +149,7 @@ Current version: 0.1.8
 Latest version:  0.2.0
 
 ? Upgrade @esimplicityinc/katalyst-xspec from 0.1.8 to 0.2.0? (y/n) y
-[upgrade-katalyst-xspec] Package upgraded successfully!
+[katalyst-xspec upgrade] Package upgraded successfully!
 
 ? Would you like to migrate scaffolding files? (y/n) y
 ? Would you like to preview changes first (dry run)? (y/n) y
@@ -160,7 +160,7 @@ Latest version:  0.2.0
 
 [Migration applied...]
 
-[upgrade-katalyst-xspec] Interactive upgrade complete!
+[katalyst-xspec upgrade] Interactive upgrade complete!
 ```
 
 ## Updating Agent Skills
@@ -168,7 +168,7 @@ Latest version:  0.2.0
 If you have Agent Skills installed:
 
 ```bash
-npx upgrade-katalyst-xspec --update-skills
+npx katalyst-xspec upgrade --update-skills
 ```
 
 This updates the skill files in your agent directories (`.opencode/skills/`, `.claude/skills/`, etc.) to the latest versions.
@@ -207,7 +207,7 @@ cp /tmp/katalyst-xspec-backup-<timestamp>/steps/steps.ts.original ./features/ste
 Specify a custom backup directory:
 
 ```bash
-npx upgrade-katalyst-xspec --migrate --backup-dir ./backups/pre-migration
+npx katalyst-xspec upgrade --migrate --backup-dir ./backups/pre-migration
 ```
 
 ## Version History
@@ -254,7 +254,7 @@ You need to run upgrade from a scaffolded katalyst-xspec directory that has `nod
 ```bash
 cd katalyst-xspec
 npm install
-npx upgrade-katalyst-xspec
+npx katalyst-xspec upgrade
 ```
 
 ### Migration conflicts

@@ -417,10 +417,10 @@ Use the migration feature to update scaffolding while preserving your customizat
 
 ```bash
 # Preview changes first
-npx upgrade-katalyst-xspec --migrate --dry-run
+npx katalyst-xspec upgrade --migrate --dry-run
 
 # Apply migration
-npx upgrade-katalyst-xspec --migrate
+npx katalyst-xspec upgrade --migrate
 ```
 
 See [Upgrading Guide](./guides/upgrading.md) for details.
@@ -440,10 +440,10 @@ cp /tmp/katalyst-xspec-backup-<timestamp>/steps/my-steps.ts ./features/steps/
 **Prevention:** Always use `--migrate` instead of re-running the scaffolder:
 ```bash
 # WRONG - overwrites custom files
-npx @esimplicityinc/create-katalyst-xspec --force
+npx @esimplicityinc/katalyst-xspec init --force
 
 # RIGHT - preserves custom files  
-npx upgrade-katalyst-xspec --migrate
+npx katalyst-xspec upgrade --migrate
 ```
 
 ---

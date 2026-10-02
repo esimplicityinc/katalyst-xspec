@@ -14,7 +14,8 @@ const {
   rewriteLegacyImports,
   ensureGithubPackagesNpmrc,
   mergePackageJson,
-} = require('../bin/upgrade-katalyst-xspec.js');
+  rewriteLegacyScripts,
+} = require('../cli/upgrade.cjs');
 
 function write(root, rel, content) {
   const full = path.join(root, rel);
@@ -92,5 +93,45 @@ describe('upgrade-katalyst-xspec: legacy @esimplicity/stack-tests projects', () 
     const template = JSON.stringify({ devDependencies: { '@esimplicityinc/katalyst-xspec': '^0.4.0' } });
     const merged = JSON.parse(mergePackageJson(existing, template));
     assert.deepEqual(merged.devDependencies, { zod: '^3.0.0', '@esimplicityinc/katalyst-xspec': '^0.4.0' });
+  });
+});
+
+describe('rewriteLegacyScripts', () => {
+  let dir;
+  beforeEach(() => {
+    dir = fs.mkdtempSync(path.join(os.tmpdir(), 'kx-scripts-'));
+  });
+  afterEach(() => {
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('points old per-package CLI names at the single katalyst-xspec command', () => {
+    write(dir, 'package.json', JSON.stringify({
+      name: 'p',
+      scripts: {
+        'gen:stubs': 'generate-step-stubs',
+        'check-updates': 'npx upgrade-stack-tests --check',
+        upgrade: 'npx upgrade-katalyst-xspec',
+        'upgrade:migrate': 'upgrade-katalyst-xspec --migrate',
+        test: 'bddgen && playwright test',
+      },
+    }, null, 2) + '\n');
+
+    assert.equal(rewriteLegacyScripts(dir), true);
+    const pkg = JSON.parse(fs.readFileSync(path.join(dir, 'package.json'), 'utf8'));
+    assert.deepEqual(pkg.scripts, {
+      'gen:stubs': 'katalyst-xspec stubs',
+      'check-updates': 'katalyst-xspec upgrade --check',
+      upgrade: 'katalyst-xspec upgrade',
+      'upgrade:migrate': 'katalyst-xspec upgrade --migrate',
+      test: 'bddgen && playwright test',
+    });
+    assert.equal(rewriteLegacyScripts(dir), false, 'second run is a no-op');
+  });
+
+  it('is a no-op without package.json or scripts', () => {
+    assert.equal(rewriteLegacyScripts(dir), false);
+    write(dir, 'package.json', '{"name":"p"}');
+    assert.equal(rewriteLegacyScripts(dir), false);
   });
 });

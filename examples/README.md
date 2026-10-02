@@ -98,7 +98,7 @@ example-name/
 Use the CLI to scaffold a new project:
 
 ```bash
-npx @kata/create-katalyst-xspec my-project
+npx @esimplicityinc/katalyst-xspec init my-project
 cd my-project
 npm install
 npm test

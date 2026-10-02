@@ -1,6 +1,6 @@
 {
   "name": "@esimplicityinc/katalyst-xspec",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -16,7 +16,7 @@
       "default": "./dist/steps/index.js"
     }
   },
-  "description": "Reusable Playwright-BDD fixtures, ports, adapters, and step registrations for API/UI/hybrid/TUI testing.",
+  "description": "Playwright-BDD testing framework for API/UI/hybrid/TUI: fixtures, ports, adapters, step definitions, and the katalyst-xspec CLI (init, upgrade, stubs).",
   "repository": {
     "type": "git",
     "url": "https://github.com/esimplicityinc/katalyst-xspec"
@@ -41,6 +41,9 @@
   ],
   "files": [
     "dist",
+    "bin",
+    "cli",
+    "skills",
     "scripts"
   ],
   "engines": {
@@ -49,7 +52,7 @@
   "scripts": {
     "build": "tsup",
     "clean": "rm -rf dist",
-    "test": "node --import tsx --test src/__tests__/*.test.ts",
+    "test": "node --import tsx --test src/__tests__/*.test.ts && node --test test/*.test.cjs",
     "postinstall": "node scripts/postinstall.cjs"
   },
   "peerDependencies": {
@@ -70,5 +73,8 @@
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
+  },
+  "bin": {
+    "katalyst-xspec": "bin/katalyst-xspec.cjs"
   }
 }

@@ -21,12 +21,12 @@ testconvergence/
 │   │   ├── steps/            # Step definitions
 │   │   ├── fixtures.ts       # Playwright-BDD fixtures
 │   │   └── index.ts          # Public exports
-│   ├── tests/                # Unit tests
+│   ├── bin/katalyst-xspec.cjs  # CLI entry point (dispatches subcommands)
+│   ├── cli/                  # init / upgrade / stubs subcommands
+│   ├── skills/               # Agent Skills bundled for `init --with-skills`
+│   ├── test/                 # CLI tests
 │   ├── package.json
 │   └── tsconfig.json
-├── create-katalyst-xspec/       # CLI scaffolding tool
-│   └── bin/
-│       └── create-katalyst-xspec.js
 ├── docs/                     # Documentation
 ├── examples/                 # Example projects
 └── package.json              # Root workspace config
@@ -102,14 +102,14 @@ npm run lint -w katalyst-xspec
 npm run clean -w katalyst-xspec
 ```
 
-### CLI Tool (create-katalyst-xspec)
+### CLI (`katalyst-xspec`)
 
 ```bash
-# Test the CLI locally
-node create-katalyst-xspec/bin/create-katalyst-xspec.js test-project
+# Run the CLI locally
+node katalyst-xspec/bin/katalyst-xspec.cjs init --dir test-project
 
-# Run CLI tests
-npm test -w create-katalyst-xspec
+# Library + CLI tests
+npm test -w katalyst-xspec
 ```
 
 ### All Packages
@@ -205,7 +205,7 @@ Test your changes against a real project:
 ```bash
 # Create test project
 cd /tmp
-npx create-katalyst-xspec my-test-app
+npx @esimplicityinc/katalyst-xspec init my-test-app
 
 # Link local library
 cd my-test-app
@@ -300,7 +300,6 @@ npm run clean --workspaces
 # Remove node_modules
 rm -rf node_modules
 rm -rf katalyst-xspec/node_modules
-rm -rf create-katalyst-xspec/node_modules
 
 # Reinstall
 npm install

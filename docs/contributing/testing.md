@@ -410,14 +410,14 @@ describe('createBddTest()', () => {
 ### Testing CLI Scaffolding
 
 ```typescript
-// tests/e2e/create-katalyst-xspec.test.ts
+// tests/e2e/init.test.ts
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { execSync } from 'node:child_process';
 import { existsSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 
-describe('create-katalyst-xspec CLI', () => {
+describe('katalyst-xspec init', () => {
   const testDir = join(__dirname, 'test-output');
   const projectDir = join(testDir, 'my-test-project');
 
@@ -436,7 +436,7 @@ describe('create-katalyst-xspec CLI', () => {
   });
 
   it('should scaffold a new project', () => {
-    execSync(`npx create-katalyst-xspec ${projectDir}`, {
+    execSync(`npx @esimplicityinc/katalyst-xspec init ${projectDir}`, {
       stdio: 'pipe',
     });
 

@@ -22,11 +22,11 @@ const SKILL_AGENTS = {
 };
 
 function log(msg) {
-  console.log(`[upgrade-katalyst-xspec] ${msg}`);
+  console.log(`[katalyst-xspec upgrade] ${msg}`);
 }
 
 function error(msg) {
-  console.error(`[upgrade-katalyst-xspec] ERROR: ${msg}`);
+  console.error(`[katalyst-xspec upgrade] ERROR: ${msg}`);
 }
 
 function detectPackageManager(startDir) {
@@ -106,11 +106,46 @@ function ensureGithubPackagesNpmrc(cwd, { dryRun = false } = {}) {
   return true;
 }
 
+/**
+ * Before 0.5.0 the CLIs shipped in a separate package with their own binaries
+ * (create-/upgrade-stack-tests, upgrade-katalyst-xspec, generate-step-stubs).
+ * Point package.json scripts at the single `katalyst-xspec` command instead.
+ * Returns true if package.json changed.
+ */
+const LEGACY_SCRIPT_COMMANDS = [
+  [/(?:\bnpx\s+)?\b(?:upgrade-stack-tests|upgrade-katalyst-xspec)\b/g, 'katalyst-xspec upgrade'],
+  [/(?:\bnpx\s+)?\bgenerate-step-stubs\b/g, 'katalyst-xspec stubs'],
+];
+
+function rewriteLegacyScripts(cwd, { dryRun = false } = {}) {
+  const pkgPath = path.join(cwd, 'package.json');
+  if (!fs.existsSync(pkgPath)) return false;
+  const raw = fs.readFileSync(pkgPath, 'utf8');
+  const pkg = JSON.parse(raw);
+  if (!pkg.scripts) return false;
+
+  let changed = false;
+  for (const [name, value] of Object.entries(pkg.scripts)) {
+    if (typeof value !== 'string') continue;
+    const updated = LEGACY_SCRIPT_COMMANDS.reduce((acc, [re, to]) => acc.replace(re, to), value);
+    if (updated !== value) {
+      pkg.scripts[name] = updated;
+      changed = true;
+    }
+  }
+  if (changed && !dryRun) {
+    const indent = (raw.match(/^[ \t]+(?=")/m) || ['  '])[0];
+    fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, indent) + '\n');
+  }
+  return changed;
+}
+
 /** Move a project from @esimplicity/stack-tests to @esimplicityinc/katalyst-xspec. */
 function migrateLegacyPackage(cwd, pm, targetVersion) {
   log(`${LEGACY_PACKAGE_NAME} has been renamed to ${PACKAGE_NAME}. Migrating...`);
   if (ensureGithubPackagesNpmrc(cwd)) log(`Added "${GITHUB_PACKAGES_NPMRC_LINE}" to .npmrc`);
   for (const file of rewriteLegacyImports(cwd)) log(`Updated imports: ${file}`);
+  if (rewriteLegacyScripts(cwd)) log('Updated package.json scripts to use the katalyst-xspec command');
 
   const removeCmd = { npm: 'npm uninstall', bun: 'bun remove', pnpm: 'pnpm remove', yarn: 'yarn remove' }[pm] || 'npm uninstall';
   log(`Running: ${removeCmd} ${LEGACY_PACKAGE_NAME}`);
@@ -196,7 +231,7 @@ function parseArgs(args) {
 
 function showHelp() {
   console.log(`
-Usage: npx upgrade-katalyst-xspec [options]
+Usage: npx katalyst-xspec upgrade [options]
 
 Upgrade @esimplicityinc/katalyst-xspec to the latest version.
 
@@ -211,13 +246,13 @@ Options:
   -h, --help            Show this help message
 
 Examples:
-  npx upgrade-katalyst-xspec                    # Upgrade to latest
-  npx upgrade-katalyst-xspec --check            # Check for updates only
-  npx upgrade-katalyst-xspec -v 0.1.1           # Install specific version
-  npx upgrade-katalyst-xspec --update-skills    # Update skills only
-  npx upgrade-katalyst-xspec --migrate          # Full scaffolding migration
-  npx upgrade-katalyst-xspec --migrate --dry-run # Preview migration changes
-  npx upgrade-katalyst-xspec -i                 # Interactive mode
+  npx katalyst-xspec upgrade                    # Upgrade to latest
+  npx katalyst-xspec upgrade --check            # Check for updates only
+  npx katalyst-xspec upgrade -v 0.1.1           # Install specific version
+  npx katalyst-xspec upgrade --update-skills    # Update skills only
+  npx katalyst-xspec upgrade --migrate          # Full scaffolding migration
+  npx katalyst-xspec upgrade --migrate --dry-run # Preview migration changes
+  npx katalyst-xspec upgrade -i                 # Interactive mode
 `);
 }
 
@@ -269,7 +304,7 @@ function updateSkills(cwd) {
   
   if (installedDirs.length === 0) {
     log('No Katalyst BDD skills found in current directory.');
-    log('Skills can be installed with: npx create-katalyst-xspec --with-skills');
+    log('Skills can be installed with: npx @esimplicityinc/katalyst-xspec init --with-skills');
     return true;
   }
   
@@ -445,7 +480,7 @@ function mergeFixturesTs(existing, template, cleanupRules) {
 }
 
 /**
- * Get fresh templates (imported from create-katalyst-xspec logic)
+ * Get fresh templates (mirrors cli/init.cjs)
  */
 function getTemplates() {
   const pkg = {
@@ -456,12 +491,12 @@ function getTemplates() {
     scripts: {
       gen: 'bddgen',
       test: 'bddgen && playwright test',
-      'gen:stubs': 'generate-step-stubs',
+      'gen:stubs': 'katalyst-xspec stubs',
       'clean:gen': 'rm -rf .features-gen',
       clean: 'rm -rf .features-gen node_modules test-results storage cucumber-report playwright-report'
     },
     devDependencies: {
-      '@esimplicityinc/katalyst-xspec': '^0.4.0',
+      '@esimplicityinc/katalyst-xspec': '^0.5.0',
       '@playwright/test': '^1.49.0',
       'playwright-bdd': '^9.1.0',
       dotenv: '^16.1.4',
@@ -688,6 +723,9 @@ async function migrate(cwd, options) {
     console.log(`  .npmrc: added ${GITHUB_PACKAGES_NPMRC_LINE}`);
     if (!options.dryRun) results.updated.push('.npmrc');
   }
+  if (rewriteLegacyScripts(cwd, { dryRun: options.dryRun })) {
+    console.log('  package.json: scripts now use the katalyst-xspec command');
+  }
   if (options.dryRun) {
     console.log('  (dry run - no files actually written)');
   }
@@ -897,6 +935,10 @@ async function main() {
   
   log(`Installed: ${installed.name}@${installed.version}`);
 
+  if (!installed.legacy && !options.check && rewriteLegacyScripts(cwd)) {
+    log('Updated package.json scripts to use the katalyst-xspec command');
+  }
+
   if (installed.legacy) {
     if (options.check) {
       log(`${LEGACY_PACKAGE_NAME} has been renamed to ${PACKAGE_NAME}. Run without --check to migrate.`);
@@ -953,11 +995,13 @@ if (require.main === module) {
 }
 
 module.exports = {
+  main,
   PACKAGE_NAME,
   LEGACY_PACKAGE_NAME,
   GITHUB_PACKAGES_NPMRC_LINE,
   getInstalledVersion,
   rewriteLegacyImports,
+  rewriteLegacyScripts,
   ensureGithubPackagesNpmrc,
   mergePackageJson,
 };

@@ -5,7 +5,7 @@ Get your first BDD test running in 5 minutes.
 ## Step 1: Scaffold a Test Project
 
 ```bash
-npx @esimplicityinc/create-katalyst-xspec
+npx @esimplicityinc/katalyst-xspec init
 cd katalyst-xspec
 npm install
 ```

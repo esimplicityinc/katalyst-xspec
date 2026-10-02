@@ -266,6 +266,9 @@ function parseArgs(argv) {
       const agentList = argv[++i].split(',').map(s => s.trim()).filter(Boolean);
       const validAgents = agentList.filter(a => SKILL_AGENTS[a]);
       args.skillsAgents = validAgents.length > 0 ? validAgents : null;
+    } else if (!arg.startsWith('-')) {
+      // Positional target directory: `katalyst-xspec init my-tests`
+      args.dir = arg;
     }
   }
   return args;
@@ -279,16 +282,16 @@ function templates(packageName) {
     type: 'module',
     scripts: {
       gen: 'bddgen',
-      'gen:stubs': 'generate-step-stubs',
+      'gen:stubs': 'katalyst-xspec stubs',
       test: 'bddgen && playwright test',
-      'check-updates': 'npx upgrade-katalyst-xspec --check',
-      upgrade: 'npx upgrade-katalyst-xspec',
-      'upgrade:migrate': 'npx upgrade-katalyst-xspec --migrate',
+      'check-updates': 'katalyst-xspec upgrade --check',
+      upgrade: 'katalyst-xspec upgrade',
+      'upgrade:migrate': 'katalyst-xspec upgrade --migrate',
       'clean:gen': 'rm -rf .features-gen',
       clean: 'rm -rf .features-gen node_modules test-results storage cucumber-report playwright-report'
     },
     devDependencies: {
-      '@esimplicityinc/katalyst-xspec': '^0.4.0',
+      '@esimplicityinc/katalyst-xspec': '^0.5.0',
       '@playwright/test': '^1.49.0',
       'playwright-bdd': '^9.1.0',
       dotenv: '^16.1.4',
@@ -678,7 +681,11 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}
+
+module.exports = { main };

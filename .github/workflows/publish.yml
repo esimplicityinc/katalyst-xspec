@@ -1,6 +1,6 @@
 name: Publish Packages
 
-# Publishes @esimplicityinc/katalyst-xspec and @esimplicityinc/create-katalyst-xspec
+# Publishes @esimplicityinc/katalyst-xspec (library + CLI)
 # to GitHub Packages (npm.pkg.github.com) using the built-in GITHUB_TOKEN.
 # No npm account or stored secret is needed.
 
@@ -58,7 +58,7 @@ jobs:
           DRY_RUN: ${{ inputs.dry_run }}
         run: |
           set -euo pipefail
-          for dir in katalyst-xspec create-katalyst-xspec; do
+          for dir in katalyst-xspec; do
             PACKAGE_NAME=$(node -p "require('./$dir/package.json').name")
             PACKAGE_VERSION=$(node -p "require('./$dir/package.json').version")
 
