@@ -154,6 +154,19 @@ When I select "Admin" from dropdown "Role"
 Then I fill "United States" into the "Country" dropdown
 ```
 
+### Upload a File (in-memory)
+
+```gherkin
+When I set the file input {string} to a file named {string} with content {string}
+```
+
+Content type is inferred from the extension (`.csv`, `.json`, `.xml`, otherwise `text/plain`).
+
+**Example:**
+```gherkin
+When I set the file input "#upload" to a file named "users.csv" with content "name,email\nAda,ada@example.com"
+```
+
 ### Fill Form with Data Table
 
 ```gherkin
@@ -322,6 +335,7 @@ Then I verify that "first" element with "text" "Loading" becomes "hidden" during
 
 ```gherkin
 Then the element {string} should have value {string}
+Then the element {string} should have attribute {string} equal to {string}
 Then the element {string} should be checked
 Then the element {string} should not be checked
 ```
@@ -329,6 +343,7 @@ Then the element {string} should not be checked
 **Example:**
 ```gherkin
 Then the element "#email" should have value "test@example.com"
+Then the element "#sidebar" should have attribute "data-state" equal to "expanded"
 Then the element "#terms" should be checked
 Then the element "#newsletter" should not be checked
 ```

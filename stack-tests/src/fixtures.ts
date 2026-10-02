@@ -2,6 +2,7 @@ import { test as base } from 'playwright-bdd';
 import { expect } from '@playwright/test';
 import type { APIRequestContext, Page, PlaywrightTestArgs, PlaywrightWorkerArgs } from '@playwright/test';
 import { initWorld, type World } from './world';
+import { resolveApiRequestTarget } from './network';
 import type { ApiPort } from './ports/api.port';
 import type { UiPort } from './ports/ui.port';
 import type { AuthPort } from './ports/auth.port';
@@ -188,7 +189,8 @@ export function createBddTest(options: CreateBddTestOptions = {}) {
         (process.env.TARGET_PORT ? `http://localhost:${process.env.TARGET_PORT}` : undefined) ||
         'http://localhost:3000';
 
-      const ctx = await playwright.request.newContext({ baseURL });
+      // Forces IPv4 for http *.localhost targets (kind ingress); see network.ts.
+      const ctx = await playwright.request.newContext(resolveApiRequestTarget(baseURL));
       try {
         await use(ctx);
       } finally {

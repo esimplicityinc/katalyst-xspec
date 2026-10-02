@@ -54,6 +54,7 @@ All available steps at a glance. Click step names for detailed documentation.
 | `When I fill in {string} with {string}` | Fill by label (alt syntax) |
 | `When I fill the placeholder {string} with {string}` | Fill by placeholder |
 | `When I select {string} from dropdown {string}` | Select dropdown option |
+| `When I set the file input {string} to a file named {string} with content {string}` | Upload in-memory file |
 | `When I fill the form:` | Fill multiple fields |
 
 ### Assertions
@@ -66,6 +67,7 @@ All available steps at a glance. Click step names for detailed documentation.
 | `Then the element {string} should be visible` | Assert element visible |
 | `Then the element {string} should not be visible` | Assert element hidden |
 | `Then the element {string} should have value {string}` | Assert input value |
+| `Then the element {string} should have attribute {string} equal to {string}` | Assert attribute value |
 | `Then the element {string} should be checked` | Assert checkbox checked |
 | `Then the element {string} should not be checked` | Assert unchecked |
 

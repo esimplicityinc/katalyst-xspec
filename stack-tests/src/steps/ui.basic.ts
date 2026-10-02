@@ -1,6 +1,7 @@
 import { createBdd } from 'playwright-bdd';
 import { expect } from '@playwright/test';
 import { interpolate } from '../utils';
+import { expectElementAttribute, setFileInputContent } from '../helpers/ui-element';
 
 export function registerUiBasicSteps(test: any): void {
   const { Given, When, Then } = createBdd(test as any) as any;
@@ -60,21 +61,12 @@ export function registerUiBasicSteps(test: any): void {
     'I set the file input {string} to a file named {string} with content {string}',
     { tags: '@ui or @hybrid' },
     async ({ page, world }: any, selector: string, fileName: string, content: string) => {
-      const name = interpolate(fileName, world.vars);
-      const ext = name.slice(name.lastIndexOf('.') + 1).toLowerCase();
-      const mimeType =
-        ext === 'csv'
-          ? 'text/csv'
-          : ext === 'json'
-            ? 'application/json'
-            : ext === 'xml'
-              ? 'application/xml'
-              : 'text/plain';
-      await page.locator(interpolate(selector, world.vars)).setInputFiles({
-        name,
-        mimeType,
-        buffer: Buffer.from(interpolate(content, world.vars)),
-      });
+      await setFileInputContent(
+        page,
+        interpolate(selector, world.vars),
+        interpolate(fileName, world.vars),
+        interpolate(content, world.vars),
+      );
     },
   );
 
@@ -108,7 +100,9 @@ export function registerUiBasicSteps(test: any): void {
   // Arbitrary attribute assertion by CSS selector — e.g. assert a component's
   // data-state ("expanded"/"collapsed"), aria-*, or any HTML attribute value.
   Then('the element {string} should have attribute {string} equal to {string}', { tags: '@ui or @hybrid' }, async ({ page, world }: any, selector: string, attribute: string, value: string) => {
-    await expect(page.locator(interpolate(selector, world.vars))).toHaveAttribute(
+    await expectElementAttribute(
+      page,
+      interpolate(selector, world.vars),
       interpolate(attribute, world.vars),
       interpolate(value, world.vars),
     );

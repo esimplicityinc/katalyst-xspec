@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2026-10-02
+
+### Added
+
+- **`When I set the file input {string} to a file named {string} with content {string}`** UI step. Attaches an in-memory file to an `<input type="file">`, so uploads can be tested without a fixture on disk. The content type is inferred from the extension (`.csv`, `.json`, `.xml`, otherwise `text/plain`).
+- **`Then the element {string} should have attribute {string} equal to {string}`** UI step. An auto-retrying assertion on any attribute, such as `data-state`, `aria-*` or `href`.
+- **`resolveApiRequestTarget(baseURL, env?)`** exported helper. This is the logic behind the IPv4 fix below.
+
+### Fixed
+
+- **API requests to `http://*.localhost` targets no longer fail with `ECONNRESET` on macOS.** macOS resolves `*.localhost` to `::1` first, but local kind/k3d ingresses usually bind IPv4 only. The `apiRequest` fixture now connects to `127.0.0.1` and sends the original host as the `Host` header, so host-based ingress routing still matches. This only applies to plain `http:` `*.localhost` hosts. Bare `localhost` is left alone because dev servers often bind `::1` only, and so is `https:`, where TLS SNI and certificate checks need the real hostname. Set `STACK_TESTS_FORCE_IPV4=false` to opt out.
+- **`exports` map now lists the `types` condition first and adds a `default` fallback** for `.` and `./steps`. TypeScript only honours `types` when it comes before the conditions it matches, and resolvers that don't match `import` now resolve too.
+
 ## [0.3.0] - 2026-06-13
 
 ### Breaking Changes

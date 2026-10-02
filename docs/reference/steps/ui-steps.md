@@ -313,6 +313,27 @@ When I select "United States" from dropdown "#country-select"
 
 ---
 
+### When I set the file input {string} to a file named {string} with content {string}
+
+Attaches an in-memory file to an `<input type="file">`, so uploads can be tested without a fixture file on disk. The content type is inferred from the extension: `.csv` → `text/csv`, `.json` → `application/json`, `.xml` → `application/xml`, anything else → `text/plain`.
+
+**Tag:** `@ui`
+
+**Parameters:**
+| Name | Type | Description |
+|------|------|-------------|
+| selector | string | CSS selector for the file input |
+| fileName | string | File name (also determines content type) |
+| content | string | File content (supports `{var}` interpolation) |
+
+**Example:**
+```gherkin
+When I set the file input "#upload" to a file named "users.csv" with content "name,email\nAda,ada@example.com"
+When I set the file input "input[type='file']" to a file named "payload.json" with content "{\"id\": \"{userId}\"}"
+```
+
+---
+
 ### When I {string} {string} in the {string} element with {string} {string}
 
 Performs input action on element.
@@ -551,6 +572,27 @@ Asserts an input element has a specific value.
 ```gherkin
 Then the element "#dropdown" should have value "1"
 Then the element "input[name='email']" should have value "test@example.com"
+```
+
+---
+
+### Then the element {string} should have attribute {string} equal to {string}
+
+Asserts an element's attribute has an exact value (auto-retrying). Useful for `data-*` state, `aria-*`, or any HTML attribute.
+
+**Tag:** `@ui`
+
+**Parameters:**
+| Name | Type | Description |
+|------|------|-------------|
+| selector | string | CSS selector |
+| attribute | string | Attribute name |
+| value | string | Expected attribute value |
+
+**Example:**
+```gherkin
+Then the element "#sidebar" should have attribute "data-state" equal to "expanded"
+Then the element "button.menu" should have attribute "aria-expanded" equal to "true"
 ```
 
 ---
