@@ -9,6 +9,11 @@
     "generate-step-stubs": "bin/generate-step-stubs.js"
   },
   "description": "Scaffold and manage Playwright-BDD stack-tests projects",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/esimplicityinc/katalyst-bdd-test",
+    "directory": "create-stack-tests"
+  },
   "scripts": {
     "build": "echo 'No build required'"
   },
