@@ -1,6 +1,6 @@
 # Testing the Framework
 
-Guide to writing and running tests for @esimplicity/stack-tests itself.
+Guide to writing and running tests for @esimplicityinc/katalyst-xspec itself.
 
 ## Test Architecture
 
@@ -52,7 +52,7 @@ npm test -- --grep "ApiPort"
 npm test -- --grep "should return JSON response"
 
 # Single file
-npm test -- stack-tests/tests/adapters/api.test.ts
+npm test -- katalyst-xspec/tests/adapters/api.test.ts
 ```
 
 ### Debug Mode
@@ -410,14 +410,14 @@ describe('createBddTest()', () => {
 ### Testing CLI Scaffolding
 
 ```typescript
-// tests/e2e/create-stack-tests.test.ts
+// tests/e2e/create-katalyst-xspec.test.ts
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { execSync } from 'node:child_process';
 import { existsSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 
-describe('create-stack-tests CLI', () => {
+describe('create-katalyst-xspec CLI', () => {
   const testDir = join(__dirname, 'test-output');
   const projectDir = join(testDir, 'my-test-project');
 
@@ -436,7 +436,7 @@ describe('create-stack-tests CLI', () => {
   });
 
   it('should scaffold a new project', () => {
-    execSync(`npx create-stack-tests ${projectDir}`, {
+    execSync(`npx create-katalyst-xspec ${projectDir}`, {
       stdio: 'pipe',
     });
 
@@ -448,7 +448,7 @@ describe('create-stack-tests CLI', () => {
     expect(existsSync(pkgPath)).toBe(true);
 
     const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
-    expect(pkg.dependencies).toHaveProperty('@esimplicity/stack-tests');
+    expect(pkg.dependencies).toHaveProperty('@esimplicityinc/katalyst-xspec');
     expect(pkg.dependencies).toHaveProperty('@playwright/test');
   });
 

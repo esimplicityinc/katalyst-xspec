@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 import { defineBddConfig } from 'playwright-bdd';
-import { resolveWorkers } from '@esimplicity/stack-tests';
+import { resolveWorkers } from '@esimplicityinc/katalyst-xspec';
 
 const testDir = defineBddConfig({
   features: 'features/**/*.feature',

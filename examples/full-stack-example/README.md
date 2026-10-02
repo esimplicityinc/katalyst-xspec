@@ -1,6 +1,6 @@
 # Full-Stack Testing Example
 
-Demonstrates comprehensive full-stack testing with @esimplicity/stack-tests, combining API, UI, and TUI testing in a single project.
+Demonstrates comprehensive full-stack testing with @esimplicityinc/katalyst-xspec, combining API, UI, and TUI testing in a single project.
 
 ## What This Example Shows
 

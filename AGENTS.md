@@ -2,17 +2,17 @@
 
 ## Repository Overview
 
-This is `katalyst-bdd-test`, a reusable Playwright-BDD testing framework providing:
+This is `katalyst-xspec`, a reusable Playwright-BDD testing framework providing:
 
-- **`@esimplicity/stack-tests`** - Core library with ports, adapters, fixtures, and pre-built step definitions for API, UI, TUI, and hybrid testing
-- **`@esimplicity/create-stack-tests`** - CLI scaffolding tool (`npx create-stack-tests`) and upgrade utility (`npx upgrade-stack-tests`)
+- **`@esimplicityinc/katalyst-xspec`** - Core library with ports, adapters, fixtures, and pre-built step definitions for API, UI, TUI, and hybrid testing
+- **`@esimplicityinc/create-katalyst-xspec`** - CLI scaffolding tool (`npx create-katalyst-xspec`) and upgrade utility (`npx upgrade-katalyst-xspec`)
 
 ### Key Directories
 
 | Path | Description |
 |------|-------------|
-| `stack-tests/` | Main library package (ports, adapters, steps, fixtures) |
-| `create-stack-tests/` | CLI tools for scaffolding and upgrading |
+| `katalyst-xspec/` | Main library package (ports, adapters, steps, fixtures) |
+| `create-katalyst-xspec/` | CLI tools for scaffolding and upgrading |
 | `examples/` | Example projects (api-example, ui-example, tui-example, full-stack-example) |
 | `docs/` | Documentation (guides, reference, concepts) |
 

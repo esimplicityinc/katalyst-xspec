@@ -1,6 +1,6 @@
 # API Testing Example
 
-Demonstrates REST API testing with @esimplicity/stack-tests using JSONPlaceholder as a mock API.
+Demonstrates REST API testing with @esimplicityinc/katalyst-xspec using JSONPlaceholder as a mock API.
 
 ## What This Example Shows
 
@@ -80,7 +80,7 @@ API_BASE_URL=https://your-api.example.com
 Update `fixtures.ts`:
 
 ```typescript
-import { DefaultAuthAdapter } from '@esimplicity/stack-tests';
+import { DefaultAuthAdapter } from '@esimplicityinc/katalyst-xspec';
 
 export const { test, expect } = createBddTest({
   createApi: (request) => new PlaywrightApiAdapter(request, {

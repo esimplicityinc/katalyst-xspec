@@ -1,6 +1,6 @@
 # Ports Reference
 
-Complete reference for all port interfaces in @esimplicity/stack-tests.
+Complete reference for all port interfaces in @esimplicityinc/katalyst-xspec.
 
 ## Overview
 
@@ -21,7 +21,7 @@ HTTP API operations interface.
 ### Import
 
 ```typescript
-import type { ApiPort, ApiMethod, ApiResult } from '@esimplicity/stack-tests';
+import type { ApiPort, ApiMethod, ApiResult } from '@esimplicityinc/katalyst-xspec';
 ```
 
 ### Interface
@@ -124,7 +124,7 @@ import type {
   UiUrlAssertMode, 
   UiLocatorMethod, 
   UiElementState 
-} from '@esimplicity/stack-tests';
+} from '@esimplicityinc/katalyst-xspec';
 ```
 
 ### Interface
@@ -237,7 +237,7 @@ import type {
   TuiSnapshotResult,
   TuiMouseEvent,
   TuiMouseButton,
-} from '@esimplicity/stack-tests';
+} from '@esimplicityinc/katalyst-xspec';
 ```
 
 ### Interface
@@ -349,7 +349,7 @@ Authentication operations interface.
 ### Import
 
 ```typescript
-import type { AuthPort } from '@esimplicity/stack-tests';
+import type { AuthPort } from '@esimplicityinc/katalyst-xspec';
 ```
 
 ### Interface
@@ -395,7 +395,7 @@ Resource cleanup interface.
 ### Import
 
 ```typescript
-import type { CleanupPort } from '@esimplicity/stack-tests';
+import type { CleanupPort } from '@esimplicityinc/katalyst-xspec';
 ```
 
 ### Interface

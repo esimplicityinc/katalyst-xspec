@@ -1,6 +1,6 @@
 # Adding Step Definitions
 
-Guide to creating new step definitions for @esimplicity/stack-tests.
+Guide to creating new step definitions for @esimplicityinc/katalyst-xspec.
 
 ## Overview
 

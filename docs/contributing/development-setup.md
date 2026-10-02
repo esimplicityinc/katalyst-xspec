@@ -1,6 +1,6 @@
 # Development Setup
 
-Complete guide to setting up your local development environment for contributing to @esimplicity/stack-tests.
+Complete guide to setting up your local development environment for contributing to @esimplicityinc/katalyst-xspec.
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ Complete guide to setting up your local development environment for contributing
 
 ```
 testconvergence/
-├── stack-tests/              # Core library (@esimplicity/stack-tests)
+├── katalyst-xspec/              # Core library (@esimplicityinc/katalyst-xspec)
 │   ├── src/
 │   │   ├── ports/            # Interface definitions
 │   │   ├── adapters/         # Adapter implementations
@@ -24,9 +24,9 @@ testconvergence/
 │   ├── tests/                # Unit tests
 │   ├── package.json
 │   └── tsconfig.json
-├── create-stack-tests/       # CLI scaffolding tool
+├── create-katalyst-xspec/       # CLI scaffolding tool
 │   └── bin/
-│       └── create-stack-tests.js
+│       └── create-katalyst-xspec.js
 ├── docs/                     # Documentation
 ├── examples/                 # Example projects
 └── package.json              # Root workspace config
@@ -38,11 +38,11 @@ testconvergence/
 
 ```bash
 # Fork via GitHub UI, then:
-git clone https://github.com/YOUR_USERNAME/stack-tests.git
-cd stack-tests
+git clone https://github.com/YOUR_USERNAME/katalyst-xspec.git
+cd katalyst-xspec
 
 # Add upstream remote
-git remote add upstream https://github.com/kata/stack-tests.git
+git remote add upstream https://github.com/kata/katalyst-xspec.git
 ```
 
 ### 2. Install Dependencies
@@ -59,7 +59,7 @@ npx playwright install
 
 ```bash
 # Build core library
-npm run build -w stack-tests
+npm run build -w katalyst-xspec
 
 # Build all packages
 npm run build --workspaces
@@ -80,36 +80,36 @@ npm run typecheck
 
 ## Development Commands
 
-### Core Library (stack-tests)
+### Core Library (katalyst-xspec)
 
 ```bash
 # Build
-npm run build -w stack-tests
+npm run build -w katalyst-xspec
 
 # Build in watch mode
-npm run build:watch -w stack-tests
+npm run build:watch -w katalyst-xspec
 
 # Run tests
-npm test -w stack-tests
+npm test -w katalyst-xspec
 
 # Type check
-npm run typecheck -w stack-tests
+npm run typecheck -w katalyst-xspec
 
 # Lint
-npm run lint -w stack-tests
+npm run lint -w katalyst-xspec
 
 # Clean build artifacts
-npm run clean -w stack-tests
+npm run clean -w katalyst-xspec
 ```
 
-### CLI Tool (create-stack-tests)
+### CLI Tool (create-katalyst-xspec)
 
 ```bash
 # Test the CLI locally
-node create-stack-tests/bin/create-stack-tests.js test-project
+node create-katalyst-xspec/bin/create-katalyst-xspec.js test-project
 
 # Run CLI tests
-npm test -w create-stack-tests
+npm test -w create-katalyst-xspec
 ```
 
 ### All Packages
@@ -163,24 +163,24 @@ Workspace settings (`.vscode/settings.json`):
 
 ```bash
 # Create port file
-touch stack-tests/src/ports/my-feature.port.ts
+touch katalyst-xspec/src/ports/my-feature.port.ts
 
 # Create adapter directory
-mkdir stack-tests/src/adapters/my-feature
+mkdir katalyst-xspec/src/adapters/my-feature
 
 # Create adapter files
-touch stack-tests/src/adapters/my-feature/my-feature.adapter.ts
-touch stack-tests/src/adapters/my-feature/index.ts
+touch katalyst-xspec/src/adapters/my-feature/my-feature.adapter.ts
+touch katalyst-xspec/src/adapters/my-feature/index.ts
 ```
 
 ### Creating Step Definitions
 
 ```bash
 # Create step file
-touch stack-tests/src/steps/my-feature.basic.ts
+touch katalyst-xspec/src/steps/my-feature.basic.ts
 
 # Register in steps index
-# Edit stack-tests/src/steps/index.ts
+# Edit katalyst-xspec/src/steps/index.ts
 ```
 
 ## Testing During Development
@@ -205,11 +205,11 @@ Test your changes against a real project:
 ```bash
 # Create test project
 cd /tmp
-npx create-stack-tests my-test-app
+npx create-katalyst-xspec my-test-app
 
 # Link local library
 cd my-test-app
-npm link ../path/to/stack-tests
+npm link ../path/to/katalyst-xspec
 
 # Run tests
 npm test
@@ -219,16 +219,16 @@ npm test
 
 ```bash
 # Build and link
-cd stack-tests
+cd katalyst-xspec
 npm run build
 npm link
 
 # Use in test project
 cd ../my-test-project
-npm link @esimplicity/stack-tests
+npm link @esimplicityinc/katalyst-xspec
 
 # Make changes, rebuild, and test
-cd ../stack-tests
+cd ../katalyst-xspec
 npm run build
 # Changes automatically reflected via link
 ```
@@ -249,7 +249,7 @@ Add to `.vscode/launch.json`:
       "name": "Debug Tests",
       "program": "${workspaceFolder}/node_modules/.bin/playwright",
       "args": ["test", "--debug"],
-      "cwd": "${workspaceFolder}/stack-tests",
+      "cwd": "${workspaceFolder}/katalyst-xspec",
       "console": "integratedTerminal"
     }
   ]
@@ -299,8 +299,8 @@ npm run clean --workspaces
 
 # Remove node_modules
 rm -rf node_modules
-rm -rf stack-tests/node_modules
-rm -rf create-stack-tests/node_modules
+rm -rf katalyst-xspec/node_modules
+rm -rf create-katalyst-xspec/node_modules
 
 # Reinstall
 npm install
@@ -310,10 +310,10 @@ npm install
 
 ```bash
 # Regenerate TypeScript build info
-rm -rf stack-tests/dist
-rm stack-tests/*.tsbuildinfo
+rm -rf katalyst-xspec/dist
+rm katalyst-xspec/*.tsbuildinfo
 
-npm run build -w stack-tests
+npm run build -w katalyst-xspec
 ```
 
 ### Test Failures

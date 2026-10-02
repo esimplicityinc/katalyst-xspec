@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 import { defineBddProject, cucumberReporter } from 'playwright-bdd';
-import { resolveWorkers } from '@esimplicity/stack-tests';
+import { resolveWorkers } from '@esimplicityinc/katalyst-xspec';
 
 // Define separate BDD projects for each test type
 const apiBdd = defineBddProject({

@@ -1,6 +1,6 @@
-# @esimplicity/stack-tests Examples
+# @esimplicityinc/katalyst-xspec Examples
 
-Runnable example projects demonstrating @esimplicity/stack-tests usage.
+Runnable example projects demonstrating @esimplicityinc/katalyst-xspec usage.
 
 ## Available Examples
 
@@ -98,7 +98,7 @@ example-name/
 Use the CLI to scaffold a new project:
 
 ```bash
-npx @kata/create-stack-tests my-project
+npx @kata/create-katalyst-xspec my-project
 cd my-project
 npm install
 npm test

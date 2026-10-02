@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-10-02
+
+### Breaking Changes
+
+- **Renamed the project to `katalyst-xspec`.** The repository is now `esimplicityinc/katalyst-xspec` (GitHub redirects the old URL).
+  - `@esimplicity/stack-tests` → **`@esimplicityinc/katalyst-xspec`** (`/steps` subpath unchanged)
+  - `@esimplicity/create-stack-tests` → **`@esimplicityinc/create-katalyst-xspec`**
+  - CLI binaries `create-stack-tests` / `upgrade-stack-tests` → **`create-katalyst-xspec`** / **`upgrade-katalyst-xspec`** (`generate-step-stubs` is unchanged)
+- **Packages are now published to GitHub Packages, not npmjs.com.** Consumers need `@esimplicityinc:registry=https://npm.pkg.github.com` in `.npmrc` and a GitHub token with `read:packages`. The old `@esimplicity/stack-tests` releases stay on npmjs.com but won't receive updates.
+- **Action required:** in an existing project, run `npx -p @esimplicityinc/create-katalyst-xspec upgrade-katalyst-xspec`. It detects `@esimplicity/stack-tests`, adds the `.npmrc` scope line, rewrites imports in `features/` and `playwright.config.*`, and swaps the dependency. `--migrate` does the same as part of a full scaffolding migration. To migrate by hand, do those three steps yourself.
+
+### Changed
+
+- **The IPv4 opt-out env var is now `KATALYST_XSPEC_FORCE_IPV4`.** `STACK_TESTS_FORCE_IPV4` is still honoured.
+- **`create-katalyst-xspec` scaffolds an `.npmrc`** that maps the `@esimplicityinc` scope to GitHub Packages, and the default output directory is now `katalyst-xspec/`.
+- **The publish workflow publishes to GitHub Packages with the built-in `GITHUB_TOKEN`** and runs the test suite before publishing. No npm secrets are needed.
+
 ## [0.3.1] - 2026-10-02
 
 ### Added

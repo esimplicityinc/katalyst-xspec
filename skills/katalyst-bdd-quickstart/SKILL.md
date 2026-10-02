@@ -1,18 +1,18 @@
 ---
 name: katalyst-bdd-quickstart
-description: Get started with the Katalyst BDD testing framework. Use when setting up a new test project, scaffolding tests, configuring environment variables, understanding project structure, or running tests for the first time. Triggers on "set up tests", "install stack-tests", "create test project", "configure BDD", "how to run tests".
+description: Get started with the Katalyst BDD testing framework. Use when setting up a new test project, scaffolding tests, configuring environment variables, understanding project structure, or running tests for the first time. Triggers on "set up tests", "install katalyst-xspec", "create test project", "configure BDD", "how to run tests".
 ---
 
 # Katalyst BDD Quick Start Guide
 
-This skill helps you get started with the @esimplicity/stack-tests BDD testing framework.
+This skill helps you get started with the @esimplicityinc/katalyst-xspec BDD testing framework.
 
 ## Step 1: Scaffold a New Project
 
 Run the scaffolding command:
 
 ```bash
-npx @esimplicity/create-stack-tests
+npx @esimplicityinc/create-katalyst-xspec
 ```
 
 Options:
@@ -21,7 +21,7 @@ Options:
 
 Example:
 ```bash
-npx @esimplicity/create-stack-tests --dir my-tests
+npx @esimplicityinc/create-katalyst-xspec --dir my-tests
 cd my-tests
 npm install
 ```
@@ -54,7 +54,7 @@ my-tests/
 
 **`features/steps/fixtures.ts`** - Configures adapters:
 ```typescript
-import { createBddTest } from '@esimplicity/stack-tests';
+import { createBddTest } from '@esimplicityinc/katalyst-xspec';
 
 export const test = createBddTest({
   // Default adapters are used unless you customize
@@ -64,7 +64,7 @@ export const test = createBddTest({
 **`features/steps/steps.ts`** - Registers step definitions:
 ```typescript
 import { test } from './fixtures';
-import { registerAllSteps } from '@esimplicity/stack-tests/steps';
+import { registerAllSteps } from '@esimplicityinc/katalyst-xspec/steps';
 
 registerAllSteps(test);
 
@@ -283,7 +283,7 @@ Given I register cleanup DELETE "/resource/{id}"
 To upgrade an existing project to the latest version:
 
 ```bash
-npx @esimplicity/upgrade-stack-tests
+npx -p @esimplicityinc/create-katalyst-xspec upgrade-katalyst-xspec
 ```
 
 This updates:

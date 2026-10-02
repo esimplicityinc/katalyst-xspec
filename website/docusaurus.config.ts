@@ -11,11 +11,11 @@ const config: Config = {
   // Set the production url of your site here
   url: "https://esimplicityinc.github.io",
   // Set the /<baseUrl>/ pathname under which your site is served
-  baseUrl: "/katalyst-bdd-test/",
+  baseUrl: "/katalyst-xspec/",
 
   // GitHub pages deployment config
   organizationName: "esimplicityinc",
-  projectName: "katalyst-bdd-test",
+  projectName: "katalyst-xspec",
 
   onBrokenLinks: "warn",
 
@@ -41,7 +41,7 @@ const config: Config = {
           routeBasePath: "docs",
           sidebarPath: "./sidebars.ts",
           editUrl:
-            "https://github.com/esimplicityinc/katalyst-bdd-test/tree/main/website/",
+            "https://github.com/esimplicityinc/katalyst-xspec/tree/main/website/",
         },
         blog: false,
         theme: {
@@ -71,12 +71,12 @@ const config: Config = {
           label: "Documentation",
         },
         {
-          href: "https://github.com/esimplicityinc/katalyst-bdd-test/tree/main/examples",
+          href: "https://github.com/esimplicityinc/katalyst-xspec/tree/main/examples",
           label: "Examples",
           position: "left",
         },
         {
-          href: "https://github.com/esimplicityinc/katalyst-bdd-test",
+          href: "https://github.com/esimplicityinc/katalyst-xspec",
           label: "GitHub",
           position: "right",
         },
@@ -107,11 +107,11 @@ const config: Config = {
           items: [
             {
               label: "GitHub",
-              href: "https://github.com/esimplicityinc/katalyst-bdd-test",
+              href: "https://github.com/esimplicityinc/katalyst-xspec",
             },
             {
-              label: "npm",
-              href: "https://www.npmjs.com/package/@esimplicity/stack-tests",
+              label: "Packages",
+              href: "https://github.com/esimplicityinc/katalyst-xspec/pkgs/npm/katalyst-xspec",
             },
           ],
         },

@@ -1,16 +1,16 @@
 # Troubleshooting
 
-Common issues and solutions when working with @esimplicity/stack-tests.
+Common issues and solutions when working with @esimplicityinc/katalyst-xspec.
 
 ## Installation Issues
 
-### "Cannot find module '@esimplicity/stack-tests'"
+### "Cannot find module '@esimplicityinc/katalyst-xspec'"
 
 The package isn't installed or isn't resolving correctly.
 
 **Solution:**
 ```bash
-npm install -D @esimplicity/stack-tests
+npm install -D @esimplicityinc/katalyst-xspec
 ```
 
 If you're in a monorepo, ensure you're in the correct workspace directory.
@@ -89,7 +89,7 @@ A step in your feature file doesn't match any registered step definition.
 
 1. Check your `fixtures.ts` includes the step registration:
 ```typescript
-import { registerApiSteps, registerUiSteps } from '@esimplicity/stack-tests/steps';
+import { registerApiSteps, registerUiSteps } from '@esimplicityinc/katalyst-xspec/steps';
 
 registerApiSteps(test);
 registerUiSteps(test);
@@ -188,7 +188,7 @@ CLEANUP_AUTH_TOKEN=your-admin-token-here
 For OIDC providers (Keycloak, Auth0, etc.), use the OIDC helper in your fixtures:
 
 ```typescript
-import { createBddTest, createOidcCleanupAuth } from '@esimplicity/stack-tests';
+import { createBddTest, createOidcCleanupAuth } from '@esimplicityinc/katalyst-xspec';
 
 export const test = createBddTest({
   getCleanupAuth: createOidcCleanupAuth({
@@ -409,7 +409,7 @@ npx playwright show-trace trace.zip
 
 ### "Old version of scaffolding"
 
-After upgrading `@esimplicity/stack-tests`, your scaffolding files may be outdated.
+After upgrading `@esimplicityinc/katalyst-xspec`, your scaffolding files may be outdated.
 
 **Solution:**
 
@@ -417,10 +417,10 @@ Use the migration feature to update scaffolding while preserving your customizat
 
 ```bash
 # Preview changes first
-npx upgrade-stack-tests --migrate --dry-run
+npx upgrade-katalyst-xspec --migrate --dry-run
 
 # Apply migration
-npx upgrade-stack-tests --migrate
+npx upgrade-katalyst-xspec --migrate
 ```
 
 See [Upgrading Guide](./guides/upgrading.md) for details.
@@ -434,16 +434,16 @@ If you ran the scaffolder again and lost custom files:
 1. Check the backup directory (shown during migration)
 2. Restore from backup:
 ```bash
-cp /tmp/stack-tests-backup-<timestamp>/steps/my-steps.ts ./features/steps/
+cp /tmp/katalyst-xspec-backup-<timestamp>/steps/my-steps.ts ./features/steps/
 ```
 
 **Prevention:** Always use `--migrate` instead of re-running the scaffolder:
 ```bash
 # WRONG - overwrites custom files
-npx @esimplicity/create-stack-tests --force
+npx @esimplicityinc/create-katalyst-xspec --force
 
 # RIGHT - preserves custom files  
-npx upgrade-stack-tests --migrate
+npx upgrade-katalyst-xspec --migrate
 ```
 
 ---

@@ -48,7 +48,7 @@ export default defineConfig({
 // playwright.config.ts
 import { defineConfig, devices } from '@playwright/test';
 import { defineBddProject, cucumberReporter } from 'playwright-bdd';
-import { tagsForProject, resolveExtraTags, resolveWorkers } from '@esimplicity/stack-tests';
+import { tagsForProject, resolveExtraTags, resolveWorkers } from '@esimplicityinc/katalyst-xspec';
 import dotenv from 'dotenv';
 import path from 'node:path';
 import fs from 'node:fs';
@@ -210,7 +210,7 @@ const hybridBdd = defineBddProject({
 ### Using tagsForProject Helper
 
 ```typescript
-import { tagsForProject, resolveExtraTags } from '@esimplicity/stack-tests';
+import { tagsForProject, resolveExtraTags } from '@esimplicityinc/katalyst-xspec';
 
 // Basic usage - excludes @Skip and @ignore by default
 tagsForProject({ projectTag: '@api' })
@@ -252,7 +252,7 @@ import {
   UniversalAuthAdapter,
   DefaultCleanupAdapter,
   TuiTesterAdapter,
-} from '@esimplicity/stack-tests';
+} from '@esimplicityinc/katalyst-xspec';
 
 export const test = createBddTest({
   // API adapter - uses Playwright's request context
@@ -286,7 +286,7 @@ import {
   registerSharedSteps,
   registerHybridSuite,
   registerTuiSteps,
-} from '@esimplicity/stack-tests/steps';
+} from '@esimplicityinc/katalyst-xspec/steps';
 
 // Register step definitions
 registerApiSteps(test);

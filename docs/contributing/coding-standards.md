@@ -1,6 +1,6 @@
 # Coding Standards
 
-Style guidelines and conventions for @esimplicity/stack-tests development.
+Style guidelines and conventions for @esimplicityinc/katalyst-xspec development.
 
 ## TypeScript Guidelines
 

@@ -25,10 +25,10 @@ Agent Skills are structured knowledge files that follow the [agentskills.io](htt
 
 ### During Project Scaffolding (Recommended)
 
-When you scaffold a new project with `create-stack-tests`, you'll be prompted to install Agent Skills:
+When you scaffold a new project with `create-katalyst-xspec`, you'll be prompted to install Agent Skills:
 
 ```bash
-npx @esimplicity/create-stack-tests
+npx @esimplicityinc/create-katalyst-xspec
 
 # Interactive prompts:
 # ? Would you like to install Katalyst BDD Agent Skills? Yes
@@ -45,13 +45,13 @@ You can also use CLI flags to control skill installation:
 
 ```bash
 # Install skills for all supported agents
-npx @esimplicity/create-stack-tests --with-skills
+npx @esimplicityinc/create-katalyst-xspec --with-skills
 
 # Skip skills installation
-npx @esimplicity/create-stack-tests --no-skills
+npx @esimplicityinc/create-katalyst-xspec --no-skills
 
 # Install for specific agents only
-npx @esimplicity/create-stack-tests --with-skills --skills-agents opencode,claude
+npx @esimplicityinc/create-katalyst-xspec --with-skills --skills-agents opencode,claude
 
 # Available agent options: opencode, claude, cursor, generic
 ```
@@ -60,7 +60,7 @@ npx @esimplicity/create-stack-tests --with-skills --skills-agents opencode,claud
 
 To manually install skills in an existing project:
 
-1. Copy the skills from the [katalyst-bdd-test repository](https://github.com/esimplicityinc/katalyst-bdd-test/tree/main/skills)
+1. Copy the skills from the [katalyst-xspec repository](https://github.com/esimplicityinc/katalyst-xspec/tree/main/skills)
 2. Place them in the appropriate directory for your AI agent:
 
 | Agent | Directory |
@@ -76,12 +76,12 @@ When new versions of Katalyst BDD are released, you can update your installed sk
 
 ```bash
 # Update all installed skills to latest version
-npx @esimplicity/upgrade-stack-tests --update-skills
+npx -p @esimplicityinc/create-katalyst-xspec upgrade-katalyst-xspec --update-skills
 ```
 
 This command:
 1. Detects which agent directories have Katalyst skills installed
-2. Updates them to the version bundled with the current `create-stack-tests` package
+2. Updates them to the version bundled with the current `create-katalyst-xspec` package
 
 ## Using Skills with AI Agents
 
@@ -166,7 +166,7 @@ Deep dive into:
 
 ## Best Practices
 
-1. **Keep skills updated** - Run `npx upgrade-stack-tests --update-skills` after upgrading Katalyst BDD
+1. **Keep skills updated** - Run `npx upgrade-katalyst-xspec --update-skills` after upgrading Katalyst BDD
 2. **Install for your primary agent** - Only install skills for agents you actually use
 3. **Provide context** - When asking AI agents for help, mention you're using Katalyst BDD
 4. **Review generated code** - Always review AI-generated tests before committing
@@ -194,7 +194,7 @@ Try being explicit in your prompt:
 
 Update to the latest version:
 ```bash
-npx @esimplicity/upgrade-stack-tests --update-skills
+npx -p @esimplicityinc/create-katalyst-xspec upgrade-katalyst-xspec --update-skills
 ```
 
 ## Related

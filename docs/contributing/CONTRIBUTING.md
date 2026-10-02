@@ -1,6 +1,6 @@
-# Contributing to @esimplicity/stack-tests
+# Contributing to @esimplicityinc/katalyst-xspec
 
-Welcome! We appreciate your interest in contributing to the @esimplicity/stack-tests BDD testing framework.
+Welcome! We appreciate your interest in contributing to the @esimplicityinc/katalyst-xspec BDD testing framework.
 
 ## Code of Conduct
 
@@ -121,8 +121,8 @@ Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `perf`
 
 ```bash
 # Clone and setup
-git clone https://github.com/kata/stack-tests.git
-cd stack-tests
+git clone https://github.com/kata/katalyst-xspec.git
+cd katalyst-xspec
 npm install
 
 # Create branch

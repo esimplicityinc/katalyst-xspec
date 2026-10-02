@@ -1,6 +1,6 @@
 # Release Process
 
-Guide to versioning, releasing, and publishing @esimplicity/stack-tests packages.
+Guide to versioning, releasing, and publishing @esimplicityinc/katalyst-xspec packages.
 
 ## Overview
 
@@ -38,8 +38,8 @@ We follow [Semantic Versioning](https://semver.org/):
 
 | Package | Registry |
 |---------|----------|
-| @esimplicity/stack-tests | npm |
-| @esimplicity/create-stack-tests | npm |
+| @esimplicityinc/katalyst-xspec | npm |
+| @esimplicityinc/create-katalyst-xspec | npm |
 
 ## Release Workflow
 
@@ -59,12 +59,12 @@ git checkout -b release/v0.2.0
 Update `package.json` in each package:
 
 ```bash
-# Update stack-tests
-cd stack-tests
+# Update katalyst-xspec
+cd katalyst-xspec
 npm version 0.2.0 --no-git-tag-version
 
-# Update create-stack-tests
-cd ../create-stack-tests
+# Update create-katalyst-xspec
+cd ../create-katalyst-xspec
 npm version 0.2.0 --no-git-tag-version
 ```
 
@@ -129,191 +129,29 @@ git push origin v0.2.0
 
 ### 7. Automated Publishing
 
-The CI pipeline automatically:
-1. Detects the new tag
-2. Builds packages
-3. Publishes to GitHub Packages
-4. Creates GitHub Release
+Publishing a GitHub Release (`gh release create vX.Y.Z --target main ...`) triggers
+`.github/workflows/publish.yml`, which:
+1. Installs, builds and tests all workspaces
+2. Publishes `@esimplicityinc/katalyst-xspec` and `@esimplicityinc/create-katalyst-xspec`
+   to GitHub Packages using the built-in `GITHUB_TOKEN` (versions already published are skipped)
+
+The workflow can also be run manually from the Actions tab, with an optional dry run.
 
 ## Manual Publishing (if needed)
 
-### npm Authentication
+Authenticate to GitHub Packages with a token that has `write:packages`:
 
 ```bash
-# Login to npm
-npm login
+npm login --scope=@esimplicityinc --auth-type=legacy --registry=https://npm.pkg.github.com
 ```
 
-### Publish
+Then publish (each package's `publishConfig.registry` already points at GitHub Packages):
 
 ```bash
-# Publish stack-tests
-cd stack-tests
-npm publish
-
-# Publish create-stack-tests
-cd ../create-stack-tests
-npm publish
+npm run build
+(cd katalyst-xspec && npm publish)
+(cd create-katalyst-xspec && npm publish)
 ```
-
-## CI/CD Configuration
-
-### GitHub Actions Workflow
-
-```yaml
-# .github/workflows/release.yml
-name: Release
-
-on:
-  push:
-    tags:
-      - 'v*'
-
-jobs:
-  release:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      packages: write
-    
-    steps:
-      - uses: actions/checkout@v4
-      
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          registry-url: 'https://registry.npmjs.org'
-      
-      - name: Install dependencies
-        run: npm ci
-      
-      - name: Build
-        run: npm run build --workspaces
-      
-      - name: Test
-        run: npm test --workspaces
-      
-      - name: Publish stack-tests
-        run: npm publish
-        working-directory: stack-tests
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Publish create-stack-tests
-        run: npm publish
-        working-directory: create-stack-tests
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          generate_release_notes: true
-          files: |
-            stack-tests/dist/**
-```
-
-## Changelog Format
-
-Follow [Keep a Changelog](https://keepachangelog.com/):
-
-```markdown
-# Changelog
-
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [Unreleased]
-
-### Added
-- Feature in progress
-
-## [0.2.0] - 2024-01-20
-
-### Added
-- New feature A
-- New feature B
-
-### Changed
-- Changed behavior X
-
-### Deprecated
-- Feature Y (use Z instead)
-
-### Removed
-- Removed feature W
-
-### Fixed
-- Bug fix for issue #123
-
-### Security
-- Security update for CVE-XXXX
-
-## [0.1.0] - 2024-01-01
-
-### Added
-- Initial release
-```
-
-## Hotfix Process
-
-For urgent fixes to released versions:
-
-```bash
-# Create hotfix branch from tag
-git checkout -b hotfix/v0.2.1 v0.2.0
-
-# Make fix
-# ... edit files ...
-
-# Update version
-npm version 0.2.1 --no-git-tag-version -w stack-tests
-
-# Commit and push
-git add .
-git commit -m "fix: critical bug in API adapter"
-git push origin hotfix/v0.2.1
-
-# Create PR, then after merge:
-git checkout main
-git pull
-git tag -a v0.2.1 -m "Hotfix v0.2.1"
-git push origin v0.2.1
-```
-
-## Breaking Changes
-
-When introducing breaking changes:
-
-1. **Document in CHANGELOG**
-   ```markdown
-   ### BREAKING CHANGES
-   - `ApiPort.get()` now returns `Response` instead of `Promise<Response>`
-   ```
-
-2. **Add migration guide**
-   ```markdown
-   ## Migrating from 0.x to 1.0
-
-   ### ApiPort changes
-   
-   Before:
-   ```typescript
-   const response = await api.get('/users');
-   ```
-   
-   After:
-   ```typescript
-   const response = api.get('/users');
-   await response.json();
-   ```
-   ```
-
-3. **Deprecation period** (if possible)
-   - Add deprecation warnings in minor version
-   - Remove in next major version
 
 ## Release Checklist
 
@@ -333,7 +171,7 @@ When introducing breaking changes:
 - [ ] GitHub Release created
 
 ### Post-release
-- [ ] Verify packages installable (`npm install @esimplicity/stack-tests@0.2.0`)
+- [ ] Verify packages installable (`npm install @esimplicityinc/katalyst-xspec@0.2.0`)
 - [ ] Announce release (Discord, email, etc.)
 - [ ] Update example projects
 - [ ] Monitor for issues
@@ -344,13 +182,13 @@ When introducing breaking changes:
 
 ```bash
 # Check package exists
-npm view @esimplicity/stack-tests@0.2.0
+npm view @esimplicityinc/katalyst-xspec@0.2.0
 
 # Clear npm cache
 npm cache clean --force
 
 # Try installing again
-npm install @esimplicity/stack-tests@0.2.0
+npm install @esimplicityinc/katalyst-xspec@0.2.0
 ```
 
 ### Authentication errors
@@ -367,10 +205,10 @@ cat ~/.npmrc | grep npm.pkg.github.com
 
 ```bash
 # Unpublish (within 72 hours)
-npm unpublish @esimplicity/stack-tests@0.2.0
+npm unpublish @esimplicityinc/katalyst-xspec@0.2.0
 
 # Or deprecate
-npm deprecate @esimplicity/stack-tests@0.2.0 "Use 0.2.1 instead"
+npm deprecate @esimplicityinc/katalyst-xspec@0.2.0 "Use 0.2.1 instead"
 ```
 
 ## Related Guides

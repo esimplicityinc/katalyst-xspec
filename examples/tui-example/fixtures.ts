@@ -1,5 +1,5 @@
-import { createBddTest, TuiTesterAdapter } from '@esimplicity/stack-tests';
-import { registerTuiSteps, registerSharedSteps } from '@esimplicity/stack-tests/steps';
+import { createBddTest, TuiTesterAdapter } from '@esimplicityinc/katalyst-xspec';
+import { registerTuiSteps, registerSharedSteps } from '@esimplicityinc/katalyst-xspec/steps';
 
 // Create test fixtures with TUI adapter
 export const { test, expect } = createBddTest({

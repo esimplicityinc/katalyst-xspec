@@ -1,6 +1,6 @@
 # CI/CD Integration Guide
 
-Run @esimplicity/stack-tests in continuous integration pipelines.
+Run @esimplicityinc/katalyst-xspec in continuous integration pipelines.
 
 ## GitHub Actions
 
@@ -278,7 +278,7 @@ services:
 
   e2e:
     build:
-      context: ./stack-tests
+      context: ./katalyst-xspec
       dockerfile: Dockerfile.e2e
     depends_on:
       - api
@@ -422,7 +422,7 @@ steps:
 ```typescript
 // playwright.config.ts
 import { defineConfig } from '@playwright/test';
-import { resolveWorkers } from '@esimplicity/stack-tests';
+import { resolveWorkers } from '@esimplicityinc/katalyst-xspec';
 
 export default defineConfig({
   // Fail fast in CI

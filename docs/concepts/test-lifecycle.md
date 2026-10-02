@@ -390,7 +390,7 @@ Configure parallelism:
 
 ```typescript
 // playwright.config.ts
-import { resolveWorkers } from '@esimplicity/stack-tests';
+import { resolveWorkers } from '@esimplicityinc/katalyst-xspec';
 
 export default defineConfig({
   fullyParallel: true,

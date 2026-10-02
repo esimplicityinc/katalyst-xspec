@@ -1,4 +1,4 @@
-# Clean up files created by running stack tests
+# Clean up files created by running katalyst-xspec tests
 clean:
     rm -rf node_modules/
     rm -rf **/node_modules/

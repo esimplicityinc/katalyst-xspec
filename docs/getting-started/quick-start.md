@@ -5,8 +5,8 @@ Get your first BDD test running in 5 minutes.
 ## Step 1: Scaffold a Test Project
 
 ```bash
-npx @esimplicity/create-stack-tests
-cd stack-tests
+npx @esimplicityinc/create-katalyst-xspec
+cd katalyst-xspec
 npm install
 ```
 
@@ -17,7 +17,7 @@ npm install
 The scaffold creates:
 
 ```
-stack-tests/
+katalyst-xspec/
 ├── features/
 │   ├── api/
 │   │   └── 00_api_examples.feature    # API test examples

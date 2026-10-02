@@ -3,13 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Example project demonstrating @esimplicity/stack-tests TUI testing",
+  "description": "Example project demonstrating @esimplicityinc/katalyst-xspec TUI testing",
   "scripts": {
     "test": "playwright test",
     "test:debug": "DEBUG=tui-tester playwright test"
   },
   "dependencies": {
-    "@esimplicity/stack-tests": "^0.3.0",
+    "@esimplicityinc/katalyst-xspec": "^0.4.0",
     "@playwright/test": "^1.49.0",
     "playwright-bdd": "^9.1.0",
     "tui-tester": "^1.0.0"

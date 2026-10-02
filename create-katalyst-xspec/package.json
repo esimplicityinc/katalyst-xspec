@@ -1,0 +1,31 @@
+{
+  "name": "@esimplicityinc/create-katalyst-xspec",
+  "version": "0.4.0",
+  "private": false,
+  "type": "commonjs",
+  "bin": {
+    "create-katalyst-xspec": "bin/create-katalyst-xspec.js",
+    "upgrade-katalyst-xspec": "bin/upgrade-katalyst-xspec.js",
+    "generate-step-stubs": "bin/generate-step-stubs.js"
+  },
+  "description": "Scaffold and manage Playwright-BDD katalyst-xspec projects",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/esimplicityinc/katalyst-xspec",
+    "directory": "create-katalyst-xspec"
+  },
+  "scripts": {
+    "build": "echo 'No build required'",
+    "test": "node --test test/*.test.js"
+  },
+  "files": [
+    "bin",
+    "skills"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
+}

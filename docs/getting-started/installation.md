@@ -1,11 +1,11 @@
 # Installation
 
-This guide covers installing @esimplicity/stack-tests and its dependencies.
+This guide covers installing @esimplicityinc/katalyst-xspec and its dependencies.
 
 ## Prerequisites
 
 ### Required
-- **Node.js** 18.x or higher
+- **Node.js** 20.x or higher
 - **npm**, **yarn**, **pnpm**, or **bun**
 
 ### Optional (for TUI testing)
@@ -25,18 +25,32 @@ sudo dnf install tmux
 tmux -V
 ```
 
+## Registry Setup (GitHub Packages)
+
+`@esimplicityinc/katalyst-xspec` and `@esimplicityinc/create-katalyst-xspec` are published to GitHub Packages. Before installing, map the scope in your project's `.npmrc`:
+
+```
+@esimplicityinc:registry=https://npm.pkg.github.com
+```
+
+and authenticate with a GitHub token that has `read:packages` in your user `~/.npmrc`:
+
+```
+//npm.pkg.github.com/:_authToken=<your_github_token>
+```
+
 ## Installation Methods
 
 ### Method 1: Using the Scaffold CLI (Recommended)
 
-The fastest way to get started is using the `create-stack-tests` CLI:
+The fastest way to get started is using the `create-katalyst-xspec` CLI:
 
 ```bash
 # From your project root
-npx @esimplicity/create-stack-tests
+npx @esimplicityinc/create-katalyst-xspec
 
 # Or with a custom directory name
-npx @esimplicity/create-stack-tests --dir e2e-tests
+npx @esimplicityinc/create-katalyst-xspec --dir e2e-tests
 ```
 
 This creates a complete test package with:
@@ -52,13 +66,13 @@ The CLI can also install [Agent Skills](../guides/agent-skills.md) for AI-assist
 
 ```bash
 # Install with Agent Skills (you'll be prompted to select agents)
-npx @esimplicity/create-stack-tests --with-skills
+npx @esimplicityinc/create-katalyst-xspec --with-skills
 
 # Install skills for specific agents
-npx @esimplicity/create-stack-tests --with-skills --skills-agents opencode,claude
+npx @esimplicityinc/create-katalyst-xspec --with-skills --skills-agents opencode,claude
 
 # Skip skills installation
-npx @esimplicity/create-stack-tests --no-skills
+npx @esimplicityinc/create-katalyst-xspec --no-skills
 ```
 
 Available agent options: `opencode`, `claude`, `cursor`, `generic`
@@ -68,7 +82,7 @@ Available agent options: `opencode`, `claude`, `cursor`, `generic`
 1. Install the package:
 
 ```bash
-npm install -D @esimplicity/stack-tests
+npm install -D @esimplicityinc/katalyst-xspec
 ```
 
 2. Install peer dependencies:
@@ -92,12 +106,12 @@ If working within the monorepo:
 npm install
 
 # Or link directly
-npm install -D @esimplicity/stack-tests@"file:../stack-tests"
+npm install -D @esimplicityinc/katalyst-xspec@"file:../katalyst-xspec"
 ```
 
 ## Peer Dependencies
 
-@esimplicity/stack-tests requires these peer dependencies:
+@esimplicityinc/katalyst-xspec requires these peer dependencies:
 
 | Package | Version | Required |
 |---------|---------|----------|
@@ -112,7 +126,7 @@ Create a simple test to verify everything works:
 
 ```typescript
 // test-setup.ts
-import { createBddTest } from '@esimplicity/stack-tests';
+import { createBddTest } from '@esimplicityinc/katalyst-xspec';
 
 const test = createBddTest();
 console.log('Installation successful!');
@@ -164,12 +178,12 @@ The scaffolded project includes these npm scripts:
 
 ## Troubleshooting
 
-### "Cannot find module '@esimplicity/stack-tests'"
+### "Cannot find module '@esimplicityinc/katalyst-xspec'"
 
 Ensure you've installed the package:
 
 ```bash
-npm install -D @esimplicity/stack-tests
+npm install -D @esimplicityinc/katalyst-xspec
 ```
 
 ### "tui-tester is not installed"

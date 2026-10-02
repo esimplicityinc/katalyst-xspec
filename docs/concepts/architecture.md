@@ -1,6 +1,6 @@
 # Architecture
 
-@esimplicity/stack-tests is built on the **Ports and Adapters** (Hexagonal) architecture pattern, enabling clean separation of concerns and easy extensibility.
+@esimplicityinc/katalyst-xspec is built on the **Ports and Adapters** (Hexagonal) architecture pattern, enabling clean separation of concerns and easy extensibility.
 
 ## Overview
 
@@ -301,7 +301,7 @@ flowchart TD
 ### Configuration Example
 
 ```typescript
-import { createBddTest } from '@esimplicity/stack-tests';
+import { createBddTest } from '@esimplicityinc/katalyst-xspec';
 
 // Use all defaults
 const test = createBddTest();

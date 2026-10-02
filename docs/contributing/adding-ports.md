@@ -1,6 +1,6 @@
 # Adding New Ports
 
-Guide to creating new port interfaces for @esimplicity/stack-tests.
+Guide to creating new port interfaces for @esimplicityinc/katalyst-xspec.
 
 ## Overview
 

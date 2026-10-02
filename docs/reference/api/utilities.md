@@ -1,6 +1,6 @@
 # Utilities Reference
 
-Helper functions exported by @esimplicity/stack-tests.
+Helper functions exported by @esimplicityinc/katalyst-xspec.
 
 ## Variable Interpolation
 
@@ -9,7 +9,7 @@ Helper functions exported by @esimplicity/stack-tests.
 Replaces `{varName}` placeholders with values from a variables object.
 
 ```typescript
-import { interpolate } from '@esimplicity/stack-tests';
+import { interpolate } from '@esimplicityinc/katalyst-xspec';
 ```
 
 #### Signature
@@ -59,7 +59,7 @@ interpolate('Missing: {unknown}', vars);
 Safely parses a JSON string, returning undefined on failure.
 
 ```typescript
-import { tryParseJson } from '@esimplicity/stack-tests';
+import { tryParseJson } from '@esimplicityinc/katalyst-xspec';
 ```
 
 #### Signature
@@ -88,7 +88,7 @@ tryParseJson('');
 Accesses nested properties using JSONPath-like syntax.
 
 ```typescript
-import { selectPath } from '@esimplicity/stack-tests';
+import { selectPath } from '@esimplicityinc/katalyst-xspec';
 ```
 
 #### Signature
@@ -152,7 +152,7 @@ selectPath(data, 'nonexistent');
 Parses expected values with type coercion and variable interpolation.
 
 ```typescript
-import { parseExpected } from '@esimplicity/stack-tests';
+import { parseExpected } from '@esimplicityinc/katalyst-xspec';
 ```
 
 #### Signature
@@ -193,7 +193,7 @@ parseExpected('hello', world);    // 'hello'
 Asserts that a value equals `'****'` (masked value).
 
 ```typescript
-import { assertMasked } from '@esimplicity/stack-tests';
+import { assertMasked } from '@esimplicityinc/katalyst-xspec';
 ```
 
 #### Signature
@@ -218,7 +218,7 @@ assertMasked('secret'); // Throws error
 Adds an item to the world's cleanup queue.
 
 ```typescript
-import { registerCleanup } from '@esimplicity/stack-tests';
+import { registerCleanup } from '@esimplicityinc/katalyst-xspec';
 ```
 
 #### Signature
@@ -272,7 +272,7 @@ registerCleanup(world, {
 Creates a new initialized World object.
 
 ```typescript
-import { initWorld } from '@esimplicity/stack-tests';
+import { initWorld } from '@esimplicityinc/katalyst-xspec';
 ```
 
 #### Signature
@@ -308,7 +308,7 @@ world.headers['Authorization'] = 'Bearer token';
 The test state container type.
 
 ```typescript
-import type { World, CleanupItem } from '@esimplicity/stack-tests';
+import type { World, CleanupItem } from '@esimplicityinc/katalyst-xspec';
 ```
 
 #### Definition
@@ -345,7 +345,7 @@ type CleanupItem = {
 Resolves the number of Playwright workers based on environment variables, test type, and CI detection.
 
 ```typescript
-import { resolveWorkers } from '@esimplicity/stack-tests';
+import { resolveWorkers } from '@esimplicityinc/katalyst-xspec';
 ```
 
 #### Signature
@@ -377,7 +377,7 @@ function resolveWorkers(options?: {
 #### Example
 
 ```typescript
-import { resolveWorkers } from '@esimplicity/stack-tests';
+import { resolveWorkers } from '@esimplicityinc/katalyst-xspec';
 
 // playwright.config.ts
 export default defineConfig({
@@ -403,7 +403,7 @@ WORKERS=auto npm test  # same as unset
 Returns the number of available CPU cores on the current machine.
 
 ```typescript
-import { getCpuCount } from '@esimplicity/stack-tests';
+import { getCpuCount } from '@esimplicityinc/katalyst-xspec';
 ```
 
 #### Signature
@@ -415,7 +415,7 @@ function getCpuCount(): number
 #### Example
 
 ```typescript
-import { getCpuCount } from '@esimplicity/stack-tests';
+import { getCpuCount } from '@esimplicityinc/katalyst-xspec';
 
 console.log(`Available CPU cores: ${getCpuCount()}`);
 ```
@@ -429,7 +429,7 @@ console.log(`Available CPU cores: ${getCpuCount()}`);
 ```typescript
 import { createBdd } from 'playwright-bdd';
 import { test } from './fixtures';
-import { interpolate, selectPath, registerCleanup } from '@esimplicity/stack-tests';
+import { interpolate, selectPath, registerCleanup } from '@esimplicityinc/katalyst-xspec';
 
 const { When, Then } = createBdd(test);
 

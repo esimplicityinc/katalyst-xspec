@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Example project demonstrating full-stack testing with @esimplicity/stack-tests",
+  "description": "Example project demonstrating full-stack testing with @esimplicityinc/katalyst-xspec",
   "scripts": {
     "gen": "bddgen",
     "test": "bddgen && playwright test",
@@ -15,7 +15,7 @@
     "test:debug": "bddgen && PWDEBUG=1 playwright test"
   },
   "dependencies": {
-    "@esimplicity/stack-tests": "^0.3.0",
+    "@esimplicityinc/katalyst-xspec": "^0.4.0",
     "@playwright/test": "^1.49.0",
     "playwright-bdd": "^9.1.0",
     "tui-tester": "^1.0.0"

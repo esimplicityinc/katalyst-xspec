@@ -95,7 +95,7 @@ For consumers using `createOidcCleanupAuth()` in their fixture setup:
 Builds tag filter expressions with default excludes.
 
 ```typescript
-import { tagsForProject } from '@esimplicity/stack-tests';
+import { tagsForProject } from '@esimplicityinc/katalyst-xspec';
 ```
 
 #### Signature
@@ -150,7 +150,7 @@ tagsForProject({
 Normalizes tag filter input from environment or CLI.
 
 ```typescript
-import { resolveExtraTags } from '@esimplicity/stack-tests';
+import { resolveExtraTags } from '@esimplicityinc/katalyst-xspec';
 ```
 
 #### Signature
@@ -206,7 +206,7 @@ resolveExtraTags('@smoke')
 Resolves the Playwright worker count based on environment variables, test type, and CI detection.
 
 ```typescript
-import { resolveWorkers } from '@esimplicity/stack-tests';
+import { resolveWorkers } from '@esimplicityinc/katalyst-xspec';
 ```
 
 #### Signature
@@ -271,7 +271,7 @@ WORKERS=auto npm test
 Returns the number of available CPU cores. Useful for logging or diagnostics.
 
 ```typescript
-import { getCpuCount } from '@esimplicity/stack-tests';
+import { getCpuCount } from '@esimplicityinc/katalyst-xspec';
 ```
 
 #### Signature
@@ -296,7 +296,7 @@ console.log(`Running on ${getCpuCount()} CPU cores`);
 // playwright.config.ts
 import { defineConfig } from '@playwright/test';
 import { defineBddProject, cucumberReporter } from 'playwright-bdd';
-import { tagsForProject, resolveExtraTags, resolveWorkers } from '@esimplicity/stack-tests';
+import { tagsForProject, resolveExtraTags, resolveWorkers } from '@esimplicityinc/katalyst-xspec';
 import dotenv from 'dotenv';
 
 dotenv.config();
