@@ -1,6 +1,6 @@
-# Contributing to @esimplicityinc/katalyst-xspec
+# Contributing to @esimplicitylabs/katalyst-xspec
 
-Welcome! We appreciate your interest in contributing to the @esimplicityinc/katalyst-xspec BDD testing framework.
+Welcome! We appreciate your interest in contributing to the @esimplicitylabs/katalyst-xspec BDD testing framework.
 
 ## Code of Conduct
 

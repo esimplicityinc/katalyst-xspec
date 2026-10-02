@@ -18,7 +18,7 @@ class PlaywrightApiAdapter implements ApiPort {
 
 ```typescript
 // In fixtures.ts
-import { createBddTest, PlaywrightApiAdapter } from '@esimplicityinc/katalyst-xspec';
+import { createBddTest, PlaywrightApiAdapter } from '@esimplicitylabs/katalyst-xspec';
 
 const test = createBddTest({
   createApi: ({ apiRequest }) => new PlaywrightApiAdapter(apiRequest),
@@ -52,7 +52,7 @@ class PlaywrightUiAdapter implements UiPort {
 ### Configuration
 
 ```typescript
-import { createBddTest, PlaywrightUiAdapter } from '@esimplicityinc/katalyst-xspec';
+import { createBddTest, PlaywrightUiAdapter } from '@esimplicitylabs/katalyst-xspec';
 
 const test = createBddTest({
   createUi: ({ page }) => new PlaywrightUiAdapter(page),
@@ -99,7 +99,7 @@ type TuiConfig = {
 ### Configuration
 
 ```typescript
-import { createBddTest, TuiTesterAdapter } from '@esimplicityinc/katalyst-xspec';
+import { createBddTest, TuiTesterAdapter } from '@esimplicitylabs/katalyst-xspec';
 
 const test = createBddTest({
   createTui: () => new TuiTesterAdapter({
@@ -154,7 +154,7 @@ class UniversalAuthAdapter implements AuthPort {
 ### Configuration
 
 ```typescript
-import { createBddTest, UniversalAuthAdapter } from '@esimplicityinc/katalyst-xspec';
+import { createBddTest, UniversalAuthAdapter } from '@esimplicitylabs/katalyst-xspec';
 
 const test = createBddTest({
   createAuth: ({ api, ui }) => new UniversalAuthAdapter({ api, ui }),
@@ -216,7 +216,7 @@ type CleanupRule = {
 ### Configuration
 
 ```typescript
-import { createBddTest, DefaultCleanupAdapter } from '@esimplicityinc/katalyst-xspec';
+import { createBddTest, DefaultCleanupAdapter } from '@esimplicitylabs/katalyst-xspec';
 
 const test = createBddTest({
   createCleanup: () => new DefaultCleanupAdapter({

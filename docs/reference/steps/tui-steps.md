@@ -5,7 +5,7 @@ Complete reference for all `@tui` tagged step definitions.
 ## Registration
 
 ```typescript
-import { registerTuiSteps } from '@esimplicityinc/katalyst-xspec/steps';
+import { registerTuiSteps } from '@esimplicitylabs/katalyst-xspec/steps';
 
 registerTuiSteps(test);
 ```

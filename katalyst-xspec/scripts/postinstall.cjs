@@ -78,7 +78,7 @@ function main() {
   }
 
   // Always show success message
-  console.log(`${GREEN}${BOLD}@esimplicityinc/katalyst-xspec${RESET} installed successfully!`);
+  console.log(`${GREEN}${BOLD}@esimplicitylabs/katalyst-xspec${RESET} installed successfully!`);
   console.log('');
 }
 

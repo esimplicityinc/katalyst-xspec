@@ -20,7 +20,7 @@ ${lines.join('\n')}
 
 Run "katalyst-xspec <command> --help" for command options.
 
-New project:   npx @esimplicityinc/katalyst-xspec init
+New project:   npx @esimplicitylabs/katalyst-xspec init
 In a project:  npx katalyst-xspec upgrade
 `;
 }

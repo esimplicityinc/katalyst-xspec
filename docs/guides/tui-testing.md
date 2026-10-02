@@ -1,6 +1,6 @@
 # TUI Testing Guide
 
-Comprehensive guide to terminal user interface testing with @esimplicityinc/katalyst-xspec.
+Comprehensive guide to terminal user interface testing with @esimplicitylabs/katalyst-xspec.
 
 ## Overview
 
@@ -49,7 +49,7 @@ npm install -D tui-tester
 import {
   createBddTest,
   TuiTesterAdapter,
-} from '@esimplicityinc/katalyst-xspec';
+} from '@esimplicitylabs/katalyst-xspec';
 
 export const test = createBddTest({
   createTui: () => new TuiTesterAdapter({
@@ -65,7 +65,7 @@ export const test = createBddTest({
 
 ```typescript
 // features/steps/steps.ts
-import { registerTuiSteps } from '@esimplicityinc/katalyst-xspec/steps';
+import { registerTuiSteps } from '@esimplicitylabs/katalyst-xspec/steps';
 
 registerTuiSteps(test);
 ```
@@ -74,7 +74,7 @@ registerTuiSteps(test);
 
 ```typescript
 // playwright.config.ts
-import { resolveWorkers } from '@esimplicityinc/katalyst-xspec';
+import { resolveWorkers } from '@esimplicitylabs/katalyst-xspec';
 
 const tuiBdd = defineBddProject({
   name: 'tui',

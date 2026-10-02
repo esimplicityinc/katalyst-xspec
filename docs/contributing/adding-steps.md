@@ -1,6 +1,6 @@
 # Adding Step Definitions
 
-Guide to creating new step definitions for @esimplicityinc/katalyst-xspec.
+Guide to creating new step definitions for @esimplicitylabs/katalyst-xspec.
 
 ## Overview
 

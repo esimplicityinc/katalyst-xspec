@@ -5,14 +5,14 @@ import {
   TuiTesterAdapter,
   DefaultAuthAdapter,
   DefaultCleanupAdapter,
-} from '@esimplicityinc/katalyst-xspec';
+} from '@esimplicitylabs/katalyst-xspec';
 import {
   registerApiSteps,
   registerUiSteps,
   registerTuiSteps,
   registerSharedSteps,
   registerHybridSteps,
-} from '@esimplicityinc/katalyst-xspec/steps';
+} from '@esimplicitylabs/katalyst-xspec/steps';
 
 // Create test fixtures with all adapters
 export const { test, expect } = createBddTest({

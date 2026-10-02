@@ -4,7 +4,7 @@
 
 This is `katalyst-xspec`, a reusable Playwright-BDD testing framework providing:
 
-- **`@esimplicityinc/katalyst-xspec`** - Core library with ports, adapters, fixtures, and pre-built step definitions for API, UI, TUI, and hybrid testing
+- **`@esimplicitylabs/katalyst-xspec`** - Core library with ports, adapters, fixtures, and pre-built step definitions for API, UI, TUI, and hybrid testing
   - Ships the `katalyst-xspec` CLI: `init` (scaffold), `upgrade` (upgrade/migrate/skills), `stubs` (step stub generator)
 
 ### Key Directories

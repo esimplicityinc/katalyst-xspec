@@ -1,5 +1,5 @@
-import { createBddTest, PlaywrightUiAdapter } from '@esimplicityinc/katalyst-xspec';
-import { registerUiSteps, registerSharedSteps } from '@esimplicityinc/katalyst-xspec/steps';
+import { createBddTest, PlaywrightUiAdapter } from '@esimplicitylabs/katalyst-xspec';
+import { registerUiSteps, registerSharedSteps } from '@esimplicitylabs/katalyst-xspec/steps';
 
 // Create test fixtures with UI adapter
 export const { test, expect } = createBddTest({

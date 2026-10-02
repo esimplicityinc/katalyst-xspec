@@ -1,16 +1,16 @@
 # Troubleshooting
 
-Common issues and solutions when working with @esimplicityinc/katalyst-xspec.
+Common issues and solutions when working with @esimplicitylabs/katalyst-xspec.
 
 ## Installation Issues
 
-### "Cannot find module '@esimplicityinc/katalyst-xspec'"
+### "Cannot find module '@esimplicitylabs/katalyst-xspec'"
 
 The package isn't installed or isn't resolving correctly.
 
 **Solution:**
 ```bash
-npm install -D @esimplicityinc/katalyst-xspec
+npm install -D @esimplicitylabs/katalyst-xspec
 ```
 
 If you're in a monorepo, ensure you're in the correct workspace directory.
@@ -89,7 +89,7 @@ A step in your feature file doesn't match any registered step definition.
 
 1. Check your `fixtures.ts` includes the step registration:
 ```typescript
-import { registerApiSteps, registerUiSteps } from '@esimplicityinc/katalyst-xspec/steps';
+import { registerApiSteps, registerUiSteps } from '@esimplicitylabs/katalyst-xspec/steps';
 
 registerApiSteps(test);
 registerUiSteps(test);
@@ -188,7 +188,7 @@ CLEANUP_AUTH_TOKEN=your-admin-token-here
 For OIDC providers (Keycloak, Auth0, etc.), use the OIDC helper in your fixtures:
 
 ```typescript
-import { createBddTest, createOidcCleanupAuth } from '@esimplicityinc/katalyst-xspec';
+import { createBddTest, createOidcCleanupAuth } from '@esimplicitylabs/katalyst-xspec';
 
 export const test = createBddTest({
   getCleanupAuth: createOidcCleanupAuth({
@@ -409,7 +409,7 @@ npx playwright show-trace trace.zip
 
 ### "Old version of scaffolding"
 
-After upgrading `@esimplicityinc/katalyst-xspec`, your scaffolding files may be outdated.
+After upgrading `@esimplicitylabs/katalyst-xspec`, your scaffolding files may be outdated.
 
 **Solution:**
 
@@ -440,7 +440,7 @@ cp /tmp/katalyst-xspec-backup-<timestamp>/steps/my-steps.ts ./features/steps/
 **Prevention:** Always use `--migrate` instead of re-running the scaffolder:
 ```bash
 # WRONG - overwrites custom files
-npx @esimplicityinc/katalyst-xspec init --force
+npx @esimplicitylabs/katalyst-xspec init --force
 
 # RIGHT - preserves custom files  
 npx katalyst-xspec upgrade --migrate

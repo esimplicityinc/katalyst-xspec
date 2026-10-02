@@ -67,7 +67,7 @@ Then:
 // features/steps/custom/user.steps.ts
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures';
-import { interpolate } from '@esimplicityinc/katalyst-xspec';
+import { interpolate } from '@esimplicitylabs/katalyst-xspec';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -113,7 +113,7 @@ Then('the user should see their dashboard', { tags: '@ui' },
 ```typescript
 // features/steps/steps.ts
 import { test } from './fixtures';
-import { registerApiSteps, registerUiSteps } from '@esimplicityinc/katalyst-xspec/steps';
+import { registerApiSteps, registerUiSteps } from '@esimplicitylabs/katalyst-xspec/steps';
 
 // Register built-in steps
 registerApiSteps(test);
@@ -303,7 +303,7 @@ Then('the response should have a valid user', async ({ world }) => {
 ### Reuse Existing Adapters
 
 ```typescript
-import { interpolate, selectPath, registerCleanup } from '@esimplicityinc/katalyst-xspec';
+import { interpolate, selectPath, registerCleanup } from '@esimplicitylabs/katalyst-xspec';
 
 When('I create and verify a user', { tags: '@api' }, 
   async ({ api, world }) => {

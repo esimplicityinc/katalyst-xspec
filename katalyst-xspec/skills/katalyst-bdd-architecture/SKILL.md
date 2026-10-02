@@ -140,7 +140,7 @@ type World = {
 The core function that wires everything together:
 
 ```typescript
-import { createBddTest } from '@esimplicityinc/katalyst-xspec';
+import { createBddTest } from '@esimplicitylabs/katalyst-xspec';
 
 const test = createBddTest({
   // Optional: Override default adapters
@@ -247,7 +247,7 @@ When('I send JSON:', async ({ api, world }, docString: string) => {
 ### Custom API Adapter
 
 ```typescript
-import { ApiPort, ApiResult, ApiMethod } from '@esimplicityinc/katalyst-xspec';
+import { ApiPort, ApiResult, ApiMethod } from '@esimplicitylabs/katalyst-xspec';
 import axios from 'axios';
 
 class AxiosApiAdapter implements ApiPort {
@@ -305,7 +305,7 @@ class AxiosApiAdapter implements ApiPort {
 ### Custom Auth Adapter
 
 ```typescript
-import { AuthPort, World, ApiPort, UiPort } from '@esimplicityinc/katalyst-xspec';
+import { AuthPort, World, ApiPort, UiPort } from '@esimplicitylabs/katalyst-xspec';
 
 class CustomAuthAdapter implements AuthPort {
   constructor(private deps: { api: ApiPort; ui: UiPort }) {}
@@ -354,7 +354,7 @@ class CustomAuthAdapter implements AuthPort {
 
 ```typescript
 // fixtures.ts
-import { createBddTest } from '@esimplicityinc/katalyst-xspec';
+import { createBddTest } from '@esimplicitylabs/katalyst-xspec';
 import { AxiosApiAdapter } from './adapters/axios-api';
 import { CustomAuthAdapter } from './adapters/custom-auth';
 
@@ -414,7 +414,7 @@ export class MailhogEmailAdapter implements EmailPort {
 
 ```typescript
 // fixtures.ts
-import { createBddTest } from '@esimplicityinc/katalyst-xspec';
+import { createBddTest } from '@esimplicitylabs/katalyst-xspec';
 import { MailhogEmailAdapter } from './adapters/mailhog-email';
 
 // Extend the test fixture
@@ -453,7 +453,7 @@ Then('I should receive an email at {string} with subject {string}',
 ### Variable Interpolation
 
 ```typescript
-import { interpolate } from '@esimplicityinc/katalyst-xspec';
+import { interpolate } from '@esimplicitylabs/katalyst-xspec';
 
 const template = 'Hello {name}, your ID is {id}';
 const result = interpolate(template, { name: 'John', id: '123' });
@@ -463,7 +463,7 @@ const result = interpolate(template, { name: 'John', id: '123' });
 ### JSON Path Selection
 
 ```typescript
-import { selectPath } from '@esimplicityinc/katalyst-xspec';
+import { selectPath } from '@esimplicitylabs/katalyst-xspec';
 
 const data = { 
   user: { 
@@ -479,7 +479,7 @@ selectPath(data, 'user.roles[0]');  // 'admin'
 ### Tag Helpers
 
 ```typescript
-import { tagsForProject, resolveExtraTags } from '@esimplicityinc/katalyst-xspec';
+import { tagsForProject, resolveExtraTags } from '@esimplicitylabs/katalyst-xspec';
 
 // Build tag expression with defaults
 tagsForProject({ projectTag: '@api' });

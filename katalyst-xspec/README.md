@@ -1,21 +1,17 @@
-# @esimplicityinc/katalyst-xspec
+# @esimplicitylabs/katalyst-xspec
 
 Reusable Playwright-BDD fixtures, ports, adapters, and step registrations for API, UI, and hybrid testing. Designed to be consumed as a dev dependency across repos.
 
 ## Install
 
-GitHub Packages (recommended for release builds):
-
 ```bash
-npm config set @kata:registry https://npm.pkg.github.com
-npm set //npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN
-npm install -D @esimplicityinc/katalyst-xspec @playwright/test playwright-bdd
+npm install -D @esimplicitylabs/katalyst-xspec @playwright/test playwright-bdd
 ```
 
-Workspace/local development (from this monorepo):
+Or scaffold a new project:
 
 ```bash
-bun add -d @esimplicityinc/katalyst-xspec@"file:../packages/katalyst-xspec" @playwright/test playwright-bdd
+npx @esimplicitylabs/katalyst-xspec init my-tests
 ```
 
 ## What’s included
@@ -37,7 +33,7 @@ import {
   PlaywrightUiAdapter,
   UniversalAuthAdapter,
   DefaultCleanupAdapter,
-} from '@esimplicityinc/katalyst-xspec';
+} from '@esimplicitylabs/katalyst-xspec';
 
 export const { test } = createBddTest({
   createApi: ({ apiRequest }) => new PlaywrightApiAdapter(apiRequest),
@@ -51,7 +47,7 @@ export const { test } = createBddTest({
 ```ts
 // features/steps/steps_api/index.ts
 import { test } from '../fixtures';
-import { registerApiSteps } from '@esimplicityinc/katalyst-xspec/steps';
+import { registerApiSteps } from '@esimplicitylabs/katalyst-xspec/steps';
 registerApiSteps(test);
 ```
 

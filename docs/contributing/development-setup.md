@@ -1,6 +1,6 @@
 # Development Setup
 
-Complete guide to setting up your local development environment for contributing to @esimplicityinc/katalyst-xspec.
+Complete guide to setting up your local development environment for contributing to @esimplicitylabs/katalyst-xspec.
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ Complete guide to setting up your local development environment for contributing
 
 ```
 testconvergence/
-├── katalyst-xspec/              # Core library (@esimplicityinc/katalyst-xspec)
+├── katalyst-xspec/              # Core library (@esimplicitylabs/katalyst-xspec)
 │   ├── src/
 │   │   ├── ports/            # Interface definitions
 │   │   ├── adapters/         # Adapter implementations
@@ -205,7 +205,7 @@ Test your changes against a real project:
 ```bash
 # Create test project
 cd /tmp
-npx @esimplicityinc/katalyst-xspec init my-test-app
+npx @esimplicitylabs/katalyst-xspec init my-test-app
 
 # Link local library
 cd my-test-app
@@ -225,7 +225,7 @@ npm link
 
 # Use in test project
 cd ../my-test-project
-npm link @esimplicityinc/katalyst-xspec
+npm link @esimplicitylabs/katalyst-xspec
 
 # Make changes, rebuild, and test
 cd ../katalyst-xspec

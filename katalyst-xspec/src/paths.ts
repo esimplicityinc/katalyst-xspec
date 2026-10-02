@@ -32,7 +32,7 @@ export type ResolveStepsOptions = {
  *
  * @example
  * ```ts
- * import { resolveFeatures } from '@esimplicityinc/katalyst-xspec';
+ * import { resolveFeatures } from '@esimplicitylabs/katalyst-xspec';
  * import { defineBddProject } from 'playwright-bdd';
  *
  * const apiBdd = defineBddProject({
@@ -75,7 +75,7 @@ export function resolveFeatures(options: ResolveFeaturesOptions = {}): string {
  *
  * @example
  * ```ts
- * import { resolveSteps } from '@esimplicityinc/katalyst-xspec';
+ * import { resolveSteps } from '@esimplicitylabs/katalyst-xspec';
  * import { defineBddProject } from 'playwright-bdd';
  *
  * const apiBdd = defineBddProject({
@@ -104,7 +104,7 @@ export function resolveSteps(options: ResolveStepsOptions = {}): string {
  *
  * @example
  * ```ts
- * import { resolveBddPaths } from '@esimplicityinc/katalyst-xspec';
+ * import { resolveBddPaths } from '@esimplicitylabs/katalyst-xspec';
  * import { defineBddProject } from 'playwright-bdd';
  *
  * const { features, steps } = resolveBddPaths({ tag: 'api' });

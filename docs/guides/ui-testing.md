@@ -1,6 +1,6 @@
 # UI Testing Guide
 
-Comprehensive guide to browser-based UI testing with @esimplicityinc/katalyst-xspec.
+Comprehensive guide to browser-based UI testing with @esimplicitylabs/katalyst-xspec.
 
 ## Overview
 

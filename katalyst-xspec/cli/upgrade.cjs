@@ -7,10 +7,13 @@ const path = require('path');
 const os = require('os');
 const readline = require('readline');
 
-const PACKAGE_NAME = '@esimplicityinc/katalyst-xspec';
-// Pre-0.4.0 name (published to npmjs.com). Projects still on it are migrated.
-const LEGACY_PACKAGE_NAME = '@esimplicity/stack-tests';
-// katalyst-xspec is published to GitHub Packages; consumers need this scope mapping.
+// Published on npmjs.com.
+const PACKAGE_NAME = '@esimplicitylabs/katalyst-xspec';
+// Earlier names; projects on any of these are migrated to PACKAGE_NAME.
+//   @esimplicityinc/katalyst-xspec  0.4.0-0.5.0 (GitHub Packages)
+//   @esimplicity/stack-tests        <= 0.3.0   (npmjs.com)
+const LEGACY_PACKAGE_NAMES = ['@esimplicityinc/katalyst-xspec', '@esimplicity/stack-tests'];
+// The scope mapping 0.4.0-0.5.0 scaffolded into .npmrc; no longer needed.
 const GITHUB_PACKAGES_NPMRC_LINE = '@esimplicityinc:registry=https://npm.pkg.github.com';
 
 // Agent skill directories configuration
@@ -45,7 +48,7 @@ function detectPackageManager(startDir) {
 }
 
 function getInstalledVersion(cwd) {
-  for (const [name, legacy] of [[PACKAGE_NAME, false], [LEGACY_PACKAGE_NAME, true]]) {
+  for (const [name, legacy] of [[PACKAGE_NAME, false], ...LEGACY_PACKAGE_NAMES.map((n) => [n, true])]) {
     const pkgPath = path.join(cwd, 'node_modules', name, 'package.json');
     if (fs.existsSync(pkgPath)) {
       const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
@@ -55,9 +58,9 @@ function getInstalledVersion(cwd) {
   return null;
 }
 
-// Matches '@esimplicity/stack-tests' and '@esimplicity/stack-tests/<subpath>'
-// inside quotes, but not unrelated packages such as '@esimplicity/stack-tests-x'.
-const LEGACY_SPECIFIER_RE = /(['"])@esimplicity\/stack-tests(\/[^'"]*)?\1/g;
+// Matches a quoted legacy name, optionally with a '/<subpath>', but not
+// unrelated packages that merely share the prefix ('@esimplicity/stack-tests-x').
+const LEGACY_SPECIFIER_RE = /(['"])(?:@esimplicityinc\/katalyst-xspec|@esimplicity\/stack-tests)(\/[^'"]*)?\1/g;
 
 /**
  * Rewrite legacy import specifiers to the new package name in the files a
@@ -94,14 +97,22 @@ function rewriteLegacyImports(cwd, { dryRun = false } = {}) {
   return changed;
 }
 
-/** Ensure .npmrc maps the @esimplicityinc scope to GitHub Packages. Returns true if changed. */
-function ensureGithubPackagesNpmrc(cwd, { dryRun = false } = {}) {
+/**
+ * Remove the `@esimplicityinc` -> GitHub Packages scope line that 0.4.0-0.5.0
+ * scaffolded. Left alone if the file also configures npm.pkg.github.com auth,
+ * since then the project likely uses other @esimplicityinc packages.
+ * Deletes .npmrc if that line was its only content. Returns true if changed.
+ */
+function removeGithubPackagesNpmrc(cwd, { dryRun = false } = {}) {
   const npmrcPath = path.join(cwd, '.npmrc');
-  const existing = fs.existsSync(npmrcPath) ? fs.readFileSync(npmrcPath, 'utf8') : '';
-  if (existing.split(/\r?\n/).some((line) => line.trim().startsWith('@esimplicityinc:registry='))) return false;
+  if (!fs.existsSync(npmrcPath)) return false;
+  const lines = fs.readFileSync(npmrcPath, 'utf8').split(/\r?\n/);
+  if (!lines.some((l) => l.trim() === GITHUB_PACKAGES_NPMRC_LINE)) return false;
+  if (lines.some((l) => l.trim().startsWith('//npm.pkg.github.com/'))) return false;
+  const kept = lines.filter((l) => l.trim() !== GITHUB_PACKAGES_NPMRC_LINE);
   if (!dryRun) {
-    const prefix = existing && !existing.endsWith('\n') ? `${existing}\n` : existing;
-    fs.writeFileSync(npmrcPath, `${prefix}${GITHUB_PACKAGES_NPMRC_LINE}\n`);
+    if (kept.every((l) => l.trim() === '')) fs.unlinkSync(npmrcPath);
+    else fs.writeFileSync(npmrcPath, kept.join('\n').replace(/\n*$/, '\n'));
   }
   return true;
 }
@@ -140,26 +151,22 @@ function rewriteLegacyScripts(cwd, { dryRun = false } = {}) {
   return changed;
 }
 
-/** Move a project from @esimplicity/stack-tests to @esimplicityinc/katalyst-xspec. */
-function migrateLegacyPackage(cwd, pm, targetVersion) {
-  log(`${LEGACY_PACKAGE_NAME} has been renamed to ${PACKAGE_NAME}. Migrating...`);
-  if (ensureGithubPackagesNpmrc(cwd)) log(`Added "${GITHUB_PACKAGES_NPMRC_LINE}" to .npmrc`);
+/** Move a project from a legacy package name to PACKAGE_NAME. */
+function migrateLegacyPackage(cwd, pm, legacyName, targetVersion) {
+  log(`${legacyName} has been renamed to ${PACKAGE_NAME}. Migrating...`);
+  if (removeGithubPackagesNpmrc(cwd)) log(`Removed "${GITHUB_PACKAGES_NPMRC_LINE}" from .npmrc (no longer needed)`);
   for (const file of rewriteLegacyImports(cwd)) log(`Updated imports: ${file}`);
   if (rewriteLegacyScripts(cwd)) log('Updated package.json scripts to use the katalyst-xspec command');
 
   const removeCmd = { npm: 'npm uninstall', bun: 'bun remove', pnpm: 'pnpm remove', yarn: 'yarn remove' }[pm] || 'npm uninstall';
-  log(`Running: ${removeCmd} ${LEGACY_PACKAGE_NAME}`);
-  spawnSync(removeCmd, [LEGACY_PACKAGE_NAME], { stdio: 'inherit', shell: true });
+  log(`Running: ${removeCmd} ${legacyName}`);
+  spawnSync(removeCmd, [legacyName], { stdio: 'inherit', shell: true });
 
   // Add as a devDependency, matching what the scaffolder generates.
   const addCmd = { npm: 'npm install -D', bun: 'bun add -d', pnpm: 'pnpm add -D', yarn: 'yarn add -D' }[pm] || 'npm install -D';
   const spec = targetVersion ? `${PACKAGE_NAME}@${targetVersion}` : PACKAGE_NAME;
   log(`Running: ${addCmd} ${spec}`);
   const result = spawnSync(addCmd, [spec], { stdio: 'inherit', shell: true });
-  if (result.status !== 0) {
-    error(`Install failed. GitHub Packages requires auth: set NODE_AUTH_TOKEN or add`);
-    error(`"//npm.pkg.github.com/:_authToken=<token with read:packages>" to your user ~/.npmrc.`);
-  }
   return result.status === 0;
 }
 
@@ -233,7 +240,7 @@ function showHelp() {
   console.log(`
 Usage: npx katalyst-xspec upgrade [options]
 
-Upgrade @esimplicityinc/katalyst-xspec to the latest version.
+Upgrade @esimplicitylabs/katalyst-xspec to the latest version.
 
 Options:
   -c, --check           Check for updates without installing
@@ -304,7 +311,7 @@ function updateSkills(cwd) {
   
   if (installedDirs.length === 0) {
     log('No Katalyst BDD skills found in current directory.');
-    log('Skills can be installed with: npx @esimplicityinc/katalyst-xspec init --with-skills');
+    log('Skills can be installed with: npx @esimplicitylabs/katalyst-xspec init --with-skills');
     return true;
   }
   
@@ -434,7 +441,7 @@ function mergePackageJson(existing, template) {
 
   PKG_MERGED_MAPS.forEach((key) => {
     const combined = { ...existingPkg[key], ...templatePkg[key] };
-    if (key === 'dependencies' || key === 'devDependencies') delete combined[LEGACY_PACKAGE_NAME];
+    if (key === 'dependencies' || key === 'devDependencies') LEGACY_PACKAGE_NAMES.forEach((n) => delete combined[n]);
     if (Object.keys(combined).length > 0) {
       merged[key] = combined;
     }
@@ -452,7 +459,7 @@ function mergeStepsTs(existing, template, customImports) {
   
   // Add custom imports after the library imports
   if (customImports.length > 0) {
-    const importEndMatch = merged.match(/from '@esimplicityinc\/katalyst-xspec\/steps';/);
+    const importEndMatch = merged.match(/from '@esimplicitylabs\/katalyst-xspec\/steps';/);
     if (importEndMatch) {
       const insertPos = merged.indexOf(importEndMatch[0]) + importEndMatch[0].length;
       const customImportBlock = '\n\n// Custom step imports (preserved from migration)\n' + 
@@ -496,7 +503,7 @@ function getTemplates() {
       clean: 'rm -rf .features-gen node_modules test-results storage cucumber-report playwright-report'
     },
     devDependencies: {
-      '@esimplicityinc/katalyst-xspec': '^0.5.0',
+      '@esimplicitylabs/katalyst-xspec': '^0.6.0',
       '@playwright/test': '^1.49.0',
       'playwright-bdd': '^9.1.0',
       dotenv: '^16.1.4',
@@ -514,7 +521,7 @@ function getTemplates() {
   UniversalAuthAdapter,
   DefaultCleanupAdapter,
   TuiTesterAdapter,
-} from '@esimplicityinc/katalyst-xspec';
+} from '@esimplicitylabs/katalyst-xspec';
 
 export const { test } = createBddTest({
   createApi: ({ apiRequest }) => new PlaywrightApiAdapter(apiRequest),
@@ -538,7 +545,7 @@ import {
   registerSharedSteps,
   registerHybridSuite,
   registerTuiSteps,
-} from '@esimplicityinc/katalyst-xspec/steps';
+} from '@esimplicitylabs/katalyst-xspec/steps';
 
 registerApiSteps(test);
 registerUiSteps(test);
@@ -712,15 +719,15 @@ async function migrate(cwd, options) {
   
   console.log(`  Updated ${Object.keys(filesToUpdate).length} files`);
 
-  // Rename: point any remaining @esimplicity/stack-tests imports (custom step
-  // files, playwright.config) at the new package, and map the GitHub Packages scope.
+  // Rename: point legacy imports (custom step files, playwright.config) at the
+  // current package, and drop the obsolete GitHub Packages scope line.
   const renamed = rewriteLegacyImports(cwd, { dryRun: options.dryRun });
   if (renamed.length) {
-    console.log(`  Rewrote ${LEGACY_PACKAGE_NAME} imports in ${renamed.length} file(s): ${renamed.join(', ')}`);
+    console.log(`  Rewrote legacy imports in ${renamed.length} file(s): ${renamed.join(', ')}`);
     if (!options.dryRun) results.updated.push(...renamed);
   }
-  if (ensureGithubPackagesNpmrc(cwd, { dryRun: options.dryRun })) {
-    console.log(`  .npmrc: added ${GITHUB_PACKAGES_NPMRC_LINE}`);
+  if (removeGithubPackagesNpmrc(cwd, { dryRun: options.dryRun })) {
+    console.log(`  .npmrc: removed ${GITHUB_PACKAGES_NPMRC_LINE}`);
     if (!options.dryRun) results.updated.push('.npmrc');
   }
   if (rewriteLegacyScripts(cwd, { dryRun: options.dryRun })) {
@@ -941,10 +948,10 @@ async function main() {
 
   if (installed.legacy) {
     if (options.check) {
-      log(`${LEGACY_PACKAGE_NAME} has been renamed to ${PACKAGE_NAME}. Run without --check to migrate.`);
+      log(`${installed.name} has been renamed to ${PACKAGE_NAME}. Run without --check to migrate.`);
       process.exit(0);
     }
-    const ok = migrateLegacyPackage(cwd, pm, options.version);
+    const ok = migrateLegacyPackage(cwd, pm, installed.name, options.version);
     if (ok) log(`Migrated to ${PACKAGE_NAME}.`);
     process.exit(ok ? 0 : 1);
   }
@@ -997,11 +1004,11 @@ if (require.main === module) {
 module.exports = {
   main,
   PACKAGE_NAME,
-  LEGACY_PACKAGE_NAME,
+  LEGACY_PACKAGE_NAMES,
   GITHUB_PACKAGES_NPMRC_LINE,
   getInstalledVersion,
   rewriteLegacyImports,
   rewriteLegacyScripts,
-  ensureGithubPackagesNpmrc,
+  removeGithubPackagesNpmrc,
   mergePackageJson,
 };

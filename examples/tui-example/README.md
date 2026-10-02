@@ -1,6 +1,6 @@
 # TUI Testing Example
 
-Demonstrates terminal UI testing with @esimplicityinc/katalyst-xspec using common Unix commands.
+Demonstrates terminal UI testing with @esimplicitylabs/katalyst-xspec using common Unix commands.
 
 ## What This Example Shows
 

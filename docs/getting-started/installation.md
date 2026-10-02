@@ -1,6 +1,6 @@
 # Installation
 
-This guide covers installing @esimplicityinc/katalyst-xspec and its dependencies.
+This guide covers installing @esimplicitylabs/katalyst-xspec and its dependencies.
 
 ## Prerequisites
 
@@ -25,20 +25,6 @@ sudo dnf install tmux
 tmux -V
 ```
 
-## Registry Setup (GitHub Packages)
-
-`@esimplicityinc/katalyst-xspec` is published to GitHub Packages. Before installing, map the scope in your project's `.npmrc`:
-
-```
-@esimplicityinc:registry=https://npm.pkg.github.com
-```
-
-and authenticate with a GitHub token that has `read:packages` in your user `~/.npmrc`:
-
-```
-//npm.pkg.github.com/:_authToken=<your_github_token>
-```
-
 ## Installation Methods
 
 ### Method 1: Using the Scaffold CLI (Recommended)
@@ -47,10 +33,10 @@ The fastest way to get started is using the `katalyst-xspec init` command:
 
 ```bash
 # From your project root
-npx @esimplicityinc/katalyst-xspec init
+npx @esimplicitylabs/katalyst-xspec init
 
 # Or with a custom directory name
-npx @esimplicityinc/katalyst-xspec init --dir e2e-tests
+npx @esimplicitylabs/katalyst-xspec init --dir e2e-tests
 ```
 
 This creates a complete test package with:
@@ -66,13 +52,13 @@ The CLI can also install [Agent Skills](../guides/agent-skills.md) for AI-assist
 
 ```bash
 # Install with Agent Skills (you'll be prompted to select agents)
-npx @esimplicityinc/katalyst-xspec init --with-skills
+npx @esimplicitylabs/katalyst-xspec init --with-skills
 
 # Install skills for specific agents
-npx @esimplicityinc/katalyst-xspec init --with-skills --skills-agents opencode,claude
+npx @esimplicitylabs/katalyst-xspec init --with-skills --skills-agents opencode,claude
 
 # Skip skills installation
-npx @esimplicityinc/katalyst-xspec init --no-skills
+npx @esimplicitylabs/katalyst-xspec init --no-skills
 ```
 
 Available agent options: `opencode`, `claude`, `cursor`, `generic`
@@ -82,7 +68,7 @@ Available agent options: `opencode`, `claude`, `cursor`, `generic`
 1. Install the package:
 
 ```bash
-npm install -D @esimplicityinc/katalyst-xspec
+npm install -D @esimplicitylabs/katalyst-xspec
 ```
 
 2. Install peer dependencies:
@@ -106,12 +92,12 @@ If working within the monorepo:
 npm install
 
 # Or link directly
-npm install -D @esimplicityinc/katalyst-xspec@"file:../katalyst-xspec"
+npm install -D @esimplicitylabs/katalyst-xspec@"file:../katalyst-xspec"
 ```
 
 ## Peer Dependencies
 
-@esimplicityinc/katalyst-xspec requires these peer dependencies:
+@esimplicitylabs/katalyst-xspec requires these peer dependencies:
 
 | Package | Version | Required |
 |---------|---------|----------|
@@ -126,7 +112,7 @@ Create a simple test to verify everything works:
 
 ```typescript
 // test-setup.ts
-import { createBddTest } from '@esimplicityinc/katalyst-xspec';
+import { createBddTest } from '@esimplicitylabs/katalyst-xspec';
 
 const test = createBddTest();
 console.log('Installation successful!');
@@ -178,12 +164,12 @@ The scaffolded project includes these npm scripts:
 
 ## Troubleshooting
 
-### "Cannot find module '@esimplicityinc/katalyst-xspec'"
+### "Cannot find module '@esimplicitylabs/katalyst-xspec'"
 
 Ensure you've installed the package:
 
 ```bash
-npm install -D @esimplicityinc/katalyst-xspec
+npm install -D @esimplicitylabs/katalyst-xspec
 ```
 
 ### "tui-tester is not installed"

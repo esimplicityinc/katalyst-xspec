@@ -47,7 +47,7 @@ let cachedOidcHeaders: Record<string, string> | undefined;
  *
  * @example Keycloak with password grant:
  * ```typescript
- * import { createBddTest, createOidcCleanupAuth } from '@esimplicityinc/katalyst-xspec';
+ * import { createBddTest, createOidcCleanupAuth } from '@esimplicitylabs/katalyst-xspec';
  *
  * // Set env vars: OIDC_TOKEN_URL, OIDC_CLIENT_ID, OIDC_USERNAME, OIDC_PASSWORD
  * const test = createBddTest({

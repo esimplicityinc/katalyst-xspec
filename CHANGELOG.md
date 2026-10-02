@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-10-02
+
+### Breaking Changes
+
+- **The package moved to npmjs.com as `@esimplicitylabs/katalyst-xspec`.** Installing no longer needs a GitHub token or registry setup:
+
+  ```bash
+  npx @esimplicitylabs/katalyst-xspec init my-tests
+  ```
+
+  Imports change from `@esimplicityinc/katalyst-xspec` (and `/steps`) to `@esimplicitylabs/katalyst-xspec`. `@esimplicityinc/katalyst-xspec@0.5.0` stays on GitHub Packages but won't be updated.
+- **Action required:** in an existing project, run `npx @esimplicitylabs/katalyst-xspec upgrade`. It works from `@esimplicityinc/katalyst-xspec` and from `@esimplicity/stack-tests`. It rewrites imports in `features/` and `playwright.config.*`, updates `package.json` scripts, removes the `@esimplicityinc:registry=https://npm.pkg.github.com` line from `.npmrc`, and swaps the dependency. The `.npmrc` line is left in place if the file also sets a GitHub Packages token, since the project probably uses other `@esimplicityinc` packages.
+
+### Changed
+
+- **`init` no longer writes an `.npmrc`.**
+- **The publish workflow publishes to npmjs.com via npm trusted publishing (OIDC)** instead of to GitHub Packages.
+
+### Fixed
+
+- **`upgrade --migrate` now keeps custom imports in `steps.ts`.** Since 0.4.0 it searched for the pre-rename package name, so it never found the import block to insert them after.
+
 ## [0.5.0] - 2026-10-02
 
 ### Breaking Changes

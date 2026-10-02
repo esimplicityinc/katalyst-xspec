@@ -11,7 +11,7 @@ Complete reference for the `createBddTest` function and fixture system.
 ### Import
 
 ```typescript
-import { createBddTest, type CreateBddTestOptions } from '@esimplicityinc/katalyst-xspec';
+import { createBddTest, type CreateBddTestOptions } from '@esimplicitylabs/katalyst-xspec';
 ```
 
 ### Signature
@@ -60,7 +60,7 @@ When options are not provided, defaults are used:
 #### Minimal (All Defaults)
 
 ```typescript
-import { createBddTest } from '@esimplicityinc/katalyst-xspec';
+import { createBddTest } from '@esimplicitylabs/katalyst-xspec';
 
 export const test = createBddTest();
 ```
@@ -68,7 +68,7 @@ export const test = createBddTest();
 #### Custom API Adapter
 
 ```typescript
-import { createBddTest, PlaywrightApiAdapter } from '@esimplicityinc/katalyst-xspec';
+import { createBddTest, PlaywrightApiAdapter } from '@esimplicitylabs/katalyst-xspec';
 
 export const test = createBddTest({
   createApi: ({ apiRequest }) => {
@@ -81,7 +81,7 @@ export const test = createBddTest({
 #### With TUI Support
 
 ```typescript
-import { createBddTest, TuiTesterAdapter } from '@esimplicityinc/katalyst-xspec';
+import { createBddTest, TuiTesterAdapter } from '@esimplicitylabs/katalyst-xspec';
 
 export const test = createBddTest({
   createTui: () => new TuiTesterAdapter({
@@ -94,7 +94,7 @@ export const test = createBddTest({
 #### Custom Cleanup Rules
 
 ```typescript
-import { createBddTest, DefaultCleanupAdapter } from '@esimplicityinc/katalyst-xspec';
+import { createBddTest, DefaultCleanupAdapter } from '@esimplicitylabs/katalyst-xspec';
 
 export const test = createBddTest({
   createCleanup: () => new DefaultCleanupAdapter({
@@ -109,7 +109,7 @@ export const test = createBddTest({
 #### Custom Cleanup Authentication
 
 ```typescript
-import { createBddTest, createOidcCleanupAuth } from '@esimplicityinc/katalyst-xspec';
+import { createBddTest, createOidcCleanupAuth } from '@esimplicitylabs/katalyst-xspec';
 
 // Use OIDC provider (Keycloak, Auth0, Okta, etc.)
 export const test = createBddTest({
@@ -130,7 +130,7 @@ export const test2 = createBddTest({
 #### Extended World
 
 ```typescript
-import { createBddTest, initWorld, type World } from '@esimplicityinc/katalyst-xspec';
+import { createBddTest, initWorld, type World } from '@esimplicitylabs/katalyst-xspec';
 
 interface MyWorld extends World {
   currentUser?: { id: string; email: string };
@@ -268,7 +268,7 @@ After test completion:
 Re-exported base test from playwright-bdd for advanced use cases.
 
 ```typescript
-import { baseTest } from '@esimplicityinc/katalyst-xspec';
+import { baseTest } from '@esimplicitylabs/katalyst-xspec';
 
 // Extend with custom fixtures
 const customTest = baseTest.extend({
@@ -286,7 +286,7 @@ import type {
   CleanupAuthProvider,
   TuiFactory,
   TuiConfig,
-} from '@esimplicityinc/katalyst-xspec';
+} from '@esimplicitylabs/katalyst-xspec';
 ```
 
 ### TuiFactory

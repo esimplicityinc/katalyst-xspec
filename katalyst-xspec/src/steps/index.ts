@@ -73,7 +73,7 @@ export function registerHybridSuite(test: any): void {
  *
  * @example
  * ```typescript
- * import { createBddTest, registerTuiSteps, TuiTesterAdapter } from '@esimplicityinc/katalyst-xspec';
+ * import { createBddTest, registerTuiSteps, TuiTesterAdapter } from '@esimplicitylabs/katalyst-xspec';
  *
  * const test = createBddTest({
  *   createTui: () => new TuiTesterAdapter({
@@ -97,7 +97,7 @@ export function registerTuiSteps(test: any): void {
  *
  * @example
  * ```typescript
- * import { createBddTest, registerAllSteps } from '@esimplicityinc/katalyst-xspec';
+ * import { createBddTest, registerAllSteps } from '@esimplicitylabs/katalyst-xspec';
  *
  * const test = createBddTest({ ... });
  * registerAllSteps(test);

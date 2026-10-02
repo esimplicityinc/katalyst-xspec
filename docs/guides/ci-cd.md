@@ -1,6 +1,6 @@
 # CI/CD Integration Guide
 
-Run @esimplicityinc/katalyst-xspec in continuous integration pipelines.
+Run @esimplicitylabs/katalyst-xspec in continuous integration pipelines.
 
 ## GitHub Actions
 
@@ -422,7 +422,7 @@ steps:
 ```typescript
 // playwright.config.ts
 import { defineConfig } from '@playwright/test';
-import { resolveWorkers } from '@esimplicityinc/katalyst-xspec';
+import { resolveWorkers } from '@esimplicitylabs/katalyst-xspec';
 
 export default defineConfig({
   // Fail fast in CI

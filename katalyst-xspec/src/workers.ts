@@ -41,7 +41,7 @@ export type ResolveWorkersOptions = {
  *
  * @example
  * ```ts
- * import { resolveWorkers } from '@esimplicityinc/katalyst-xspec';
+ * import { resolveWorkers } from '@esimplicitylabs/katalyst-xspec';
  *
  * export default defineConfig({
  *   workers: resolveWorkers(),

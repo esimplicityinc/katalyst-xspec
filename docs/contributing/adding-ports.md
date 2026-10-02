@@ -1,6 +1,6 @@
 # Adding New Ports
 
-Guide to creating new port interfaces for @esimplicityinc/katalyst-xspec.
+Guide to creating new port interfaces for @esimplicitylabs/katalyst-xspec.
 
 ## Overview
 

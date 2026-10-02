@@ -1,5 +1,5 @@
-import { createBddTest, PlaywrightApiAdapter } from '@esimplicityinc/katalyst-xspec';
-import { registerApiSteps, registerSharedSteps } from '@esimplicityinc/katalyst-xspec/steps';
+import { createBddTest, PlaywrightApiAdapter } from '@esimplicitylabs/katalyst-xspec';
+import { registerApiSteps, registerSharedSteps } from '@esimplicitylabs/katalyst-xspec/steps';
 
 // Create test fixtures with API adapter
 export const { test, expect } = createBddTest({

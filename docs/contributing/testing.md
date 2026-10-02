@@ -1,6 +1,6 @@
 # Testing the Framework
 
-Guide to writing and running tests for @esimplicityinc/katalyst-xspec itself.
+Guide to writing and running tests for @esimplicitylabs/katalyst-xspec itself.
 
 ## Test Architecture
 
@@ -436,7 +436,7 @@ describe('katalyst-xspec init', () => {
   });
 
   it('should scaffold a new project', () => {
-    execSync(`npx @esimplicityinc/katalyst-xspec init ${projectDir}`, {
+    execSync(`npx @esimplicitylabs/katalyst-xspec init ${projectDir}`, {
       stdio: 'pipe',
     });
 
@@ -448,7 +448,7 @@ describe('katalyst-xspec init', () => {
     expect(existsSync(pkgPath)).toBe(true);
 
     const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
-    expect(pkg.dependencies).toHaveProperty('@esimplicityinc/katalyst-xspec');
+    expect(pkg.dependencies).toHaveProperty('@esimplicitylabs/katalyst-xspec');
     expect(pkg.dependencies).toHaveProperty('@playwright/test');
   });
 

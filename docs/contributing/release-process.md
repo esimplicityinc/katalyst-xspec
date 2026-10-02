@@ -1,6 +1,6 @@
 # Release Process
 
-Guide to versioning, releasing, and publishing @esimplicityinc/katalyst-xspec packages.
+Guide to versioning, releasing, and publishing @esimplicitylabs/katalyst-xspec packages.
 
 ## Overview
 
@@ -38,7 +38,7 @@ We follow [Semantic Versioning](https://semver.org/):
 
 | Package | Registry |
 |---------|----------|
-| @esimplicityinc/katalyst-xspec | GitHub Packages |
+| @esimplicitylabs/katalyst-xspec | npmjs.com |
 
 ## Release Workflow
 
@@ -127,23 +127,18 @@ git push origin v0.2.0
 Publishing a GitHub Release (`gh release create vX.Y.Z --target main ...`) triggers
 `.github/workflows/publish.yml`, which:
 1. Installs, builds and tests all workspaces
-2. Publishes `@esimplicityinc/katalyst-xspec` to GitHub Packages using the built-in `GITHUB_TOKEN` (versions already published are skipped)
+2. Publishes `@esimplicitylabs/katalyst-xspec` to npmjs.com via npm trusted publishing (OIDC; no stored token). Versions already published are skipped
 
 The workflow can also be run manually from the Actions tab, with an optional dry run.
 
 ## Manual Publishing (if needed)
 
-Authenticate to GitHub Packages with a token that has `write:packages`:
+Requires an npm account that's a member of the `esimplicitylabs` org:
 
 ```bash
-npm login --scope=@esimplicityinc --auth-type=legacy --registry=https://npm.pkg.github.com
-```
-
-Then publish (each package's `publishConfig.registry` already points at GitHub Packages):
-
-```bash
+npm login
 npm run build
-(cd katalyst-xspec && npm publish)
+(cd katalyst-xspec && npm publish --access public)
 ```
 
 ## Release Checklist
@@ -164,7 +159,7 @@ npm run build
 - [ ] GitHub Release created
 
 ### Post-release
-- [ ] Verify packages installable (`npm install @esimplicityinc/katalyst-xspec@0.2.0`)
+- [ ] Verify packages installable (`npm install @esimplicitylabs/katalyst-xspec@0.2.0`)
 - [ ] Announce release (Discord, email, etc.)
 - [ ] Update example projects
 - [ ] Monitor for issues
@@ -175,33 +170,33 @@ npm run build
 
 ```bash
 # Check package exists
-npm view @esimplicityinc/katalyst-xspec@0.2.0
+npm view @esimplicitylabs/katalyst-xspec@0.2.0
 
 # Clear npm cache
 npm cache clean --force
 
 # Try installing again
-npm install @esimplicityinc/katalyst-xspec@0.2.0
+npm install @esimplicitylabs/katalyst-xspec@0.2.0
 ```
 
 ### Authentication errors
 
 ```bash
-# Verify token
-npm whoami --registry=https://npm.pkg.github.com
-
-# Check .npmrc
-cat ~/.npmrc | grep npm.pkg.github.com
+# Local publishing: check you're logged in to npmjs.com
+npm whoami
 ```
+
+In CI, an `E404` / `ENEEDAUTH` on `npm publish` means the trusted publisher on
+npmjs.com doesn't exactly match `esimplicityinc` / `katalyst-xspec` / `publish.yml`.
 
 ### Version conflict
 
 ```bash
 # Unpublish (within 72 hours)
-npm unpublish @esimplicityinc/katalyst-xspec@0.2.0
+npm unpublish @esimplicitylabs/katalyst-xspec@0.2.0
 
 # Or deprecate
-npm deprecate @esimplicityinc/katalyst-xspec@0.2.0 "Use 0.2.1 instead"
+npm deprecate @esimplicitylabs/katalyst-xspec@0.2.0 "Use 0.2.1 instead"
 ```
 
 ## Related Guides

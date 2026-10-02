@@ -5,14 +5,14 @@ description: Get started with the Katalyst BDD testing framework. Use when setti
 
 # Katalyst BDD Quick Start Guide
 
-This skill helps you get started with the @esimplicityinc/katalyst-xspec BDD testing framework.
+This skill helps you get started with the @esimplicitylabs/katalyst-xspec BDD testing framework.
 
 ## Step 1: Scaffold a New Project
 
 Run the scaffolding command:
 
 ```bash
-npx @esimplicityinc/katalyst-xspec init
+npx @esimplicitylabs/katalyst-xspec init
 ```
 
 Options:
@@ -21,7 +21,7 @@ Options:
 
 Example:
 ```bash
-npx @esimplicityinc/katalyst-xspec init --dir my-tests
+npx @esimplicitylabs/katalyst-xspec init --dir my-tests
 cd my-tests
 npm install
 ```
@@ -54,7 +54,7 @@ my-tests/
 
 **`features/steps/fixtures.ts`** - Configures adapters:
 ```typescript
-import { createBddTest } from '@esimplicityinc/katalyst-xspec';
+import { createBddTest } from '@esimplicitylabs/katalyst-xspec';
 
 export const test = createBddTest({
   // Default adapters are used unless you customize
@@ -64,7 +64,7 @@ export const test = createBddTest({
 **`features/steps/steps.ts`** - Registers step definitions:
 ```typescript
 import { test } from './fixtures';
-import { registerAllSteps } from '@esimplicityinc/katalyst-xspec/steps';
+import { registerAllSteps } from '@esimplicitylabs/katalyst-xspec/steps';
 
 registerAllSteps(test);
 
@@ -283,7 +283,7 @@ Given I register cleanup DELETE "/resource/{id}"
 To upgrade an existing project to the latest version:
 
 ```bash
-npx @esimplicityinc/katalyst-xspec upgrade
+npx @esimplicitylabs/katalyst-xspec upgrade
 ```
 
 This updates:

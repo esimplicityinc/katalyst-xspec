@@ -1,6 +1,6 @@
-# @esimplicityinc/katalyst-xspec Examples
+# @esimplicitylabs/katalyst-xspec Examples
 
-Runnable example projects demonstrating @esimplicityinc/katalyst-xspec usage.
+Runnable example projects demonstrating @esimplicitylabs/katalyst-xspec usage.
 
 ## Available Examples
 
@@ -98,7 +98,7 @@ example-name/
 Use the CLI to scaffold a new project:
 
 ```bash
-npx @esimplicityinc/katalyst-xspec init my-project
+npx @esimplicitylabs/katalyst-xspec init my-project
 cd my-project
 npm install
 npm test

@@ -5,7 +5,7 @@ Complete reference for shared step definitions (variables and cleanup).
 ## Registration
 
 ```typescript
-import { registerSharedSteps } from '@esimplicityinc/katalyst-xspec/steps';
+import { registerSharedSteps } from '@esimplicitylabs/katalyst-xspec/steps';
 
 registerSharedSteps(test);
 ```

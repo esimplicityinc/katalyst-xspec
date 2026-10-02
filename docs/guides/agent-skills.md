@@ -28,7 +28,7 @@ Agent Skills are structured knowledge files that follow the [agentskills.io](htt
 When you scaffold a new project with `katalyst-xspec init`, you'll be prompted to install Agent Skills:
 
 ```bash
-npx @esimplicityinc/katalyst-xspec init
+npx @esimplicitylabs/katalyst-xspec init
 
 # Interactive prompts:
 # ? Would you like to install Katalyst BDD Agent Skills? Yes
@@ -45,13 +45,13 @@ You can also use CLI flags to control skill installation:
 
 ```bash
 # Install skills for all supported agents
-npx @esimplicityinc/katalyst-xspec init --with-skills
+npx @esimplicitylabs/katalyst-xspec init --with-skills
 
 # Skip skills installation
-npx @esimplicityinc/katalyst-xspec init --no-skills
+npx @esimplicitylabs/katalyst-xspec init --no-skills
 
 # Install for specific agents only
-npx @esimplicityinc/katalyst-xspec init --with-skills --skills-agents opencode,claude
+npx @esimplicitylabs/katalyst-xspec init --with-skills --skills-agents opencode,claude
 
 # Available agent options: opencode, claude, cursor, generic
 ```
@@ -76,12 +76,12 @@ When new versions of Katalyst BDD are released, you can update your installed sk
 
 ```bash
 # Update all installed skills to latest version
-npx @esimplicityinc/katalyst-xspec upgrade --update-skills
+npx @esimplicitylabs/katalyst-xspec upgrade --update-skills
 ```
 
 This command:
 1. Detects which agent directories have Katalyst skills installed
-2. Updates them to the version bundled with the installed `@esimplicityinc/katalyst-xspec` package
+2. Updates them to the version bundled with the installed `@esimplicitylabs/katalyst-xspec` package
 
 ## Using Skills with AI Agents
 
@@ -194,7 +194,7 @@ Try being explicit in your prompt:
 
 Update to the latest version:
 ```bash
-npx @esimplicityinc/katalyst-xspec upgrade --update-skills
+npx @esimplicitylabs/katalyst-xspec upgrade --update-skills
 ```
 
 ## Related

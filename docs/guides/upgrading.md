@@ -1,6 +1,6 @@
 # Upgrading and Migration
 
-This guide covers upgrading @esimplicityinc/katalyst-xspec and migrating existing scaffolded projects.
+This guide covers upgrading @esimplicitylabs/katalyst-xspec and migrating existing scaffolded projects.
 
 ## Checking for Updates
 
@@ -17,7 +17,7 @@ npx katalyst-xspec upgrade --check
 Output:
 ```
 [katalyst-xspec upgrade] Detected package manager: npm
-[katalyst-xspec upgrade] Installed: @esimplicityinc/katalyst-xspec@0.1.8
+[katalyst-xspec upgrade] Installed: @esimplicitylabs/katalyst-xspec@0.1.8
 [katalyst-xspec upgrade] Latest available: 0.2.0
 [katalyst-xspec upgrade] Update available: 0.1.8 -> 0.2.0
 [katalyst-xspec upgrade] Run without --check to upgrade.
@@ -25,7 +25,7 @@ Output:
 
 ## Simple Package Upgrade
 
-To upgrade just the `@esimplicityinc/katalyst-xspec` package:
+To upgrade just the `@esimplicitylabs/katalyst-xspec` package:
 
 ```bash
 # Upgrade to latest
@@ -148,7 +148,7 @@ Package manager: npm
 Current version: 0.1.8
 Latest version:  0.2.0
 
-? Upgrade @esimplicityinc/katalyst-xspec from 0.1.8 to 0.2.0? (y/n) y
+? Upgrade @esimplicitylabs/katalyst-xspec from 0.1.8 to 0.2.0? (y/n) y
 [katalyst-xspec upgrade] Package upgraded successfully!
 
 ? Would you like to migrate scaffolding files? (y/n) y
@@ -222,7 +222,7 @@ New features:
 
 **Migration note:** Replace `workers: process.env.CI ? 1 : undefined` in your `playwright.config.ts` with:
 ```typescript
-import { resolveWorkers } from '@esimplicityinc/katalyst-xspec';
+import { resolveWorkers } from '@esimplicitylabs/katalyst-xspec';
 
 // In defineConfig:
 workers: resolveWorkers(),

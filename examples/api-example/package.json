@@ -3,14 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Example project demonstrating @esimplicityinc/katalyst-xspec API testing",
+  "description": "Example project demonstrating @esimplicitylabs/katalyst-xspec API testing",
   "scripts": {
     "test": "playwright test",
     "test:headed": "playwright test --headed",
     "test:debug": "PWDEBUG=1 playwright test"
   },
   "dependencies": {
-    "@esimplicityinc/katalyst-xspec": "^0.5.0",
+    "@esimplicitylabs/katalyst-xspec": "^0.6.0",
     "@playwright/test": "^1.49.0",
     "playwright-bdd": "^9.1.0"
   },

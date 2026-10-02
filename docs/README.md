@@ -1,4 +1,4 @@
-# @esimplicityinc/katalyst-xspec Documentation
+# @esimplicitylabs/katalyst-xspec Documentation
 
 A comprehensive BDD testing framework built on Playwright, providing reusable fixtures, adapters, and step definitions for API, UI, TUI, and hybrid testing.
 

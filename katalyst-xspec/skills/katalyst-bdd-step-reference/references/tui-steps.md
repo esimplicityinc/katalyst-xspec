@@ -463,7 +463,7 @@ Feature: CLI Application
 Configure TUI in your fixtures:
 
 ```typescript
-import { createBddTest, TuiTesterAdapter } from '@esimplicityinc/katalyst-xspec';
+import { createBddTest, TuiTesterAdapter } from '@esimplicitylabs/katalyst-xspec';
 
 const test = createBddTest({
   createTui: () => new TuiTesterAdapter({

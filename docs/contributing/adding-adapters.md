@@ -1,6 +1,6 @@
 # Adding New Adapters
 
-Guide to implementing adapter classes for @esimplicityinc/katalyst-xspec ports.
+Guide to implementing adapter classes for @esimplicitylabs/katalyst-xspec ports.
 
 ## Overview
 

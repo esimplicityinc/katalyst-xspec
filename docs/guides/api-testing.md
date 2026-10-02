@@ -1,6 +1,6 @@
 # API Testing Guide
 
-Comprehensive guide to testing HTTP APIs with @esimplicityinc/katalyst-xspec.
+Comprehensive guide to testing HTTP APIs with @esimplicitylabs/katalyst-xspec.
 
 ## Overview
 

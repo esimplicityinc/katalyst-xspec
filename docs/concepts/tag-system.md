@@ -126,7 +126,7 @@ Tag expressions filter which tests run.
 Builds tag expressions with default excludes:
 
 ```typescript
-import { tagsForProject } from '@esimplicityinc/katalyst-xspec';
+import { tagsForProject } from '@esimplicitylabs/katalyst-xspec';
 
 // Basic - adds default excludes
 tagsForProject({ projectTag: '@api' })
@@ -149,7 +149,7 @@ tagsForProject({
 Normalizes tag input from environment or CLI:
 
 ```typescript
-import { resolveExtraTags } from '@esimplicityinc/katalyst-xspec';
+import { resolveExtraTags } from '@esimplicitylabs/katalyst-xspec';
 
 // Tag expression (passed through)
 resolveExtraTags('@smoke or @critical')
@@ -175,7 +175,7 @@ resolveExtraTags('')
 ```typescript
 // playwright.config.ts
 import { defineBddProject } from 'playwright-bdd';
-import { tagsForProject, resolveExtraTags } from '@esimplicityinc/katalyst-xspec';
+import { tagsForProject, resolveExtraTags } from '@esimplicitylabs/katalyst-xspec';
 
 const extraTags = resolveExtraTags(process.env.TEST_TAGS);
 

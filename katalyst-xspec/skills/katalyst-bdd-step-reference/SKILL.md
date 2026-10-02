@@ -5,7 +5,7 @@ description: Complete reference of all available BDD step definitions in the Kat
 
 # Katalyst BDD Step Reference
 
-This skill provides a complete reference of all step definitions available in @esimplicityinc/katalyst-xspec.
+This skill provides a complete reference of all step definitions available in @esimplicitylabs/katalyst-xspec.
 
 ## Tag System
 

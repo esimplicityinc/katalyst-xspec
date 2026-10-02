@@ -48,7 +48,7 @@ classDiagram
 
 ```typescript
 // adapters/axios-api.adapter.ts
-import type { ApiPort, ApiMethod, ApiResult } from '@esimplicityinc/katalyst-xspec';
+import type { ApiPort, ApiMethod, ApiResult } from '@esimplicitylabs/katalyst-xspec';
 import axios, { AxiosInstance } from 'axios';
 
 export class AxiosApiAdapter implements ApiPort {
@@ -121,7 +121,7 @@ export class AxiosApiAdapter implements ApiPort {
 
 ```typescript
 // features/steps/fixtures.ts
-import { createBddTest } from '@esimplicityinc/katalyst-xspec';
+import { createBddTest } from '@esimplicitylabs/katalyst-xspec';
 import { AxiosApiAdapter } from './adapters/axios-api.adapter';
 
 export const test = createBddTest({
@@ -135,7 +135,7 @@ export const test = createBddTest({
 
 ```typescript
 // adapters/oauth-auth.adapter.ts
-import type { AuthPort, ApiPort, UiPort, World } from '@esimplicityinc/katalyst-xspec';
+import type { AuthPort, ApiPort, UiPort, World } from '@esimplicitylabs/katalyst-xspec';
 
 export class OAuthAuthAdapter implements AuthPort {
   constructor(
@@ -220,8 +220,8 @@ export const test = createBddTest({
 
 ```typescript
 // adapters/custom-cleanup.adapter.ts
-import type { CleanupPort, World } from '@esimplicityinc/katalyst-xspec';
-import { registerCleanup } from '@esimplicityinc/katalyst-xspec';
+import type { CleanupPort, World } from '@esimplicitylabs/katalyst-xspec';
+import { registerCleanup } from '@esimplicitylabs/katalyst-xspec';
 
 type CleanupRule = {
   varMatch: string | RegExp;
@@ -277,7 +277,7 @@ export const test = createBddTest({
 
 ```typescript
 // adapters/logging-api.adapter.ts
-import type { ApiPort, ApiMethod, ApiResult } from '@esimplicityinc/katalyst-xspec';
+import type { ApiPort, ApiMethod, ApiResult } from '@esimplicitylabs/katalyst-xspec';
 
 export class LoggingApiAdapter implements ApiPort {
   constructor(private delegate: ApiPort) {}
@@ -322,7 +322,7 @@ export class LoggingApiAdapter implements ApiPort {
 ### Use Logging Wrapper
 
 ```typescript
-import { PlaywrightApiAdapter } from '@esimplicityinc/katalyst-xspec';
+import { PlaywrightApiAdapter } from '@esimplicitylabs/katalyst-xspec';
 import { LoggingApiAdapter } from './adapters/logging-api.adapter';
 
 export const test = createBddTest({
@@ -339,7 +339,7 @@ export const test = createBddTest({
 
 ```typescript
 // adapters/retry-api.adapter.ts
-import type { ApiPort, ApiMethod, ApiResult } from '@esimplicityinc/katalyst-xspec';
+import type { ApiPort, ApiMethod, ApiResult } from '@esimplicitylabs/katalyst-xspec';
 
 export class RetryApiAdapter implements ApiPort {
   constructor(
@@ -401,7 +401,7 @@ export class RetryApiAdapter implements ApiPort {
 
 ```typescript
 // adapters/mock-api.adapter.ts
-import type { ApiPort, ApiMethod, ApiResult } from '@esimplicityinc/katalyst-xspec';
+import type { ApiPort, ApiMethod, ApiResult } from '@esimplicitylabs/katalyst-xspec';
 
 type MockResponse = {
   status: number;

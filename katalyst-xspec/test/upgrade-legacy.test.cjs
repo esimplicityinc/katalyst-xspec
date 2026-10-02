@@ -7,12 +7,11 @@ const os = require('node:os');
 const path = require('node:path');
 
 const {
-  LEGACY_PACKAGE_NAME,
+  LEGACY_PACKAGE_NAMES,
   PACKAGE_NAME,
-  GITHUB_PACKAGES_NPMRC_LINE,
   getInstalledVersion,
   rewriteLegacyImports,
-  ensureGithubPackagesNpmrc,
+  removeGithubPackagesNpmrc,
   mergePackageJson,
   rewriteLegacyScripts,
 } = require('../cli/upgrade.cjs');
@@ -23,7 +22,7 @@ function write(root, rel, content) {
   fs.writeFileSync(full, content);
 }
 
-describe('upgrade-katalyst-xspec: legacy @esimplicity/stack-tests projects', () => {
+describe('upgrade: legacy package names', () => {
   let dir;
   beforeEach(() => {
     dir = fs.mkdtempSync(path.join(os.tmpdir(), 'kx-upgrade-'));
@@ -32,26 +31,27 @@ describe('upgrade-katalyst-xspec: legacy @esimplicity/stack-tests projects', () 
     fs.rmSync(dir, { recursive: true, force: true });
   });
 
-  it('uses the new package name and the GitHub Packages scope', () => {
-    assert.equal(PACKAGE_NAME, '@esimplicityinc/katalyst-xspec');
-    assert.equal(LEGACY_PACKAGE_NAME, '@esimplicity/stack-tests');
-    assert.equal(GITHUB_PACKAGES_NPMRC_LINE, '@esimplicityinc:registry=https://npm.pkg.github.com');
+  it('publishes as @esimplicitylabs/katalyst-xspec and knows both old names', () => {
+    assert.equal(PACKAGE_NAME, '@esimplicitylabs/katalyst-xspec');
+    assert.deepEqual(LEGACY_PACKAGE_NAMES, ['@esimplicityinc/katalyst-xspec', '@esimplicity/stack-tests']);
   });
 
-  it('detects an installed legacy package and flags it', () => {
+  for (const legacy of ['@esimplicityinc/katalyst-xspec', '@esimplicity/stack-tests']) {
+    it(`detects an installed ${legacy} and flags it as legacy`, () => {
+      write(dir, `node_modules/${legacy}/package.json`, JSON.stringify({ version: '0.3.0' }));
+      assert.deepEqual(getInstalledVersion(dir), { version: '0.3.0', name: legacy, legacy: true });
+    });
+  }
+
+  it('prefers the current package when old and new are installed', () => {
     write(dir, 'node_modules/@esimplicity/stack-tests/package.json', JSON.stringify({ version: '0.3.0' }));
-    assert.deepEqual(getInstalledVersion(dir), { version: '0.3.0', name: LEGACY_PACKAGE_NAME, legacy: true });
+    write(dir, 'node_modules/@esimplicitylabs/katalyst-xspec/package.json', JSON.stringify({ version: '0.6.0' }));
+    assert.deepEqual(getInstalledVersion(dir), { version: '0.6.0', name: PACKAGE_NAME, legacy: false });
   });
 
-  it('prefers the new package when both are installed', () => {
-    write(dir, 'node_modules/@esimplicity/stack-tests/package.json', JSON.stringify({ version: '0.3.0' }));
-    write(dir, 'node_modules/@esimplicityinc/katalyst-xspec/package.json', JSON.stringify({ version: '0.4.0' }));
-    assert.deepEqual(getInstalledVersion(dir), { version: '0.4.0', name: PACKAGE_NAME, legacy: false });
-  });
-
-  it('rewrites legacy import specifiers (root and /steps) in features and playwright config only', () => {
-    write(dir, 'features/steps/steps.ts', "import { a } from '@esimplicity/stack-tests/steps';\nimport { b } from \"@esimplicity/stack-tests\";\n");
-    write(dir, 'features/steps/custom/my.ts', "export * from '@esimplicity/stack-tests';\n");
+  it('rewrites both legacy import specifiers (root and /steps) in features and playwright config only', () => {
+    write(dir, 'features/steps/steps.ts', "import { a } from '@esimplicity/stack-tests/steps';\nimport { b } from \"@esimplicityinc/katalyst-xspec\";\n");
+    write(dir, 'features/steps/custom/my.ts', "export * from '@esimplicityinc/katalyst-xspec/steps';\n");
     write(dir, 'playwright.config.ts', "import { resolveWorkers } from '@esimplicity/stack-tests';\n");
     write(dir, 'features/untouched.ts', "import x from '@esimplicity/stack-tests-other';\n");
     write(dir, 'node_modules/foo/index.ts', "import '@esimplicity/stack-tests';\n");
@@ -61,8 +61,9 @@ describe('upgrade-katalyst-xspec: legacy @esimplicity/stack-tests projects', () 
     assert.deepEqual(changed, ['features/steps/custom/my.ts', 'features/steps/steps.ts', 'playwright.config.ts']);
     assert.equal(
       fs.readFileSync(path.join(dir, 'features/steps/steps.ts'), 'utf8'),
-      "import { a } from '@esimplicityinc/katalyst-xspec/steps';\nimport { b } from \"@esimplicityinc/katalyst-xspec\";\n",
+      "import { a } from '@esimplicitylabs/katalyst-xspec/steps';\nimport { b } from \"@esimplicitylabs/katalyst-xspec\";\n",
     );
+    assert.equal(fs.readFileSync(path.join(dir, 'features/steps/custom/my.ts'), 'utf8'), "export * from '@esimplicitylabs/katalyst-xspec/steps';\n");
     assert.equal(fs.readFileSync(path.join(dir, 'features/untouched.ts'), 'utf8'), "import x from '@esimplicity/stack-tests-other';\n");
     assert.equal(fs.readFileSync(path.join(dir, 'node_modules/foo/index.ts'), 'utf8'), "import '@esimplicity/stack-tests';\n");
   });
@@ -73,26 +74,38 @@ describe('upgrade-katalyst-xspec: legacy @esimplicity/stack-tests projects', () 
     assert.match(fs.readFileSync(path.join(dir, 'playwright.config.ts'), 'utf8'), /@esimplicity\/stack-tests/);
   });
 
-  it('adds the GitHub Packages scope to .npmrc once, preserving existing lines', () => {
-    write(dir, '.npmrc', 'save-exact=true');
-    assert.equal(ensureGithubPackagesNpmrc(dir), true);
-    assert.equal(ensureGithubPackagesNpmrc(dir), false);
-    assert.equal(fs.readFileSync(path.join(dir, '.npmrc'), 'utf8'), `save-exact=true\n${GITHUB_PACKAGES_NPMRC_LINE}\n`);
+  it('removes only the exact GitHub Packages scope line that 0.4/0.5 scaffolded', () => {
+    write(dir, '.npmrc', 'save-exact=true\n@esimplicityinc:registry=https://npm.pkg.github.com\n');
+    assert.equal(removeGithubPackagesNpmrc(dir), true);
+    assert.equal(fs.readFileSync(path.join(dir, '.npmrc'), 'utf8'), 'save-exact=true\n');
+    assert.equal(removeGithubPackagesNpmrc(dir), false);
   });
 
-  it('creates .npmrc when missing', () => {
-    assert.equal(ensureGithubPackagesNpmrc(dir), true);
-    assert.equal(fs.readFileSync(path.join(dir, '.npmrc'), 'utf8'), `${GITHUB_PACKAGES_NPMRC_LINE}\n`);
+  it('deletes .npmrc when that line was its only content', () => {
+    write(dir, '.npmrc', '@esimplicityinc:registry=https://npm.pkg.github.com\n');
+    assert.equal(removeGithubPackagesNpmrc(dir), true);
+    assert.equal(fs.existsSync(path.join(dir, '.npmrc')), false);
   });
 
-  it('migrate package.json merge drops the legacy dependency', () => {
+  it('keeps the scope line when the project also configures auth for it (other @esimplicityinc packages)', () => {
+    const content = '@esimplicityinc:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}\n';
+    write(dir, '.npmrc', content);
+    assert.equal(removeGithubPackagesNpmrc(dir), false);
+    assert.equal(fs.readFileSync(path.join(dir, '.npmrc'), 'utf8'), content);
+  });
+
+  it('is a no-op without .npmrc', () => {
+    assert.equal(removeGithubPackagesNpmrc(dir), false);
+  });
+
+  it('migrate package.json merge drops both legacy dependencies', () => {
     const existing = JSON.stringify({
       name: 'my-tests',
-      devDependencies: { '@esimplicity/stack-tests': '^0.3.0', zod: '^3.0.0' },
+      devDependencies: { '@esimplicity/stack-tests': '^0.3.0', '@esimplicityinc/katalyst-xspec': '^0.5.0', zod: '^3.0.0' },
     });
-    const template = JSON.stringify({ devDependencies: { '@esimplicityinc/katalyst-xspec': '^0.4.0' } });
+    const template = JSON.stringify({ devDependencies: { '@esimplicitylabs/katalyst-xspec': '^0.6.0' } });
     const merged = JSON.parse(mergePackageJson(existing, template));
-    assert.deepEqual(merged.devDependencies, { zod: '^3.0.0', '@esimplicityinc/katalyst-xspec': '^0.4.0' });
+    assert.deepEqual(merged.devDependencies, { zod: '^3.0.0', '@esimplicitylabs/katalyst-xspec': '^0.6.0' });
   });
 });
 

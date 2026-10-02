@@ -1,6 +1,6 @@
 # Adapters Reference
 
-Complete reference for all adapter implementations in @esimplicityinc/katalyst-xspec.
+Complete reference for all adapter implementations in @esimplicitylabs/katalyst-xspec.
 
 ## Overview
 
@@ -34,7 +34,7 @@ HTTP API adapter using Playwright's request context.
 ### Import
 
 ```typescript
-import { PlaywrightApiAdapter } from '@esimplicityinc/katalyst-xspec';
+import { PlaywrightApiAdapter } from '@esimplicitylabs/katalyst-xspec';
 ```
 
 ### Constructor
@@ -50,7 +50,7 @@ new PlaywrightApiAdapter(request: APIRequestContext)
 ### Usage
 
 ```typescript
-import { createBddTest, PlaywrightApiAdapter } from '@esimplicityinc/katalyst-xspec';
+import { createBddTest, PlaywrightApiAdapter } from '@esimplicitylabs/katalyst-xspec';
 
 const test = createBddTest({
   createApi: ({ apiRequest }) => new PlaywrightApiAdapter(apiRequest),
@@ -73,7 +73,7 @@ Browser UI adapter using Playwright's Page.
 ### Import
 
 ```typescript
-import { PlaywrightUiAdapter } from '@esimplicityinc/katalyst-xspec';
+import { PlaywrightUiAdapter } from '@esimplicitylabs/katalyst-xspec';
 ```
 
 ### Constructor
@@ -89,7 +89,7 @@ new PlaywrightUiAdapter(page: Page)
 ### Usage
 
 ```typescript
-import { createBddTest, PlaywrightUiAdapter } from '@esimplicityinc/katalyst-xspec';
+import { createBddTest, PlaywrightUiAdapter } from '@esimplicitylabs/katalyst-xspec';
 
 const test = createBddTest({
   createUi: ({ page }) => new PlaywrightUiAdapter(page),
@@ -126,7 +126,7 @@ Terminal UI adapter using tui-tester library.
 ### Import
 
 ```typescript
-import { TuiTesterAdapter } from '@esimplicityinc/katalyst-xspec';
+import { TuiTesterAdapter } from '@esimplicitylabs/katalyst-xspec';
 ```
 
 ### Constructor
@@ -155,7 +155,7 @@ type TuiConfig = {
 ### Usage
 
 ```typescript
-import { createBddTest, TuiTesterAdapter } from '@esimplicityinc/katalyst-xspec';
+import { createBddTest, TuiTesterAdapter } from '@esimplicitylabs/katalyst-xspec';
 
 const test = createBddTest({
   createTui: () => new TuiTesterAdapter({
@@ -188,7 +188,7 @@ Authentication adapter supporting both API and UI login.
 ### Import
 
 ```typescript
-import { UniversalAuthAdapter } from '@esimplicityinc/katalyst-xspec';
+import { UniversalAuthAdapter } from '@esimplicitylabs/katalyst-xspec';
 ```
 
 ### Constructor
@@ -205,7 +205,7 @@ new UniversalAuthAdapter(deps: { api: ApiPort; ui: UiPort })
 ### Usage
 
 ```typescript
-import { createBddTest, UniversalAuthAdapter } from '@esimplicityinc/katalyst-xspec';
+import { createBddTest, UniversalAuthAdapter } from '@esimplicitylabs/katalyst-xspec';
 
 const test = createBddTest({
   createAuth: ({ api, ui }) => new UniversalAuthAdapter({ api, ui }),
@@ -252,7 +252,7 @@ Resource cleanup adapter with rule-based cleanup registration.
 ### Import
 
 ```typescript
-import { DefaultCleanupAdapter } from '@esimplicityinc/katalyst-xspec';
+import { DefaultCleanupAdapter } from '@esimplicitylabs/katalyst-xspec';
 ```
 
 ### Constructor
@@ -278,7 +278,7 @@ type CleanupRule = {
 ### Usage
 
 ```typescript
-import { createBddTest, DefaultCleanupAdapter } from '@esimplicityinc/katalyst-xspec';
+import { createBddTest, DefaultCleanupAdapter } from '@esimplicitylabs/katalyst-xspec';
 
 // With rules from CLEANUP_RULES env var
 const test = createBddTest({
@@ -349,7 +349,7 @@ Set `CLEANUP_AUTH_TOKEN` env var to use a pre-generated bearer token (no login n
 Pass a `getCleanupAuth` callback to `createBddTest()`:
 
 ```typescript
-import { createBddTest, type CleanupAuthProvider } from '@esimplicityinc/katalyst-xspec';
+import { createBddTest, type CleanupAuthProvider } from '@esimplicitylabs/katalyst-xspec';
 
 const myAuth: CleanupAuthProvider = async (request) => {
   // Authenticate however your app requires
@@ -366,7 +366,7 @@ const test = createBddTest({
 For OIDC-compliant providers (Keycloak, Auth0, Okta, Azure AD), use the built-in helper:
 
 ```typescript
-import { createBddTest, createOidcCleanupAuth } from '@esimplicityinc/katalyst-xspec';
+import { createBddTest, createOidcCleanupAuth } from '@esimplicitylabs/katalyst-xspec';
 
 const test = createBddTest({
   getCleanupAuth: createOidcCleanupAuth({
@@ -386,7 +386,7 @@ See [Configuration Reference](./configuration.md#oidc-cleanup-auth-optional) for
 ### Implement a Port Interface
 
 ```typescript
-import type { ApiPort, ApiResult, ApiMethod } from '@esimplicityinc/katalyst-xspec';
+import type { ApiPort, ApiResult, ApiMethod } from '@esimplicitylabs/katalyst-xspec';
 
 export class CustomApiAdapter implements ApiPort {
   async sendJson(

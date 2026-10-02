@@ -1,8 +1,15 @@
 name: Publish Packages
 
-# Publishes @esimplicityinc/katalyst-xspec (library + CLI)
-# to GitHub Packages (npm.pkg.github.com) using the built-in GITHUB_TOKEN.
-# No npm account or stored secret is needed.
+# Publishes @esimplicitylabs/katalyst-xspec (library + CLI) to npmjs.com using
+# npm trusted publishing (OIDC). No npm token is stored.
+#
+# One-time setup on npmjs.com (package -> Settings -> Trusted publishing):
+#   Publisher: GitHub Actions
+#   Organization: esimplicityinc   Repository: katalyst-xspec
+#   Workflow filename: publish.yml  Environment: (blank)
+#   Allowed actions: npm publish
+# A trusted publisher can only be added to a package that already exists, so
+# the very first version must be published manually (`npm publish --access public`).
 
 on:
   release:
@@ -17,11 +24,11 @@ on:
 
 permissions:
   contents: read
-  packages: write
+  id-token: write # npm trusted publishing (OIDC)
 
 jobs:
   publish:
-    name: Publish to GitHub Packages
+    name: Publish to npm
     runs-on: ubuntu-latest
 
     steps:
@@ -31,20 +38,22 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@esimplicityinc'
+          # Trusted publishing needs Node >= 22.14 and npm >= 11.5.1.
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Ensure npm supports trusted publishing
+        run: |
+          node -e "const [a,b,c]=process.argv[1].split('.').map(Number); process.exit(a>11||(a===11&&(b>5||(b===5&&c>=1)))?0:1)" "$(npm --version)" \
+            || npm install -g npm@latest
+          npm --version
 
       # The lockfile is generated on macOS and lacks Linux-only optional native
       # binaries (e.g. @rollup/rollup-linux-x64-gnu), so `npm ci` can't be used.
-      # Dependencies come from npmjs.com; only the @esimplicityinc scope is
-      # routed to GitHub Packages.
       - name: Install dependencies
         run: |
           rm -rf node_modules package-lock.json
           npm install
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build packages
         run: npm run build
@@ -54,7 +63,6 @@ jobs:
 
       - name: Publish packages
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DRY_RUN: ${{ inputs.dry_run }}
         run: |
           set -euo pipefail
@@ -66,9 +74,9 @@ jobs:
               echo "${PACKAGE_NAME}@${PACKAGE_VERSION} already published, skipping."
             elif [ "${DRY_RUN}" == "true" ]; then
               echo "DRY RUN: Would publish ${PACKAGE_NAME}@${PACKAGE_VERSION}"
-              (cd "$dir" && npm publish --dry-run)
+              (cd "$dir" && npm publish --access public --dry-run)
             else
               echo "Publishing ${PACKAGE_NAME}@${PACKAGE_VERSION}"
-              (cd "$dir" && npm publish)
+              (cd "$dir" && npm publish --access public)
             fi
           done

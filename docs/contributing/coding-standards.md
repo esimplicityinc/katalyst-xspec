@@ -1,6 +1,6 @@
 # Coding Standards
 
-Style guidelines and conventions for @esimplicityinc/katalyst-xspec development.
+Style guidelines and conventions for @esimplicitylabs/katalyst-xspec development.
 
 ## TypeScript Guidelines
 

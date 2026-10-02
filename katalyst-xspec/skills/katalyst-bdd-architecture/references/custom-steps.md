@@ -197,7 +197,7 @@ Given('I set auth header', async ({ world }) => {
 Use the `interpolate` utility:
 
 ```typescript
-import { interpolate } from '@esimplicityinc/katalyst-xspec';
+import { interpolate } from '@esimplicitylabs/katalyst-xspec';
 
 When('I GET {string}', async ({ api, world }, path) => {
   // Replaces {varName} with world.vars values
@@ -219,7 +219,7 @@ import {
   registerTuiSteps,
   registerSharedSteps,
   registerHybridSuite,
-} from '@esimplicityinc/katalyst-xspec/steps';
+} from '@esimplicitylabs/katalyst-xspec/steps';
 
 // Register specific categories
 registerApiSteps(test);
@@ -233,7 +233,7 @@ export { test };
 
 ```typescript
 import { test } from './fixtures';
-import { registerAllSteps } from '@esimplicityinc/katalyst-xspec/steps';
+import { registerAllSteps } from '@esimplicitylabs/katalyst-xspec/steps';
 
 registerAllSteps(test);
 

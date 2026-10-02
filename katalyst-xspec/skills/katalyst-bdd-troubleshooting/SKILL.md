@@ -92,7 +92,7 @@ Ensure your `steps.ts` registers the needed steps:
 
 ```typescript
 import { test } from './fixtures';
-import { registerAllSteps } from '@esimplicityinc/katalyst-xspec/steps';
+import { registerAllSteps } from '@esimplicitylabs/katalyst-xspec/steps';
 
 registerAllSteps(test);  // Registers all step types
 
@@ -329,7 +329,7 @@ sudo apt-get install tmux
 ### TUI Not Configured
 In `fixtures.ts`:
 ```typescript
-import { TuiTesterAdapter } from '@esimplicityinc/katalyst-xspec';
+import { TuiTesterAdapter } from '@esimplicitylabs/katalyst-xspec';
 
 export const test = createBddTest({
   createTui: () => new TuiTesterAdapter({

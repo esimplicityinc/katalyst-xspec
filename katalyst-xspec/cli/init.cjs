@@ -291,7 +291,7 @@ function templates(packageName) {
       clean: 'rm -rf .features-gen node_modules test-results storage cucumber-report playwright-report'
     },
     devDependencies: {
-      '@esimplicityinc/katalyst-xspec': '^0.5.0',
+      '@esimplicitylabs/katalyst-xspec': '^0.6.0',
       '@playwright/test': '^1.49.0',
       'playwright-bdd': '^9.1.0',
       dotenv: '^16.1.4',
@@ -320,7 +320,7 @@ function templates(packageName) {
   UniversalAuthAdapter,
   DefaultCleanupAdapter,
   TuiTesterAdapter,
-} from '@esimplicityinc/katalyst-xspec';
+} from '@esimplicitylabs/katalyst-xspec';
 
 export const { test } = createBddTest({
   createApi: ({ apiRequest }) => new PlaywrightApiAdapter(apiRequest),
@@ -344,7 +344,7 @@ import {
   registerSharedSteps,
   registerHybridSuite,
   registerTuiSteps,
-} from '@esimplicityinc/katalyst-xspec/steps';
+} from '@esimplicitylabs/katalyst-xspec/steps';
 
 registerApiSteps(test);
 registerUiSteps(test);
@@ -360,7 +360,7 @@ export { test };
 
   const playwrightConfig = `import { defineConfig } from '@playwright/test';
 import { defineBddProject, cucumberReporter } from 'playwright-bdd';
-import { resolveWorkers } from '@esimplicityinc/katalyst-xspec';
+import { resolveWorkers } from '@esimplicitylabs/katalyst-xspec';
 import dotenv from 'dotenv';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -526,21 +526,10 @@ DEBUG=false
 
   const readme = `# katalyst-xspec
 
-Generated Playwright + BDD test package powered by @esimplicityinc/katalyst-xspec.
+Generated Playwright + BDD test package powered by @esimplicitylabs/katalyst-xspec.
 
 ## Install
-\`@esimplicityinc/katalyst-xspec\` is published to GitHub Packages. The generated
-\`.npmrc\` maps the \`@esimplicityinc\` scope there; you also need a GitHub token
-with \`read:packages\` in your user \`~/.npmrc\`:
-
-\`\`\`
-//npm.pkg.github.com/:_authToken=<token>
-\`\`\`
-
-(In GitHub Actions, use \`actions/setup-node\` with \`registry-url: https://npm.pkg.github.com\`
-and \`NODE_AUTH_TOKEN: \${{ secrets.GITHUB_TOKEN }}\`.)
-
-Then install deps in this folder (see commands printed by the generator).
+Install deps in this folder (see commands printed by the generator).
 
 ## Run
 - Generate tests: \
@@ -550,13 +539,13 @@ Then install deps in this folder (see commands printed by the generator).
 
 ## Structure
 - \`features/api|ui|hybrid|tui\`: feature files
-- \`features/steps/steps.ts\`: registers steps from @esimplicityinc/katalyst-xspec
+- \`features/steps/steps.ts\`: registers steps from @esimplicitylabs/katalyst-xspec
 - \`features/steps/fixtures.ts\`: creates the Playwright-BDD test with adapters
 - \`playwright.config.ts\`: BDD-aware Playwright config with reporters
 
 ## Notes
 - Edit \`playwright.config.ts\` projects/tags to match your repo.
-- Keep @playwright/test and playwright-bdd versions aligned with @esimplicityinc/katalyst-xspec peer ranges.
+- Keep @playwright/test and playwright-bdd versions aligned with @esimplicitylabs/katalyst-xspec peer ranges.
 
 ## TUI Testing (Optional)
 To enable terminal user interface testing:
@@ -594,7 +583,6 @@ To enable terminal user interface testing:
     'features/hybrid/00_hybrid_examples.feature': hybridFeature,
     'features/tui/00_tui_examples.feature': tuiFeature,
     '.gitignore': gitignore,
-    '.npmrc': '@esimplicityinc:registry=https://npm.pkg.github.com\n',
     '.env.example': envExample,
     'README.md': readme,
   };

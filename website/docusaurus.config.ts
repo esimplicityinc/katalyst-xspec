@@ -110,8 +110,8 @@ const config: Config = {
               href: "https://github.com/esimplicityinc/katalyst-xspec",
             },
             {
-              label: "Packages",
-              href: "https://github.com/esimplicityinc/katalyst-xspec/pkgs/npm/katalyst-xspec",
+              label: "npm",
+              href: "https://www.npmjs.com/package/@esimplicitylabs/katalyst-xspec",
             },
           ],
         },

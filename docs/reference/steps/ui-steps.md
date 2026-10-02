@@ -5,7 +5,7 @@ Complete reference for all `@ui` tagged step definitions.
 ## Registration
 
 ```typescript
-import { registerUiSteps } from '@esimplicityinc/katalyst-xspec/steps';
+import { registerUiSteps } from '@esimplicitylabs/katalyst-xspec/steps';
 
 registerUiSteps(test);
 ```

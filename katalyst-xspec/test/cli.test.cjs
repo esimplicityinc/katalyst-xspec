@@ -46,11 +46,9 @@ describe('katalyst-xspec init', () => {
       const pkg = JSON.parse(fs.readFileSync(path.join(cwd, 'my-tests', 'package.json'), 'utf8'));
       assert.equal(pkg.scripts['gen:stubs'], 'katalyst-xspec stubs');
       assert.equal(pkg.scripts.upgrade, 'katalyst-xspec upgrade');
-      assert.ok(pkg.devDependencies['@esimplicityinc/katalyst-xspec']);
-      assert.equal(
-        fs.readFileSync(path.join(cwd, 'my-tests', '.npmrc'), 'utf8'),
-        '@esimplicityinc:registry=https://npm.pkg.github.com\n',
-      );
+      assert.ok(pkg.devDependencies['@esimplicitylabs/katalyst-xspec']);
+      // Published on npmjs.com: no registry mapping or token needed.
+      assert.equal(fs.existsSync(path.join(cwd, 'my-tests', '.npmrc')), false);
     } finally {
       fs.rmSync(cwd, { recursive: true, force: true });
     }
