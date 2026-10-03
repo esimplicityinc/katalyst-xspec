@@ -2,6 +2,25 @@
 
 A comprehensive BDD testing framework built on Playwright, providing reusable fixtures, adapters, and step definitions for API, UI, TUI, and hybrid testing.
 
+## How it compares
+
+| | Raw Playwright | Cucumber + your own steps | katalyst-xspec |
+|---|---|---|---|
+| Readable by non-developers | No | Yes | Yes |
+| Steps you write yourself | All of them | All of them | Only the unusual ones |
+| API, UI and terminal apps in one scenario | Manual wiring | Manual wiring | Built in |
+| Role-based login and session reuse | You build it | You build it | Settings in `.env` ([Authentication](./guides/authentication.md)) |
+| Test-data cleanup | You build it | You build it | Built in |
+| Upgrades across versions | Manual | Manual | An upgrade command ([CLI](./reference/cli.md)) |
+
+Try it in five minutes:
+
+```bash
+npx @esimplicitylabs/katalyst-xspec init my-tests
+cd my-tests && npm install && npx playwright install chromium
+npm test
+```
+
 ## Quick Navigation
 
 ### Getting Started
