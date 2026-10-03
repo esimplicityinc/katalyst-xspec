@@ -1,6 +1,6 @@
 # Shared Steps Reference
 
-Complete reference for shared steps. Available in all scenarios regardless of tag (`@api`, `@ui`, `@tui`, `@hybrid`).
+Complete reference for shared steps. Available in all scenarios; like every built-in step, they need no tag.
 
 ## Variable Steps
 
@@ -247,7 +247,6 @@ type World = {
 ### API Test with Variables and Cleanup
 
 ```gherkin
-@api
 Feature: User Management
 
   Background:
@@ -276,7 +275,6 @@ Feature: User Management
 ### UI Test with Variables
 
 ```gherkin
-@ui
 Feature: Search
 
   Scenario: Search with generated term
@@ -291,7 +289,6 @@ Feature: Search
 ### Hybrid Test with Shared State
 
 ```gherkin
-@hybrid
 Feature: User Onboarding
 
   Scenario: Create user via API, verify in UI
@@ -322,7 +319,6 @@ Feature: User Onboarding
 ### Feature Flags Example
 
 ```gherkin
-@ui
 Feature: Feature Flag Testing
 
   Scenario: Test with feature enabled

@@ -274,6 +274,16 @@ function parseArgs(argv) {
   return args;
 }
 
+/** npm-safe package name from a folder name ("My Demo" -> "my-demo"). */
+function packageNameFor(dir) {
+  const name = path
+    .basename(path.resolve(dir))
+    .toLowerCase()
+    .replace(/[^a-z0-9._~-]+/g, '-')
+    .replace(/^[-._]+|[-.]+$/g, '');
+  return name || 'katalyst-xspec-tests';
+}
+
 function templates(packageName) {
   const pkg = {
     name: packageName,
@@ -291,7 +301,7 @@ function templates(packageName) {
       clean: 'rm -rf .features-gen node_modules test-results storage cucumber-report playwright-report'
     },
     devDependencies: {
-      '@esimplicitylabs/katalyst-xspec': '^0.6.0',
+      '@esimplicitylabs/katalyst-xspec': '^0.7.0',
       '@playwright/test': '^1.49.0',
       'playwright-bdd': '^9.1.0',
       dotenv: '^16.1.4',
@@ -360,7 +370,7 @@ export { test };
 
   const playwrightConfig = `import { defineConfig } from '@playwright/test';
 import { defineBddProject, cucumberReporter } from 'playwright-bdd';
-import { resolveWorkers } from '@esimplicitylabs/katalyst-xspec';
+import { resolveWorkers, tagsForProject, resolveExtraTags } from '@esimplicitylabs/katalyst-xspec';
 import dotenv from 'dotenv';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -378,33 +388,32 @@ if (fs.existsSync(localEnvPath)) {
   dotenv.config();
 }
 
+// Each project runs the feature files in its folder. Any scenario can use any
+// step (API, UI, shared). Tags are optional: use your own (e.g. @smoke) and
+// filter with TEST_TAGS="@smoke"; scenarios tagged @Skip or @ignore are skipped.
+const tags = tagsForProject({ extraTags: resolveExtraTags(process.env.TEST_TAGS) });
+
 const apiBdd = defineBddProject({
   name: 'api',
   features: 'features/api/**/*.feature',
   steps: 'features/steps/**/*.ts',
-  tags: '@api',
+  tags,
 });
 
 const uiBdd = defineBddProject({
   name: 'ui',
   features: 'features/ui/**/*.feature',
   steps: 'features/steps/**/*.ts',
-  tags: '@ui',
+  tags,
 });
 
-const hybridBdd = defineBddProject({
-  name: 'hybrid',
-  features: 'features/hybrid/**/*.feature',
-  steps: 'features/steps/**/*.ts',
-  tags: '@hybrid',
-});
-
-// TUI project (optional - uncomment when TUI testing is configured)
+// TUI project (optional - requires tui-tester and tmux; also enable
+// registerTuiSteps in features/steps/steps.ts and createTui in fixtures.ts)
 // const tuiBdd = defineBddProject({
 //   name: 'tui',
 //   features: 'features/tui/**/*.feature',
 //   steps: 'features/steps/**/*.ts',
-//   tags: '@tui',
+//   tags,
 // });
 
 export default defineConfig({
@@ -414,7 +423,7 @@ export default defineConfig({
     cucumberReporter('json', { outputFile: 'cucumber-report/report.json' }),
   ],
   // Add tuiBdd to this array when TUI testing is enabled
-  projects: [apiBdd, uiBdd, hybridBdd /* , tuiBdd */],
+  projects: [apiBdd, uiBdd /* , tuiBdd */],
   use: {
     baseURL: process.env.BASE_URL || process.env.FRONTEND_URL || 'http://localhost:3000',
     headless: process.env.HEADLESS === 'false' ? false : true,
@@ -422,74 +431,44 @@ export default defineConfig({
 });
 `;
 
+  // Examples hit public demo sites with absolute URLs so a fresh project passes
+  // with no .env. Point FRONTEND_URL / API_BASE_URL at your app and switch to
+  // relative paths (e.g. "/login") when you write real tests.
   const apiFeature = `Feature: API example
-  As an API consumer
-  I want to call the service
-  So that I can verify responses
+  Calls JSONPlaceholder, a free public fake REST API.
 
-  @api
-  Scenario: GET health
-    When I GET "/health"
+  Scenario: Get a user
+    When I GET "https://jsonplaceholder.typicode.com/users/1"
     Then the response status should be 200
+    And the value at "username" should equal "Bret"
+
+  Scenario: Create a post
+    When I POST "https://jsonplaceholder.typicode.com/posts" with JSON body:
+      """
+      { "title": "hello from katalyst-xspec", "userId": 1 }
+      """
+    Then the response status should be 201
+    And the value at "title" should equal "hello from katalyst-xspec"
 `;
 
   const uiFeature = `Feature: UI example
-  As a user
-  I want to load the homepage
-  So that I can see content
+  Uses Sauce Demo, a public shop built for test automation.
 
-  @ui
-  Scenario: Visit homepage
-    Given I navigate to "/"
-    Then the URL should contain "/"
-`;
+  Background:
+    Given I navigate to "https://www.saucedemo.com/"
 
-  const hybridFeature = `Feature: Hybrid example
-  As a tester
-  I want to mix API and UI steps
-  So that I can cover flows end-to-end
+  Scenario: Log in
+    When I fill the placeholder "Username" with "standard_user"
+    And I fill the placeholder "Password" with "secret_sauce"
+    And I click the button "Login"
+    Then the URL should contain "/inventory.html"
+    And I should see text "Products"
 
-  @hybrid
-  Scenario: API then UI
-    When I GET "/health"
-    Then the response status should be 200
-    Given I navigate to "/"
-    Then the URL should contain "/"
-`;
-
-  const tuiFeature = `Feature: TUI example
-  As a CLI user
-  I want to interact with the terminal application
-  So that I can verify TUI functionality
-
-  @tui
-  Scenario: Start and verify TUI application
-    Given I start the TUI application
-    Then I should see "Welcome"
-    When I type "help"
-    And I press enter
-    Then I should see "Available commands"
-
-  @tui
-  Scenario: Navigate menu with keyboard
-    Given I start the TUI application
-    When I navigate down 2 times
-    And I press enter
-    Then I should see "Selected option"
-
-  @tui
-  Scenario: Fill form in TUI
-    Given I start the TUI application
-    When I enter "John Doe" in the "Name" field
-    And I press tab
-    And I enter "john@example.com" in the "Email" field
-    And I submit the form
-    Then I should see "Form submitted successfully"
-
-  @tui
-  Scenario: Verify screen snapshot
-    Given I start the TUI application
-    Then the screen should match snapshot "main-menu"
+  Scenario: Locked-out user sees an error
+    When I fill the placeholder "Username" with "locked_out_user"
+    And I fill the placeholder "Password" with "secret_sauce"
+    And I click the button "Login"
+    Then I should see text "Sorry, this user has been locked out."
 `;
 
   const gitignore = `node_modules
@@ -524,27 +503,38 @@ DEBUG=false
 # WORKERS=auto
 `;
 
-  const readme = `# katalyst-xspec
+  const readme = `# ${packageName}
 
-Generated Playwright + BDD test package powered by @esimplicitylabs/katalyst-xspec.
+Playwright + BDD tests powered by [@esimplicitylabs/katalyst-xspec](https://www.npmjs.com/package/@esimplicitylabs/katalyst-xspec).
 
-## Install
-Install deps in this folder (see commands printed by the generator).
+## Setup
+\`\`\`bash
+npm install
+npx playwright install chromium   # one-time browser download for UI tests
+\`\`\`
 
 ## Run
-- Generate tests: \
-  \`npm run gen\`
-- Run tests: \
-  \`npm test\`
+\`\`\`bash
+npm test                          # generate specs from features, then run them
+npx playwright test --project ui  # just one folder
+TEST_TAGS=@smoke npm test         # just scenarios you tagged @smoke
+\`\`\`
+
+The example features call public demo sites, so they pass with no configuration.
+To test your own app, copy \`.env.example\` to \`.env\`, set \`FRONTEND_URL\` and
+\`API_BASE_URL\`, and use relative paths such as \`Given I navigate to "/login"\`.
 
 ## Structure
-- \`features/api|ui|hybrid|tui\`: feature files
-- \`features/steps/steps.ts\`: registers steps from @esimplicitylabs/katalyst-xspec
-- \`features/steps/fixtures.ts\`: creates the Playwright-BDD test with adapters
-- \`playwright.config.ts\`: BDD-aware Playwright config with reporters
+- \`features/api/\`, \`features/ui/\`: feature files; each folder is a Playwright project
+- \`features/steps/steps.ts\`: registers the built-in steps (any step works in any scenario)
+- \`features/steps/fixtures.ts\`: wires adapters into the Playwright-BDD test
+- \`playwright.config.ts\`: projects, reporters, base URL
+
+Tags are optional. Add your own (\`@smoke\`, \`@slow\`) and filter with \`TEST_TAGS\`;
+scenarios tagged \`@Skip\` or \`@ignore\` don't run.
 
 ## Notes
-- Edit \`playwright.config.ts\` projects/tags to match your repo.
+- Undefined steps? Run \`npm run gen:stubs\` to generate stubs.
 - Keep @playwright/test and playwright-bdd versions aligned with @esimplicitylabs/katalyst-xspec peer ranges.
 
 ## TUI Testing (Optional)
@@ -569,7 +559,7 @@ To enable terminal user interface testing:
    - \`features/steps/steps.ts\`: Uncomment registerTuiSteps(test)
    - \`playwright.config.ts\`: Uncomment tuiBdd project and add to projects array
 
-4. Write @tui tagged feature files in \`features/tui/\`
+4. Write feature files in \`features/tui/\`
 `;
 
   return {
@@ -578,10 +568,8 @@ To enable terminal user interface testing:
     'playwright.config.ts': playwrightConfig,
     'features/steps/fixtures.ts': fixturesTs,
     'features/steps/steps.ts': stepsTs,
-    'features/api/00_api_examples.feature': apiFeature,
-    'features/ui/00_ui_examples.feature': uiFeature,
-    'features/hybrid/00_hybrid_examples.feature': hybridFeature,
-    'features/tui/00_tui_examples.feature': tuiFeature,
+    'features/api/example.feature': apiFeature,
+    'features/ui/example.feature': uiFeature,
     '.gitignore': gitignore,
     '.env.example': envExample,
     'README.md': readme,
@@ -593,7 +581,7 @@ async function main() {
   const targetDir = path.resolve(process.cwd(), args.dir);
   const detectedPm = await detectPackageManager(process.cwd());
   const pm = commandsFor(detectedPm);
-  const files = templates('katalyst-xspec');
+  const files = templates(packageNameFor(targetDir));
   
   console.log(`Detected package manager: ${detectedPm}`);
 
@@ -659,7 +647,8 @@ async function main() {
   console.log('\nNext steps:');
   console.log(`  1) cd ${path.relative(process.cwd(), targetDir) || '.'}`);
   console.log(`  2) ${pm.install}`);
-  console.log(`  3) ${pm.test}`);
+  console.log('  3) npx playwright install chromium   (one-time browser download for UI tests)');
+  console.log(`  4) ${pm.test}`);
   
   if (results.skills.length) {
     console.log('\nSkills installed! Your AI agent can now help you:');

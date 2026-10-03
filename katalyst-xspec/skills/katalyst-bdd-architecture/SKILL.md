@@ -164,7 +164,7 @@ const test = createBddTest({
 ```typescript
 createApi: (ctx) => {
   ctx.apiRequest;  // Playwright APIRequestContext
-  ctx.page;        // Playwright Page (for @ui)
+  ctx.page;        // Playwright Page
   // Return your ApiPort implementation
 }
 
@@ -192,14 +192,14 @@ When('I do something with {string}', async ({ world }, param: string) => {
   world.vars['result'] = param;
 });
 
-// Step with tag restriction
-When('I make API call', { tags: '@api or @hybrid' }, async ({ api, world }) => {
+// Step using the API fixture (no tags needed; works in any scenario)
+When('I make API call', async ({ api, world }) => {
   const result = await api.sendJson('GET', '/endpoint');
   world.lastJson = result.json;
 });
 
 // Step with multiple fixtures
-When('I verify in both layers', { tags: '@hybrid' }, async ({ api, ui, world }) => {
+When('I verify in both layers', async ({ api, ui, world }) => {
   await api.sendJson('POST', '/data', { value: 'test' });
   await ui.goto('/data');
   await ui.expectText('test');
@@ -481,13 +481,14 @@ selectPath(data, 'user.roles[0]');  // 'admin'
 ```typescript
 import { tagsForProject, resolveExtraTags } from '@esimplicitylabs/katalyst-xspec';
 
-// Build tag expression with defaults
-tagsForProject({ projectTag: '@api' });
-// Result: 'not @Skip and not @ignore and @api'
+// Build tag expression with defaults (projects select features by folder;
+// tags only skip @Skip/@ignore and apply optional TEST_TAGS)
+tagsForProject();
+// Result: 'not @Skip and not @ignore'
 
 // With extra tags
-tagsForProject({ projectTag: '@api', extraTags: '@smoke' });
-// Result: 'not @Skip and not @ignore and @api and (@smoke)'
+tagsForProject({ extraTags: resolveExtraTags(process.env.TEST_TAGS) });
+// e.g. TEST_TAGS=@smoke -> 'not @Skip and not @ignore and (@smoke)'
 ```
 
 ## File Organization

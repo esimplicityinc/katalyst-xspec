@@ -1,4 +1,3 @@
-@api
 Feature: User API
   As a developer
   I want to test the User API

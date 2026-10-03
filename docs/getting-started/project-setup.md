@@ -19,14 +19,12 @@ const apiBdd = defineBddProject({
   name: 'api',
   features: 'features/api/**/*.feature',
   steps: 'features/steps/**/*.ts',
-  tags: '@api',
 });
 
 const uiBdd = defineBddProject({
   name: 'ui',
   features: 'features/ui/**/*.feature',
   steps: 'features/steps/**/*.ts',
-  tags: '@ui',
 });
 
 export default defineConfig({
@@ -73,28 +71,21 @@ const apiBdd = defineBddProject({
   name: 'api',
   features: 'features/api/**/*.feature',
   steps: 'features/steps/**/*.ts',
-  tags: tagsForProject({ projectTag: '@api', extraTags }),
+  tags: tagsForProject({ extraTags }),
 });
 
 const uiBdd = defineBddProject({
   name: 'ui',
   features: 'features/ui/**/*.feature',
   steps: 'features/steps/**/*.ts',
-  tags: tagsForProject({ projectTag: '@ui', extraTags }),
-});
-
-const hybridBdd = defineBddProject({
-  name: 'hybrid',
-  features: 'features/hybrid/**/*.feature',
-  steps: 'features/steps/**/*.ts',
-  tags: tagsForProject({ projectTag: '@hybrid', extraTags }),
+  tags: tagsForProject({ extraTags }),
 });
 
 const tuiBdd = defineBddProject({
   name: 'tui',
   features: 'features/tui/**/*.feature',
   steps: 'features/steps/**/*.ts',
-  tags: tagsForProject({ projectTag: '@tui', extraTags }),
+  tags: tagsForProject({ extraTags }),
 });
 
 export default defineConfig({
@@ -136,7 +127,6 @@ export default defineConfig({
       ...uiBdd,
       use: { ...devices['Desktop Chrome'] },
     },
-    hybridBdd,
     { ...tuiBdd, workers: resolveWorkers({ testType: 'tui' }) },
   ],
   
@@ -147,6 +137,8 @@ export default defineConfig({
 
 ## Project Types
 
+Projects select feature files by folder. Steps are not tied to a project: every registered step works in any scenario, so a feature in `features/ui/` can also use API steps.
+
 ### API Project
 
 Tests HTTP APIs without a browser:
@@ -156,7 +148,6 @@ const apiBdd = defineBddProject({
   name: 'api',
   features: 'features/api/**/*.feature',
   steps: 'features/steps/**/*.ts',
-  tags: '@api',
 });
 ```
 
@@ -169,7 +160,6 @@ const uiBdd = defineBddProject({
   name: 'ui',
   features: 'features/ui/**/*.feature',
   steps: 'features/steps/**/*.ts',
-  tags: '@ui',
 });
 
 // With specific browser
@@ -188,24 +178,16 @@ const tuiBdd = defineBddProject({
   name: 'tui',
   features: 'features/tui/**/*.feature',
   steps: 'features/steps/**/*.ts',
-  tags: '@tui',
 });
 ```
 
-### Hybrid Project
+### Hybrid Scenarios
 
-Tests spanning multiple layers:
-
-```typescript
-const hybridBdd = defineBddProject({
-  name: 'hybrid',
-  features: 'features/hybrid/**/*.feature',
-  steps: 'features/steps/**/*.ts',
-  tags: '@hybrid',
-});
-```
+No separate project is needed. A hybrid scenario is simply one that mixes API and UI steps; put it in whichever folder fits (e.g. `features/ui/`). If you prefer a dedicated folder, add another project pointing at it, such as `features/e2e/**/*.feature`.
 
 ## Tag Filtering
+
+Tags are optional. The `tags` option on each project only skips `@Skip`/`@ignore` scenarios and applies any tags from `TEST_TAGS`. See [Tags](../concepts/tag-system.md).
 
 ### Using tagsForProject Helper
 
@@ -213,16 +195,15 @@ const hybridBdd = defineBddProject({
 import { tagsForProject, resolveExtraTags } from '@esimplicitylabs/katalyst-xspec';
 
 // Basic usage - excludes @Skip and @ignore by default
-tagsForProject({ projectTag: '@api' })
-// Result: "not @Skip and not @ignore and @api"
+tagsForProject()
+// Result: "not @Skip and not @ignore"
 
 // With extra tags
-tagsForProject({ projectTag: '@api', extraTags: '@smoke' })
-// Result: "not @Skip and not @ignore and @api and (@smoke)"
+tagsForProject({ extraTags: '@smoke' })
+// Result: "not @Skip and not @ignore and (@smoke)"
 
 // Custom excludes
 tagsForProject({ 
-  projectTag: '@api', 
   defaultExcludes: 'not @Skip and not @wip' 
 })
 ```
@@ -309,9 +290,9 @@ API_AUTH_LOGIN_PATH=/auth/login
 
 # Authentication (required -- no hardcoded defaults)
 DEFAULT_ADMIN_USERNAME=admin@example.com
-DEFAULT_ADMIN_PASSWORD=admin123
+DEFAULT_ADMIN_PASSWORD=changeme
 DEFAULT_USER_USERNAME=user@example.com
-DEFAULT_USER_PASSWORD=user123
+DEFAULT_USER_PASSWORD=changeme
 
 # UI Configuration
 FRONTEND_URL=http://localhost:3000

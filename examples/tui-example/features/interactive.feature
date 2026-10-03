@@ -1,4 +1,3 @@
-@tui
 Feature: Interactive Terminal
   As a developer
   I want to test interactive terminal applications

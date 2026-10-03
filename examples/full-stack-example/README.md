@@ -4,16 +4,16 @@ Demonstrates comprehensive full-stack testing with @esimplicitylabs/katalyst-xsp
 
 ## What This Example Shows
 
-- Multi-layer test organization with tags
+- Multi-layer test organization by folder (one Playwright project per folder)
 - Hybrid testing (API + UI in same scenario)
 - Shared variable state across layers
 - Authentication across different layers
 - Cleanup and test isolation
-- Tag-based test filtering
+- Optional tag-based filtering (`TEST_TAGS`)
 
 ## Prerequisites
 
-- Node.js >= 18.0.0
+- Node.js >= 20
 - npm >= 9.0.0
 - Playwright browsers
 - Unix-like environment for TUI tests
@@ -92,19 +92,20 @@ full-stack-example/
 └── .env.example
 ```
 
-## Tag Organization
+## Folder Organization
 
-| Tag | Description | Adapters Used |
-|-----|-------------|---------------|
-| `@api` | API-only tests | ApiPort |
-| `@ui` | UI-only tests | UiPort |
-| `@tui` | TUI-only tests | TuiPort |
-| `@hybrid` | Cross-layer tests | Multiple ports |
+Each folder is a Playwright project. Steps are untagged, so any step works in any folder; the folders just group scenarios.
+
+| Folder | Description | Adapters Used |
+|--------|-------------|---------------|
+| `features/api/` | API-only tests | ApiPort |
+| `features/ui/` | UI-only tests | UiPort |
+| `features/tui/` | TUI-only tests | TuiPort |
+| `features/hybrid/` | Scenarios mixing API and UI steps | Multiple ports |
 
 ## Hybrid Testing Pattern
 
 ```gherkin
-@hybrid
 Scenario: Create user via API and verify in UI
   # API layer - create test data
   Given I am authenticated as an admin via API
@@ -142,11 +143,11 @@ See `.env.example` for all available configuration options.
 1. **Test Isolation**: Each scenario is independent
 2. **Automatic Cleanup**: Resources cleaned up after tests
 3. **Shared Variables**: Pass data between layers using variables
-4. **Tag Filtering**: Run specific test types
+4. **Project Selection**: Run one folder with `--project` (tags optional)
 5. **Configuration**: Environment-based settings
 
 ## Related Documentation
 
 - [Hybrid Testing Guide](../../docs/guides/hybrid-testing.md)
 - [Architecture Concepts](../../docs/concepts/architecture.md)
-- [Tag System](../../docs/concepts/tag-system.md)
+- [Tags](../../docs/concepts/tag-system.md)

@@ -38,17 +38,91 @@ describe('katalyst-xspec init', () => {
   const fs = require('node:fs');
   const os = require('node:os');
 
-  it('accepts the target directory positionally (init my-tests)', () => {
+  function scaffold(...args) {
     const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'kx-init-'));
+    const r = spawnSync(process.execPath, [BIN, 'init', ...args, '--no-skills'], { cwd, encoding: 'utf8' });
+    return { cwd, r };
+  }
+  const read = (...p) => fs.readFileSync(path.join(...p), 'utf8');
+
+  it('accepts the target directory positionally and names the project after it', () => {
+    const { cwd, r } = scaffold('my-tests');
     try {
-      const r = spawnSync(process.execPath, [BIN, 'init', 'my-tests', '--no-skills'], { cwd, encoding: 'utf8' });
       assert.equal(r.status, 0, r.stderr);
-      const pkg = JSON.parse(fs.readFileSync(path.join(cwd, 'my-tests', 'package.json'), 'utf8'));
+      const pkg = JSON.parse(read(cwd, 'my-tests', 'package.json'));
+      assert.equal(pkg.name, 'my-tests');
       assert.equal(pkg.scripts['gen:stubs'], 'katalyst-xspec stubs');
       assert.equal(pkg.scripts.upgrade, 'katalyst-xspec upgrade');
       assert.ok(pkg.devDependencies['@esimplicitylabs/katalyst-xspec']);
       // Published on npmjs.com: no registry mapping or token needed.
       assert.equal(fs.existsSync(path.join(cwd, 'my-tests', '.npmrc')), false);
+    } finally {
+      fs.rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it('init . uses the current folder name, made npm-safe', () => {
+    const parent = fs.mkdtempSync(path.join(os.tmpdir(), 'kx-init-'));
+    const cwd = path.join(parent, 'My Demo_Project');
+    fs.mkdirSync(cwd);
+    try {
+      const r = spawnSync(process.execPath, [BIN, 'init', '.', '--no-skills'], { cwd, encoding: 'utf8' });
+      assert.equal(r.status, 0, r.stderr);
+      assert.equal(JSON.parse(read(cwd, 'package.json')).name, 'my-demo_project');
+    } finally {
+      fs.rmSync(parent, { recursive: true, force: true });
+    }
+  });
+
+  it('scaffolds folder-based projects with no @api/@ui/@hybrid/@tui type tags', () => {
+    const { cwd, r } = scaffold('t');
+    try {
+      assert.equal(r.status, 0, r.stderr);
+      const config = read(cwd, 't', 'playwright.config.ts');
+      assert.doesNotMatch(config, /@(api|ui|hybrid|tui)\b/);
+      assert.match(config, /features: 'features\/api\/\*\*\/\*\.feature'/);
+      assert.match(config, /features: 'features\/ui\/\*\*\/\*\.feature'/);
+      assert.match(config, /resolveExtraTags\(process\.env\.TEST_TAGS\)/);
+      for (const f of ['features/api/example.feature', 'features/ui/example.feature']) {
+        assert.doesNotMatch(read(cwd, 't', f), /@(api|ui|hybrid|tui)\b/, f);
+      }
+    } finally {
+      fs.rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it('example features target public sites, so a fresh project passes without a .env', () => {
+    const { cwd, r } = scaffold('t');
+    try {
+      assert.equal(r.status, 0, r.stderr);
+      assert.match(read(cwd, 't', 'features/api/example.feature'), /When I GET "https:\/\/jsonplaceholder\.typicode\.com\//);
+      assert.match(read(cwd, 't', 'features/ui/example.feature'), /Given I navigate to "https:\/\/www\.saucedemo\.com\/"/);
+      // Examples that need extra setup are no longer scaffolded.
+      assert.equal(fs.existsSync(path.join(cwd, 't', 'features/hybrid')), false);
+      assert.equal(fs.existsSync(path.join(cwd, 't', 'features/tui')), false);
+      assert.match(r.stdout, /npx playwright install chromium/);
+    } finally {
+      fs.rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('katalyst-xspec upgrade --migrate', () => {
+  const fs = require('node:fs');
+  const os = require('node:os');
+
+  it('migrates a freshly scaffolded project (no custom step files) and strips type-tag filters', () => {
+    const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'kx-migrate-'));
+    try {
+      assert.equal(spawnSync(process.execPath, [BIN, 'init', '.', '--no-skills'], { cwd, encoding: 'utf8' }).status, 0);
+      // Simulate a pre-0.7 config.
+      const cfg = path.join(cwd, 'playwright.config.ts');
+      fs.writeFileSync(cfg, fs.readFileSync(cfg, 'utf8').replace("name: 'ui',", "name: 'ui',\n  tags: '@ui',"));
+      const backupDir = path.join(cwd, '.backup');
+      const r = spawnSync(process.execPath, [BIN, 'upgrade', '--migrate', '--backup-dir', backupDir], { cwd, encoding: 'utf8' });
+      assert.equal(r.status, 0, r.stdout + r.stderr);
+      assert.doesNotMatch(fs.readFileSync(cfg, 'utf8'), /tags: '@ui'/);
+      assert.ok(fs.existsSync(path.join(backupDir, 'steps', 'steps.ts.original')));
     } finally {
       fs.rmSync(cwd, { recursive: true, force: true });
     }

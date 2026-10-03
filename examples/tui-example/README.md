@@ -12,7 +12,7 @@ Demonstrates terminal UI testing with @esimplicitylabs/katalyst-xspec using comm
 
 ## Prerequisites
 
-- Node.js >= 18.0.0
+- Node.js >= 20
 - npm >= 9.0.0
 - Unix-like environment (macOS, Linux, WSL)
 
@@ -78,7 +78,6 @@ export const { test, expect } = createBddTest({
 2. Write feature files for your CLI:
 
 ```gherkin
-@tui
 Feature: My CLI
   Scenario: Run help command
     When I spawn the terminal with "my-cli --help"

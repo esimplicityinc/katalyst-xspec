@@ -2,7 +2,6 @@
  * UI Auth Step Definitions
  *
  * Steps for authenticating in UI tests using fetch interception.
- * Tagged with @ui for selective execution.
  */
 
 import { createBdd } from 'playwright-bdd';
@@ -28,7 +27,6 @@ export function registerUiAuthSteps(test: any): void {
    */
   Given(
     'I am authenticated in UI as {string}',
-    { tags: '@ui' },
     async ({ page, world }: any, rolesStr: string) => {
       const roles = rolesStr.split(',').map((r: string) => r.trim());
       const testRunId = world.testRunId || world.vars.test_run_id || Date.now();
@@ -59,7 +57,6 @@ export function registerUiAuthSteps(test: any): void {
    */
   Given(
     'I am authenticated in UI as {string} for tenant {string}',
-    { tags: '@ui' },
     async ({ page, world }: any, rolesStr: string, tenantId: string) => {
       const roles = rolesStr.split(',').map((r: string) => r.trim());
       const testRunId = world.testRunId || world.vars.test_run_id || Date.now();
@@ -84,7 +81,6 @@ export function registerUiAuthSteps(test: any): void {
    */
   Given(
     'I am authenticated in UI as {string} with id {string}',
-    { tags: '@ui' },
     async ({ page, world }: any, rolesStr: string, userId: string) => {
       const roles = rolesStr.split(',').map((r: string) => r.trim());
       const resolvedUserId = interpolate(userId, world.vars);
@@ -108,7 +104,6 @@ export function registerUiAuthSteps(test: any): void {
    */
   Given(
     'I am authenticated in UI with bearer token {string}',
-    { tags: '@ui' },
     async ({ page, world }: any, token: string) => {
       const resolvedToken = interpolate(token, world.vars);
       await setupBearerAuth(page, resolvedToken);
@@ -127,7 +122,6 @@ export function registerUiAuthSteps(test: any): void {
    */
   Given(
     'I am authenticated in UI with headers:',
-    { tags: '@ui' },
     async ({ page, world }: any, dataTable: any) => {
       const rows = dataTable.hashes ? dataTable.hashes() : dataTable.rawTable?.slice(1).map((row: string[]) => ({
         header: row[0],
@@ -161,7 +155,6 @@ export function registerUiAuthSteps(test: any): void {
    */
   Given(
     'I switch UI user to {string} with id {string}',
-    { tags: '@ui' },
     async ({ page, world }: any, rolesStr: string, userId: string) => {
       const roles = rolesStr.split(',').map((r: string) => r.trim());
       const resolvedUserId = interpolate(userId, world.vars);

@@ -11,8 +11,10 @@ This skill helps diagnose and fix common issues with the Katalyst BDD testing fr
 
 | Symptom | Likely Cause | Solution |
 |---------|--------------|----------|
-| "No tests found" | Forgot to generate | Run `npm run gen` |
-| Step is undefined | Wrong tag or typo | Check tag matches step availability |
+| "No tests found" | Forgot to generate | Run `npm run gen` (or just `npm test`) |
+| "Executable doesn't exist" | Browser not downloaded | Run `npx playwright install chromium` |
+| Step is undefined | Typo, renamed step, or not registered | Check exact wording in the step reference |
+| Scenario never runs | Feature outside a project's folder, `@Skip`, or old tag filter | See Issue 2b |
 | Auth fails (401/403) | Bad credentials | Check `.env` variables |
 | Element not found | Selector wrong or timing | Add waits or use debugging |
 | Cleanup not running | Not registered | Add `Given I register cleanup DELETE...` |
@@ -36,7 +38,7 @@ npm run gen
 npm test
 ```
 
-**Prevention:** Add to your workflow - always run `npm run gen` before `npm test`.
+**Prevention:** `npm test` already runs `bddgen && playwright test`. If you call `npx playwright test` directly, run `npm run gen` first.
 
 ## Issue 2: Step Not Defined
 
@@ -47,24 +49,11 @@ Step "When I click the button Submit" is not defined
 
 **Possible Causes:**
 
-### 1. Wrong Tag
-Steps are only available with the correct tag:
+### 1. Renamed or Removed Step (0.7.0)
+Steps are untagged and work in any scenario, so a tag is never the cause. Check for these 0.7.0 changes:
 
-| Step Type | Required Tag |
-|-----------|--------------|
-| API steps | `@api` or `@hybrid` |
-| UI steps | `@ui` or `@hybrid` |
-| TUI steps | `@tui` |
-| Shared steps | Any tag |
-
-**Fix:** Add the correct tag to your feature or scenario:
-```gherkin
-@ui  # <-- Required for UI steps
-Feature: Login Page
-
-  Scenario: Click button
-    When I click the button "Submit"
-```
+- TUI `When I fill the form:` is now `When I fill the TUI form:` (UI keeps `I fill the form:`).
+- TUI `Then I should see text {string}` was removed; use `Then I should see {string}` or `Then I should see {string} in the terminal`.
 
 ### 2. Typo in Step
 Steps must match exactly. Check:
@@ -99,6 +88,16 @@ registerAllSteps(test);  // Registers all step types
 export { test };
 ```
 
+## Issue 2b: Scenario Never Runs
+
+Untagged scenarios are not skipped. If a scenario is missing:
+
+1. Check the feature file is in the folder its project reads (e.g. `features/ui/**/*.feature` for the `ui` project).
+2. Check it isn't tagged `@Skip`/`@ignore`, and that `TEST_TAGS` isn't filtering it out.
+3. If `playwright.config.*` still has old filters like `tags: '@ui'` (pre-0.7), run `npx katalyst-xspec upgrade --migrate`.
+
+Old `@api`/`@ui` tags left in feature files are harmless.
+
 ## Issue 3: Authentication Failures
 
 ### API Auth Fails (401)
@@ -107,11 +106,11 @@ export { test };
 ```bash
 # Required for admin auth
 DEFAULT_ADMIN_USERNAME=admin@example.com
-DEFAULT_ADMIN_PASSWORD=admin123
+DEFAULT_ADMIN_PASSWORD=changeme
 
 # Required for user auth
 DEFAULT_USER_USERNAME=user@example.com
-DEFAULT_USER_PASSWORD=user123
+DEFAULT_USER_PASSWORD=changeme
 
 # Auth endpoint path
 API_AUTH_LOGIN_PATH=/auth/login
@@ -422,9 +421,9 @@ HEADLESS=true
 
 # Authentication (required -- no hardcoded defaults)
 DEFAULT_ADMIN_USERNAME=admin@example.com
-DEFAULT_ADMIN_PASSWORD=admin123
+DEFAULT_ADMIN_PASSWORD=changeme
 DEFAULT_USER_USERNAME=user@example.com
-DEFAULT_USER_PASSWORD=user123
+DEFAULT_USER_PASSWORD=changeme
 API_AUTH_LOGIN_PATH=/auth/login
 
 # UI Login Customization (optional)

@@ -82,7 +82,7 @@ When I POST "/users" with JSON body:
 ```typescript
 import { DataTable } from '@cucumber/cucumber';
 
-When('I fill the form:', async ({ ui }, dataTable: DataTable) => {
+When('I fill the signup form:', async ({ ui }, dataTable: DataTable) => {
   const rows = dataTable.hashes();
   // rows = [{ Field: 'Email', Value: 'test@...' }, ...]
   
@@ -94,7 +94,7 @@ When('I fill the form:', async ({ ui }, dataTable: DataTable) => {
 
 **Usage:**
 ```gherkin
-When I fill the form:
+When I fill the signup form:
   | Field    | Value            |
   | Email    | test@example.com |
   | Password | secret123        |
@@ -120,29 +120,25 @@ const pairs = dataTable.rowsHash();
 // { Email: '...', Password: '...' }
 ```
 
-## Tag-Restricted Steps
+## Step Scope
+
+Custom steps don't need `{ tags: ... }`. Like the built-in steps, a step without tags works in any scenario, whichever fixtures it uses:
 
 ```typescript
-// Only available in @api scenarios
-When('I make an API call', { tags: '@api' }, async ({ api }) => {
+When('I make an API call', async ({ api }) => {
   // ...
 });
 
-// Available in @api or @hybrid
-When('I GET {string}', { tags: '@api or @hybrid' }, async ({ api, world }, path) => {
+When('I click something', async ({ ui }) => {
   // ...
 });
 
-// Only available in @ui
-When('I click something', { tags: '@ui' }, async ({ ui }) => {
+When('I create via API and check in UI', async ({ api, ui, world }) => {
   // ...
-});
-
-// Available everywhere (no tag restriction)
-Given('I set variable {string} to {string}', async ({ world }, name, value) => {
-  world.vars[name] = value;
 });
 ```
+
+Don't reuse wording of a built-in step (e.g. `I GET {string}`, `I set variable {string} to {string}`); a step text that matches two definitions is ambiguous.
 
 ## Available Fixtures
 
@@ -285,7 +281,7 @@ import { expect } from '@playwright/test';
  * Custom steps for report generation testing
  */
 
-When('I generate a {string} report', { tags: '@api or @hybrid' }, 
+When('I generate a {string} report', 
   async ({ api, world }, reportType: string) => {
     const result = await api.sendJson('POST', '/reports/generate', {
       type: reportType,
@@ -301,7 +297,7 @@ When('I generate a {string} report', { tags: '@api or @hybrid' },
   }
 );
 
-When('I wait for the report to complete', { tags: '@api or @hybrid' },
+When('I wait for the report to complete',
   async ({ api, world }) => {
     const reportId = world.vars['reportId'];
     let attempts = 0;
@@ -323,7 +319,7 @@ When('I wait for the report to complete', { tags: '@api or @hybrid' },
   }
 );
 
-Then('the report should be downloadable', { tags: '@api or @hybrid' },
+Then('the report should be downloadable',
   async ({ api, world }) => {
     const reportUrl = world.vars['reportUrl'];
     expect(reportUrl).toBeDefined();
@@ -334,14 +330,14 @@ Then('the report should be downloadable', { tags: '@api or @hybrid' },
   }
 );
 
-When('I view the report in the UI', { tags: '@ui or @hybrid' },
+When('I view the report in the UI',
   async ({ ui, world }) => {
     const reportId = world.vars['reportId'];
     await ui.goto(`/reports/${reportId}`);
   }
 );
 
-Then('I should see the report preview', { tags: '@ui or @hybrid' },
+Then('I should see the report preview',
   async ({ ui }) => {
     await ui.expectText('Report Preview');
     await ui.expectElementState('first', 'pdf-viewer', 'locator', 'visible');

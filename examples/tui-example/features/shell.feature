@@ -1,4 +1,3 @@
-@tui
 Feature: Shell Commands
   As a developer
   I want to test shell command interactions

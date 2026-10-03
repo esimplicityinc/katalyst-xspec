@@ -2,7 +2,6 @@
  * UI Layout Assertion Step Definitions
  *
  * Steps for asserting layout states like panels, split views, and responsive behavior.
- * Tagged with @ui or @hybrid for selective execution.
  */
 
 import { expect } from '@playwright/test';
@@ -25,7 +24,6 @@ export function registerLayoutSteps(test: any): void {
    */
   Then(
     'I should see the {string} panel',
-    { tags: '@ui or @hybrid' },
     async ({ page, world }: any, panelName: string) => {
       const resolvedName = interpolate(panelName, world.vars);
       const panel = page.getByTestId(`${resolvedName}-panel`);
@@ -41,7 +39,6 @@ export function registerLayoutSteps(test: any): void {
    */
   Then(
     'I should not see the {string} panel',
-    { tags: '@ui or @hybrid' },
     async ({ page, world }: any, panelName: string) => {
       const resolvedName = interpolate(panelName, world.vars);
       const panel = page.getByTestId(`${resolvedName}-panel`);
@@ -58,7 +55,6 @@ export function registerLayoutSteps(test: any): void {
    */
   Then(
     'the {string} panel should be {string}',
-    { tags: '@ui or @hybrid' },
     async ({ page, world }: any, panelName: string, state: string) => {
       const resolvedName = interpolate(panelName, world.vars);
       const panel = page.getByTestId(`${resolvedName}-panel`);
@@ -85,7 +81,6 @@ export function registerLayoutSteps(test: any): void {
    */
   Then(
     'the {string} panel should be full width',
-    { tags: '@ui or @hybrid' },
     async ({ page, world }: any, panelName: string) => {
       const resolvedName = interpolate(panelName, world.vars);
       const panel = page.getByTestId(`${resolvedName}-panel`);
@@ -109,7 +104,6 @@ export function registerLayoutSteps(test: any): void {
    */
   Then(
     'the {string} panel should be narrow',
-    { tags: '@ui or @hybrid' },
     async ({ page, world }: any, panelName: string) => {
       const resolvedName = interpolate(panelName, world.vars);
       const panel = page.getByTestId(`${resolvedName}-panel`);
@@ -136,7 +130,6 @@ export function registerLayoutSteps(test: any): void {
    */
   Then(
     'I should see a split view layout',
-    { tags: '@ui or @hybrid' },
     async ({ page }: any) => {
       // Look for common split view indicators
       const splitContainer = page.locator("[data-testid='split-view'], .split-view, [data-split-view]");
@@ -152,7 +145,6 @@ export function registerLayoutSteps(test: any): void {
    */
   Then(
     'I should not see a split view layout',
-    { tags: '@ui or @hybrid' },
     async ({ page }: any) => {
       const splitContainer = page.locator("[data-testid='split-view'], .split-view, [data-split-view]");
       const count = await splitContainer.count();
@@ -172,7 +164,6 @@ export function registerLayoutSteps(test: any): void {
    */
   Then(
     'the sidebar should be visible',
-    { tags: '@ui or @hybrid' },
     async ({ page }: any) => {
       const sidebar = page.locator("[data-testid='sidebar'], aside, nav.sidebar, .sidebar");
       await expect(sidebar.first()).toBeVisible();
@@ -187,7 +178,6 @@ export function registerLayoutSteps(test: any): void {
    */
   Then(
     'the sidebar should be hidden',
-    { tags: '@ui or @hybrid' },
     async ({ page }: any) => {
       const sidebar = page.locator("[data-testid='sidebar'], aside.sidebar, nav.sidebar");
       const count = await sidebar.count();
@@ -205,7 +195,6 @@ export function registerLayoutSteps(test: any): void {
    */
   Then(
     'the sidebar should be collapsed',
-    { tags: '@ui or @hybrid' },
     async ({ page }: any) => {
       const sidebar = page.locator("[data-testid='sidebar'], aside, nav.sidebar, .sidebar").first();
       const isCollapsed = await sidebar.evaluate((el: HTMLElement) => {
@@ -229,7 +218,6 @@ export function registerLayoutSteps(test: any): void {
    */
   Then(
     'I should see a modal dialog',
-    { tags: '@ui or @hybrid' },
     async ({ page }: any) => {
       const modal = page.locator("[role='dialog'], [data-testid='modal'], .modal, [aria-modal='true']");
       await expect(modal.first()).toBeVisible();
@@ -244,7 +232,6 @@ export function registerLayoutSteps(test: any): void {
    */
   Then(
     'I should not see a modal dialog',
-    { tags: '@ui or @hybrid' },
     async ({ page }: any) => {
       const modal = page.locator("[role='dialog'], [data-testid='modal'], .modal, [aria-modal='true']");
       const count = await modal.count();
@@ -262,7 +249,6 @@ export function registerLayoutSteps(test: any): void {
    */
   Then(
     'I should see the {string} modal',
-    { tags: '@ui or @hybrid' },
     async ({ page, world }: any, modalName: string) => {
       const resolvedName = interpolate(modalName, world.vars);
       const modal = page.getByTestId(`${resolvedName}-modal`);
@@ -284,7 +270,6 @@ export function registerLayoutSteps(test: any): void {
    */
   Given(
     'the viewport is {string} size',
-    { tags: '@ui or @hybrid' },
     async ({ page }: any, sizeName: string) => {
       const sizes: Record<string, { width: number; height: number }> = {
         mobile: { width: 375, height: 667 },
@@ -310,7 +295,6 @@ export function registerLayoutSteps(test: any): void {
    */
   Given(
     'the viewport is {int}x{int}',
-    { tags: '@ui or @hybrid' },
     async ({ page }: any, width: number, height: number) => {
       await page.setViewportSize({ width, height });
     }
@@ -324,7 +308,6 @@ export function registerLayoutSteps(test: any): void {
    */
   Then(
     'the layout should be responsive',
-    { tags: '@ui or @hybrid' },
     async ({ page }: any) => {
       // Store original size
       const original = page.viewportSize();
@@ -358,7 +341,6 @@ export function registerLayoutSteps(test: any): void {
    */
   Then(
     'the {string} tab should be active',
-    { tags: '@ui or @hybrid' },
     async ({ page, world }: any, tabName: string) => {
       const resolvedName = interpolate(tabName, world.vars);
       const tab = page.getByRole('tab', { name: resolvedName });
@@ -374,7 +356,6 @@ export function registerLayoutSteps(test: any): void {
    */
   Then(
     'the {string} tab should not be active',
-    { tags: '@ui or @hybrid' },
     async ({ page, world }: any, tabName: string) => {
       const resolvedName = interpolate(tabName, world.vars);
       const tab = page.getByRole('tab', { name: resolvedName });
@@ -390,7 +371,6 @@ export function registerLayoutSteps(test: any): void {
    */
   When(
     'I click the {string} tab',
-    { tags: '@ui or @hybrid' },
     async ({ page, world }: any, tabName: string) => {
       const resolvedName = interpolate(tabName, world.vars);
       const tab = page.getByRole('tab', { name: resolvedName });

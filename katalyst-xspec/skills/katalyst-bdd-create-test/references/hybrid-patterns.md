@@ -4,7 +4,7 @@ Common patterns for hybrid testing (combining API and UI) with the Katalyst BDD 
 
 ## Core Principle
 
-Hybrid tests use `@hybrid` tag to access both API and UI steps. The typical flow:
+Hybrid tests are scenarios that mix API and UI steps. No tag is needed — every step works in any scenario. Put them in a folder a project reads (e.g. `features/ui/`). The typical flow:
 1. **Setup** - Create test data via API (fast, reliable)
 2. **Test** - Verify behavior in UI (user-facing validation)
 3. **Cleanup** - Remove test data via API (automatic)
@@ -14,7 +14,6 @@ Hybrid tests use `@hybrid` tag to access both API and UI steps. The typical flow
 ### Create via API, Verify in UI
 
 ```gherkin
-@hybrid
 Scenario: Create user via API, verify in admin panel
   # API: Create test data
   Given I am authenticated as an admin via API
@@ -39,7 +38,6 @@ Scenario: Create user via API, verify in admin panel
 ### Setup Data, Test Workflow
 
 ```gherkin
-@hybrid
 Scenario: Test order workflow with pre-created product
   # API: Create product
   Given I am authenticated as an admin via API
@@ -67,7 +65,6 @@ Scenario: Test order workflow with pre-created product
 ### Verify API Changes Reflect in UI
 
 ```gherkin
-@hybrid
 Scenario: API update reflects in UI
   # API: Create and update
   Given I am authenticated as an admin via API
@@ -96,7 +93,6 @@ Scenario: API update reflects in UI
 ### Share IDs Between Layers
 
 ```gherkin
-@hybrid
 Scenario: Use API-created ID in UI navigation
   # API: Create resource
   Given I am authenticated as an admin via API
@@ -117,7 +113,6 @@ Scenario: Use API-created ID in UI navigation
 ### Share Data Between Layers
 
 ```gherkin
-@hybrid
 Scenario: Verify API data in UI
   # Setup variables
   Given I generate a UUID and store as "runId"
@@ -148,7 +143,6 @@ Scenario: Verify API data in UI
 ### Separate API and UI Auth
 
 ```gherkin
-@hybrid
 Scenario: Different auth for API vs UI
   # API: Admin creates data
   Given I am authenticated as an admin via API
@@ -169,7 +163,6 @@ Scenario: Different auth for API vs UI
 ### Use API Token in UI
 
 ```gherkin
-@hybrid
 Scenario: Get token from API, use in UI
   # API: Login and get token
   When I POST "/auth/login" with JSON body:
@@ -190,7 +183,6 @@ Scenario: Get token from API, use in UI
 ### Multi-Step Business Process
 
 ```gherkin
-@hybrid
 Scenario: Complete order processing workflow
   # API: Setup - Create customer and product
   Given I am authenticated as an admin via API
@@ -228,7 +220,6 @@ Scenario: Complete order processing workflow
 ### Data Synchronization Test
 
 ```gherkin
-@hybrid
 Scenario: Real-time sync between API and UI
   Given I am authenticated as an admin via API
   Given I generate a UUID and store as "runId"
@@ -264,7 +255,6 @@ Scenario: Real-time sync between API and UI
 ### Clean State Between Tests
 
 ```gherkin
-@hybrid
 Feature: User Settings
   
   Background:
@@ -301,7 +291,6 @@ Feature: User Settings
 ### Seed Multiple Resources
 
 ```gherkin
-@hybrid
 Scenario: Dashboard with multiple data types
   Given I am authenticated as an admin via API
   Given I generate a UUID and store as "runId"
@@ -339,7 +328,6 @@ Scenario: Dashboard with multiple data types
 ### Test Error States
 
 ```gherkin
-@hybrid
 Scenario: UI shows error when API resource deleted
   # API: Create and immediately delete
   Given I am authenticated as an admin via API
@@ -361,7 +349,6 @@ Scenario: UI shows error when API resource deleted
 ## Complete Example: User Onboarding Flow
 
 ```gherkin
-@hybrid
 Feature: User Onboarding
   As a product owner
   I want to test the complete onboarding flow

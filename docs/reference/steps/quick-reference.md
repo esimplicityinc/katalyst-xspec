@@ -1,8 +1,8 @@
 # Step Quick Reference
 
-All available steps at a glance. Click step names for detailed documentation.
+All available steps at a glance. Steps are untagged: once registered, any step works in any scenario, so you can mix API, UI and shared steps freely.
 
-## API Steps (`@api` or `@hybrid`)
+## API Steps
 
 | Step | Description |
 |------|-------------|
@@ -26,7 +26,7 @@ All available steps at a glance. Click step names for detailed documentation.
 
 ---
 
-## UI Steps (`@ui` or `@hybrid`)
+## UI Steps
 
 ### Navigation
 
@@ -91,26 +91,28 @@ All available steps at a glance. Click step names for detailed documentation.
 
 ---
 
-## TUI Steps (`@tui`)
+## TUI Steps
 
 | Step | Description |
 |------|-------------|
-| `When I spawn the terminal with {string}` | Start terminal with command |
-| `When I type {string} in terminal` | Type text |
-| `When I press Enter in terminal` | Press Enter key |
-| `When I press {string} in terminal` | Press any key |
-| `When I send Ctrl+C to terminal` | Send interrupt |
-| `Then I should see {string} in terminal` | Assert text visible |
-| `Then the terminal should contain text matching {string}` | Assert regex match |
-| `Then the terminal output should not be empty` | Assert has output |
-| `Then the terminal process should exit` | Assert process ended |
-| `Then the terminal process should exit with code {int}` | Assert exit code |
+| `Given I start the TUI application` | Start the configured CLI |
+| `When I type {string}` | Type text |
+| `When I press enter` | Press Enter key |
+| `When I press {string}` | Press any key |
+| `When I fill the TUI form:` | Fill multiple fields (UI uses `I fill the form:`) |
+| `Then I should see {string}` | Wait for text |
+| `Then I should see {string} in the terminal` | Wait for text (alt syntax) |
+| `Then the screen should contain {string}` | Immediate text check |
+| `Then the screen should match pattern {string}` | Assert regex match |
+| `When I quit the application` | Quit the CLI |
+
+> TUI has no `I should see text {string}` step; that wording belongs to the UI steps.
 
 [Full TUI Steps Reference](./tui-steps.md)
 
 ---
 
-## Shared Steps (All tags)
+## Shared Steps
 
 | Step | Description |
 |------|-------------|
@@ -123,14 +125,9 @@ All available steps at a glance. Click step names for detailed documentation.
 
 ---
 
-## Tag Requirements
+## Where Steps Work
 
-| Tag | Available Steps |
-|-----|-----------------|
-| `@api` | API steps, Shared steps |
-| `@ui` | UI steps, Shared steps |
-| `@tui` | TUI steps, Shared steps |
-| `@hybrid` | API steps, UI steps, Shared steps |
+Every registered step works in every scenario — no tags required. Playwright projects choose which feature files run by folder (e.g. `features/api/`, `features/ui/`). Tags such as `@smoke` or `@wip` are optional and only used for filtering. See [Tags](../../concepts/tag-system.md).
 
 ---
 
@@ -139,7 +136,6 @@ All available steps at a glance. Click step names for detailed documentation.
 ### API: Create and verify resource
 
 ```gherkin
-@api
 Scenario: Create user
   Given I am authenticated as an admin via API
   When I POST "/users" with JSON body:
@@ -154,7 +150,6 @@ Scenario: Create user
 ### UI: Login flow
 
 ```gherkin
-@ui
 Scenario: Login
   Given I navigate to "/login"
   When I fill in "username" with "testuser"
@@ -167,7 +162,6 @@ Scenario: Login
 ### Hybrid: API setup, UI verify
 
 ```gherkin
-@hybrid
 Scenario: Create via API, verify in UI
   Given I am authenticated as an admin via API
   When I POST "/users" with JSON body:
@@ -189,4 +183,4 @@ Scenario: Create via API, verify in UI
 - [TUI Steps Reference](./tui-steps.md)
 - [Shared Steps Reference](./shared-steps.md)
 - [Hybrid Steps Reference](./hybrid-steps.md)
-- [Tag System](../../concepts/tag-system.md)
+- [Tags](../../concepts/tag-system.md)

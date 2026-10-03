@@ -132,7 +132,7 @@ sequenceDiagram
 ### Step Definition Structure
 
 ```typescript
-When('I GET {string}', { tags: '@api' }, async ({ api, world }, path) => {
+When('I GET {string}', async ({ api, world }, path) => {
   // 1. Interpolate variables
   const resolvedPath = interpolate(path, world.vars);
   

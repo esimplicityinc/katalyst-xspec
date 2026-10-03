@@ -17,6 +17,19 @@ If you're in a monorepo, ensure you're in the correct workspace directory.
 
 ---
 
+### "Executable doesn't exist" when running UI tests
+
+Playwright's browser hasn't been downloaded yet.
+
+**Solution:**
+```bash
+npx playwright install chromium
+```
+
+This is a one-time step after `npm install`.
+
+---
+
 ### "tui-tester is not installed"
 
 TUI testing is optional and requires an additional package.
@@ -83,7 +96,7 @@ A step in your feature file doesn't match any registered step definition.
 **Common causes:**
 1. Missing step registration in fixtures
 2. Typo in step text
-3. Wrong tag on scenario
+3. Using a step that was renamed or removed in 0.7.0 (TUI: `I fill the form:` is now `I fill the TUI form:`; `Then I should see text {string}` is UI-only, use `Then I should see {string}` for TUI)
 
 **Solution:**
 
@@ -97,7 +110,7 @@ registerUiSteps(test);
 
 2. Check step spelling matches exactly (case-sensitive)
 
-3. Ensure your scenario has the correct tag (`@api`, `@ui`, `@tui`, `@hybrid`)
+3. Check the step exists in the [Step Reference](./reference/steps/quick-reference.md). Scenarios don't need any tag; every registered step works in any scenario.
 
 4. **Generate step stubs** for missing steps:
 ```bash
@@ -110,29 +123,33 @@ import './generated-stubs.js';
 
 5. **Use `@wip` tag** to exclude incomplete features from generation:
 ```gherkin
-@api @wip
+@wip
 Feature: Payment Processing
   # Excluded until steps are implemented
 ```
 
-Configure your project to exclude `@wip`:
+Configure your projects to exclude `@wip`:
 ```typescript
-tags: '@api and not @wip'
+tags: tagsForProject({
+  defaultExcludes: 'not @Skip and not @ignore and not @wip',
+  extraTags: resolveExtraTags(process.env.TEST_TAGS),
+}),
 ```
 
 See [Managing Work-in-Progress Features](./concepts/tag-system.md#managing-work-in-progress-features) for details.
 
 ---
 
-### Steps work in one scenario but not another
+### A scenario isn't running
 
-Steps are tag-scoped. An `@api` step won't run in a `@ui`-only scenario.
+Since 0.7.0, steps are untagged and an untagged scenario is no longer skipped. If a scenario seems to be missing:
 
-**Solution:**
-
-Check the step's tag requirement in the [Step Reference](./reference/steps/).
-
-For steps that work across test types, use `@hybrid` tag on your scenario.
+1. Check the feature file is in the folder its project reads (e.g. `features/api/**/*.feature` for the `api` project).
+2. Check it isn't tagged `@Skip`/`@ignore`, and that `TEST_TAGS` isn't filtering it out.
+3. If `playwright.config.*` still has filters like `tags: '@ui'` from an older version, run:
+   ```bash
+   npx katalyst-xspec upgrade --migrate
+   ```
 
 ---
 
@@ -142,7 +159,7 @@ You're using TUI steps without initializing the TUI adapter.
 
 **Solution:**
 
-Ensure your scenario has the `@tui` tag and your fixtures configure TUI:
+Ensure `registerTuiSteps(test)` is enabled in `steps.ts` and your fixtures configure TUI:
 
 ```typescript
 createBddTest({
@@ -335,15 +352,15 @@ NODE_ENV=staging npm test
 
 ### Tags not filtering correctly
 
-Tag expressions have specific syntax.
+Tags are optional and only used for your own grouping. To run one area, use `--project api` / `--project ui` (or `TEST_TAGS`). Tag expressions have specific syntax.
 
 **Examples:**
 ```bash
 # Single tag
-npx playwright test --grep "@api"
+npx playwright test --grep "@smoke"
 
 # AND
-npx playwright test --grep "@api and @smoke"
+npx playwright test --grep "@smoke and @critical"
 
 # OR
 npx playwright test --grep "@smoke or @critical"
@@ -352,7 +369,7 @@ npx playwright test --grep "@smoke or @critical"
 npx playwright test --grep "not @slow"
 
 # Complex
-npx playwright test --grep "@api and (@smoke or @critical) and not @external"
+npx playwright test --grep "@regression and (@smoke or @critical) and not @external"
 ```
 
 ---
@@ -452,7 +469,7 @@ npx katalyst-xspec upgrade --migrate
 
 If your issue isn't covered here:
 
-1. Check the [Step Reference](./reference/steps/) for correct step syntax
+1. Check the [Step Reference](./reference/steps/quick-reference.md) for correct step syntax
 2. Review [Architecture](./concepts/architecture.md) to understand data flow
 3. Enable debug logging: `DEBUG=* npm test`
 4. Open an issue with:
@@ -468,5 +485,5 @@ If your issue isn't covered here:
 - [Installation](./getting-started/installation.md)
 - [Quick Start](./getting-started/quick-start.md)
 - [Upgrading](./guides/upgrading.md)
-- [Tag System](./concepts/tag-system.md)
+- [Tags](./concepts/tag-system.md)
 - [CI/CD Guide](./guides/ci-cd.md)

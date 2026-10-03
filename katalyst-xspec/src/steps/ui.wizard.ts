@@ -112,45 +112,44 @@ function parseRegex(input: string): RegExp {
 export function registerWizardSteps(test: any): void {
   const { Given, When, Then } = createBdd(test as any) as any;
 
-  Given('I open {string} page', { tags: '@ui or @hybrid' }, async ({ ui, world }, urlOrVar: string) => {
+  Given('I open {string} page', async ({ ui, world }, urlOrVar: string) => {
     await ui.goto(resolveValue(urlOrVar, world));
   });
 
-  Given('I open {string} in the browser', { tags: '@ui or @hybrid' }, async ({ ui, world }, urlOrVar: string) => {
+  Given('I open {string} in the browser', async ({ ui, world }, urlOrVar: string) => {
     await ui.goto(resolveValue(urlOrVar, world));
   });
 
-  When('I go back in the browser', { tags: '@ui or @hybrid' }, async ({ ui }) => {
+  When('I go back in the browser', async ({ ui }) => {
     await ui.goBack();
   });
 
-  When('I save the current URL as {string}', { tags: '@ui or @hybrid' }, async ({ ui, world }, varName: string) => {
+  When('I save the current URL as {string}', async ({ ui, world }, varName: string) => {
     world.vars[varName] = await ui.getCurrentUrl();
   });
 
-  When('I save the current url as {string}', { tags: '@ui or @hybrid' }, async ({ ui, world }, varName: string) => {
+  When('I save the current url as {string}', async ({ ui, world }, varName: string) => {
     world.vars[varName] = await ui.getCurrentUrl();
   });
 
-  Then('I zoom to {string} in the browser', { tags: '@ui or @hybrid' }, async ({ ui, world }, scale: string) => {
+  Then('I zoom to {string} in the browser', async ({ ui, world }, scale: string) => {
     await ui.zoomTo(parseNumber(scale, world));
   });
 
-  When('I reload the page', { tags: '@ui or @hybrid' }, async ({ ui }) => {
+  When('I reload the page', async ({ ui }) => {
     await ui.reload();
   });
 
-  Then('I wait {string} seconds', { tags: '@ui or @hybrid' }, async ({ ui, world }, seconds: string) => {
+  Then('I wait {string} seconds', async ({ ui, world }, seconds: string) => {
     await ui.waitSeconds(parseNumber(seconds, world));
   });
 
-  Then('I wait for the page to load', { tags: '@ui or @hybrid' }, async ({ ui }) => {
+  Then('I wait for the page to load', async ({ ui }) => {
     await ui.waitForPageLoad();
   });
 
   When(
     'I get a part of the URL based on {string} regular expression and save it as {string}',
-    { tags: '@ui or @hybrid' },
     async ({ ui, world }, regexString: string, varName: string) => {
       const url = await ui.getCurrentUrl();
       const regex = parseRegex(resolveValue(regexString, world));
@@ -160,7 +159,7 @@ export function registerWizardSteps(test: any): void {
     },
   );
 
-  Then('I {string} {string}', { tags: '@ui or @hybrid' }, async ({ ui, world }, action: string, value: string) => {
+  Then('I {string} {string}', async ({ ui, world }, action: string, value: string) => {
     const verb = action.trim().toLowerCase();
     const resolved = resolveValue(value, world);
     if (verb === 'type') {
@@ -176,7 +175,6 @@ export function registerWizardSteps(test: any): void {
 
   When(
     'I {string} the {string} element that contains {string}',
-    { tags: '@ui or @hybrid' },
     async ({ ui, world }, clickMode: string, elementType: string, text: string) => {
       await ui.clickElementThatContains(
         asClickMode(resolveValue(clickMode, world)),
@@ -188,7 +186,6 @@ export function registerWizardSteps(test: any): void {
 
   When(
     'I {string} the {string} element with {string} {string}',
-    { tags: '@ui or @hybrid' },
     async ({ ui, world }, clickMode: string, ordinal: string, text: string, method: string) => {
       await ui.clickElementWith(
         asClickMode(resolveValue(clickMode, world)),
@@ -199,13 +196,12 @@ export function registerWizardSteps(test: any): void {
     },
   );
 
-  When('I click on the top left corner of the page', { tags: '@ui or @hybrid' }, async ({ page }) => {
+  When('I click on the top left corner of the page', async ({ page }) => {
     await page.mouse.click(0, 0);
   });
 
   When(
     'If its visible, I {string} the {string} element with {string} {string}',
-    { tags: '@ui or @hybrid' },
     async ({ page, ui, world }, clickMode: string, ordinal: string, text: string, method: string) => {
       const idx = parseOrdinalIndex(ordinal, world);
       const resolvedText = resolveValue(text, world);
@@ -219,13 +215,12 @@ export function registerWizardSteps(test: any): void {
     },
   );
 
-  Then('I fill {string} into the {string} dropdown', { tags: '@ui or @hybrid' }, async ({ ui, world }, value: string, label: string) => {
+  Then('I fill {string} into the {string} dropdown', async ({ ui, world }, value: string, label: string) => {
     await ui.fillDropdown(resolveValue(value, world), resolveValue(label, world));
   });
 
   When(
     'I {string} {string} in the {string} element with {string} {string}',
-    { tags: '@ui or @hybrid' },
     async ({ ui, world }, action: string, value: string, ordinal: string, text: string, method: string) => {
       await ui.inputInElement(
         asInputMode(resolveValue(action, world)),
@@ -239,7 +234,6 @@ export function registerWizardSteps(test: any): void {
 
   Then(
     'I verify if a new tab which URL {string} {string} opens',
-    { tags: '@ui or @hybrid' },
     async ({ ui, world }, mode: string, expected: string) => {
       await ui.expectNewTabUrl(asUrlAssertMode(resolveValue(mode, world)), resolveValue(expected, world));
     },
@@ -247,31 +241,29 @@ export function registerWizardSteps(test: any): void {
 
   Then(
     'I verify if a new tab which url {string} {string} opens',
-    { tags: '@ui or @hybrid' },
     async ({ ui, world }, mode: string, expected: string) => {
       await ui.expectNewTabUrl(asUrlAssertMode(resolveValue(mode, world)), resolveValue(expected, world));
     },
   );
 
-  Then('I verify if the URL {string} {string}', { tags: '@ui or @hybrid' }, async ({ ui, world }, mode: string, expected: string) => {
+  Then('I verify if the URL {string} {string}', async ({ ui, world }, mode: string, expected: string) => {
     await ui.expectUrl(asUrlAssertMode(resolveValue(mode, world)), resolveValue(expected, world));
   });
 
-  Then('I verify if the url {string} {string}', { tags: '@ui or @hybrid' }, async ({ ui, world }, mode: string, expected: string) => {
+  Then('I verify if the url {string} {string}', async ({ ui, world }, mode: string, expected: string) => {
     await ui.expectUrl(asUrlAssertMode(resolveValue(mode, world)), resolveValue(expected, world));
   });
 
-  Then('I verify if the URL {string} {string} opens', { tags: '@ui or @hybrid' }, async ({ ui, world }, mode: string, expected: string) => {
+  Then('I verify if the URL {string} {string} opens', async ({ ui, world }, mode: string, expected: string) => {
     await ui.expectUrl(asUrlAssertMode(resolveValue(mode, world)), resolveValue(expected, world));
   });
 
-  Then('I verify if the url {string} {string} opens', { tags: '@ui or @hybrid' }, async ({ ui, world }, mode: string, expected: string) => {
+  Then('I verify if the url {string} {string} opens', async ({ ui, world }, mode: string, expected: string) => {
     await ui.expectUrl(asUrlAssertMode(resolveValue(mode, world)), resolveValue(expected, world));
   });
 
   Then(
     'I verify that a {string} element with {string} text {string} visible',
-    { tags: '@ui or @hybrid' },
     async ({ ui, world }, elementType: string, text: string, assertion: string) => {
       const normalized = resolveValue(assertion, world).trim().toLowerCase();
       const shouldBeVisible = normalized === 'is';
@@ -284,7 +276,6 @@ export function registerWizardSteps(test: any): void {
 
   Then(
     'I verify that {string} element with {string} {string} is {string}',
-    { tags: '@ui or @hybrid' },
     async ({ ui, world }, ordinal: string, text: string, method: string, state: string) => {
       await ui.expectElementState(
         resolveValue(ordinal, world),
@@ -297,7 +288,6 @@ export function registerWizardSteps(test: any): void {
 
   Then(
     'I verify that {string} element with {string} {string} becomes {string} during {string} seconds',
-    { tags: '@ui or @hybrid' },
     async ({ ui, world }, ordinal: string, text: string, method: string, state: string, seconds: string) => {
       await ui.expectElementStateWithin(
         resolveValue(ordinal, world),

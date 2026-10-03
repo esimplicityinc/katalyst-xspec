@@ -2,7 +2,6 @@
  * UI Form Step Definitions
  *
  * Steps for bulk form filling using Gherkin data tables.
- * Tagged with @ui or @hybrid for selective execution.
  */
 
 import { createBdd } from 'playwright-bdd';
@@ -23,7 +22,6 @@ export function registerFormSteps(test: any): void {
    */
   When(
     'I fill the form:',
-    { tags: '@ui or @hybrid' },
     async ({ ui, world }: any, dataTable: any) => {
       const rows = dataTable.hashes ? dataTable.hashes() : dataTable.rawTable?.slice(1).map((row: string[]) => ({
         field: row[0],
@@ -49,7 +47,6 @@ export function registerFormSteps(test: any): void {
    */
   When(
     'I fill the form with {string} locators:',
-    { tags: '@ui or @hybrid' },
     async ({ ui, world }: any, locatorMethod: string, dataTable: any) => {
       const rows = dataTable.hashes ? dataTable.hashes() : dataTable.rawTable?.slice(1).map((row: string[]) => ({
         field: row[0],
@@ -75,7 +72,6 @@ export function registerFormSteps(test: any): void {
    */
   When(
     'I fill and submit the form:',
-    { tags: '@ui or @hybrid' },
     async ({ ui, world }: any, dataTable: any) => {
       const rows = dataTable.hashes ? dataTable.hashes() : dataTable.rawTable?.slice(1).map((row: string[]) => ({
         field: row[0],
@@ -103,7 +99,6 @@ export function registerFormSteps(test: any): void {
    */
   Given(
     'I clear and fill the form:',
-    { tags: '@ui or @hybrid' },
     async ({ page, world }: any, dataTable: any) => {
       const rows = dataTable.hashes ? dataTable.hashes() : dataTable.rawTable?.slice(1).map((row: string[]) => ({
         field: row[0],

@@ -13,7 +13,7 @@ Demonstrates browser UI testing with @esimplicitylabs/katalyst-xspec using The I
 
 ## Prerequisites
 
-- Node.js >= 18.0.0
+- Node.js >= 20
 - npm >= 9.0.0
 - Playwright browsers
 

@@ -21,7 +21,7 @@ This is `katalyst-xspec`, a reusable Playwright-BDD testing framework providing:
 Uses hexagonal (ports & adapters) architecture:
 - **Ports**: `ApiPort`, `UiPort`, `TuiPort`, `AuthPort`, `CleanupPort`
 - **Adapters**: `PlaywrightApiAdapter`, `PlaywrightUiAdapter`, `TuiTesterAdapter`, etc.
-- **Tags**: `@api`, `@ui`, `@tui`, `@hybrid` control which steps are available
+- **Steps**: built-in steps are untagged and work in any scenario; Playwright projects select feature files by folder. Tags are optional (user grouping like `@smoke`, filtered via `TEST_TAGS`)
 
 ## Git Commit Policy
 

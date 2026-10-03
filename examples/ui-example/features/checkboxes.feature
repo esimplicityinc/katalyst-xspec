@@ -1,4 +1,3 @@
-@ui
 Feature: Checkboxes
   As a user
   I want to interact with checkboxes

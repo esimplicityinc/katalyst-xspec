@@ -12,7 +12,7 @@ Demonstrates REST API testing with @esimplicitylabs/katalyst-xspec using JSONPla
 
 ## Prerequisites
 
-- Node.js >= 18.0.0
+- Node.js >= 20
 - npm >= 9.0.0
 
 ## Setup
@@ -99,7 +99,6 @@ export const { test, expect } = createBddTest({
 Then use in features:
 
 ```gherkin
-@api
 Scenario: Authenticated request
   Given I am authenticated as an admin via API
   When I GET "/admin/users"

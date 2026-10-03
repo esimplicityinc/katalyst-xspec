@@ -101,8 +101,8 @@ import { tagsForProject } from '@esimplicitylabs/katalyst-xspec';
 #### Signature
 
 ```typescript
-function tagsForProject(options: {
-  projectTag: string;
+function tagsForProject(options?: {
+  projectTag?: string;
   extraTags?: string;
   defaultExcludes?: string;
 }): string
@@ -112,8 +112,8 @@ function tagsForProject(options: {
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `projectTag` | `string` | Required | Main project tag (e.g., `'@api'`) |
-| `extraTags` | `string` | `undefined` | Additional tag filter |
+| `projectTag` | `string` | `undefined` | Optional tag to limit the project to (e.g. `'@smoke'`). Not needed for the built-in steps, which work in any scenario. |
+| `extraTags` | `string` | `undefined` | Additional tag filter, usually `resolveExtraTags(process.env.TEST_TAGS)` |
 | `defaultExcludes` | `string` | `'not @Skip and not @ignore'` | Tags to exclude |
 
 #### Returns
@@ -124,23 +124,26 @@ Tag expression string.
 
 ```typescript
 // Basic usage
-tagsForProject({ projectTag: '@api' })
-// Result: "not @Skip and not @ignore and @api"
+tagsForProject()
+// Result: "not @Skip and not @ignore"
 
 // With extra tags
-tagsForProject({ projectTag: '@api', extraTags: '@smoke' })
-// Result: "not @Skip and not @ignore and @api and (@smoke)"
+tagsForProject({ extraTags: '@smoke' })
+// Result: "not @Skip and not @ignore and (@smoke)"
 
 // Complex extra tags
-tagsForProject({ projectTag: '@ui', extraTags: '@smoke or @critical' })
-// Result: "not @Skip and not @ignore and @ui and (@smoke or @critical)"
+tagsForProject({ extraTags: '@smoke or @critical' })
+// Result: "not @Skip and not @ignore and (@smoke or @critical)"
+
+// Optional project tag
+tagsForProject({ projectTag: '@regression' })
+// Result: "not @Skip and not @ignore and @regression"
 
 // Custom excludes
 tagsForProject({ 
-  projectTag: '@api', 
   defaultExcludes: 'not @Skip and not @wip and not @flaky' 
 })
-// Result: "not @Skip and not @wip and not @flaky and @api"
+// Result: "not @Skip and not @wip and not @flaky"
 ```
 
 ---
@@ -304,33 +307,27 @@ dotenv.config();
 // Get extra tags from environment
 const extraTags = resolveExtraTags(process.env.TEST_TAGS);
 
-// Define BDD projects
+// Define BDD projects (each selects feature files by folder;
+// any step works in any scenario)
 const apiBdd = defineBddProject({
   name: 'api',
   features: 'features/api/**/*.feature',
   steps: 'features/steps/**/*.ts',
-  tags: tagsForProject({ projectTag: '@api', extraTags }),
+  tags: tagsForProject({ extraTags }),
 });
 
 const uiBdd = defineBddProject({
   name: 'ui',
   features: 'features/ui/**/*.feature',
   steps: 'features/steps/**/*.ts',
-  tags: tagsForProject({ projectTag: '@ui', extraTags }),
+  tags: tagsForProject({ extraTags }),
 });
 
 const tuiBdd = defineBddProject({
   name: 'tui',
   features: 'features/tui/**/*.feature',
   steps: 'features/steps/**/*.ts',
-  tags: tagsForProject({ projectTag: '@tui', extraTags }),
-});
-
-const hybridBdd = defineBddProject({
-  name: 'hybrid',
-  features: 'features/hybrid/**/*.feature',
-  steps: 'features/steps/**/*.ts',
-  tags: tagsForProject({ projectTag: '@hybrid', extraTags }),
+  tags: tagsForProject({ extraTags }),
 });
 
 export default defineConfig({
@@ -354,7 +351,7 @@ export default defineConfig({
     screenshot: 'only-on-failure',
   },
   
-  projects: [apiBdd, uiBdd, tuiBdd, hybridBdd],
+  projects: [apiBdd, uiBdd, tuiBdd],
 });
 ```
 
@@ -440,11 +437,13 @@ TEST_TAGS=smoke,critical npm test
 
 # Via Playwright grep
 npx playwright test --grep "@smoke"
-npx playwright test --grep "@smoke and @api"
+npx playwright test --grep "@smoke and not @slow"
 npx playwright test --grep "not @slow"
 ```
 
 ### Project Selection
+
+Each project runs the feature files in its folder.
 
 ```bash
 # Run specific project
@@ -468,5 +467,5 @@ TEST_TAGS=@smoke npx playwright test --project=api
 ## Related Topics
 
 - [Project Setup](../../getting-started/project-setup.md) - Full configuration
-- [Tag System](../../concepts/tag-system.md) - Tag filtering details
+- [Tags](../../concepts/tag-system.md) - Tag filtering details
 - [CI/CD Integration](../../guides/ci-cd.md) - CI configuration

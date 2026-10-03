@@ -1,6 +1,6 @@
 # UI Steps Reference
 
-Complete reference for UI steps. Available in `@ui` and `@hybrid` scenarios.
+Complete reference for UI steps. Steps are untagged and work in any scenario (including alongside API steps). UI tests need a browser: `npx playwright install chromium`.
 
 ## Navigation Steps
 
@@ -496,7 +496,6 @@ Then I zoom to "150" in the browser
 ## Complete UI Example
 
 ```gherkin
-@ui
 Feature: User Login
 
   Scenario: Successful login flow

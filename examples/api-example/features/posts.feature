@@ -1,4 +1,3 @@
-@api
 Feature: Posts API
   As a developer
   I want to test the Posts API

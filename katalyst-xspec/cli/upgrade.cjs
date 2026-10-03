@@ -118,6 +118,56 @@ function removeGithubPackagesNpmrc(cwd, { dryRun = false } = {}) {
 }
 
 /**
+ * Before 0.7.0, steps and Playwright projects were scoped by type tags
+ * (@api/@ui/@hybrid/@tui). Steps no longer use them, and a project filter like
+ * `tags: '@ui'` silently drops any scenario without the tag. Remove those
+ * filters from playwright.config.* (other tag expressions are left alone).
+ */
+const TYPE_TAG = String.raw`@(?:api|ui|hybrid|tui)`;
+const TYPE_TAG_FILTER_RES = [
+  // Whole-line `tags: '@ui',` inside a multi-line object.
+  new RegExp(String.raw`^[ \t]*tags:\s*(['"])${TYPE_TAG}\1,?[ \t]*\r?\n`, 'gm'),
+  // Inline `, tags: '@ui'` in a one-line object.
+  new RegExp(String.raw`,\s*tags:\s*(['"])${TYPE_TAG}\1(?=\s*[,}])`, 'g'),
+  // Leading `tags: '@ui'` right after `{` in a one-line object.
+  new RegExp(String.raw`(?<=\{)\s*tags:\s*(['"])${TYPE_TAG}\1\s*,?`, 'g'),
+  // `projectTag: '@ui'` inside tagsForProject({ ... }), with its separator.
+  new RegExp(String.raw`projectTag:\s*(['"])${TYPE_TAG}\1\s*,?\s*`, 'g'),
+];
+
+function playwrightConfigFiles(cwd) {
+  if (!fs.existsSync(cwd)) return [];
+  return fs.readdirSync(cwd).filter((f) => /^playwright\.config\.(ts|js|mts|cts|mjs|cjs)$/.test(f));
+}
+
+function stripTypeTagFiltersFromText(text) {
+  const stripped = TYPE_TAG_FILTER_RES.reduce((acc, re) => acc.replace(re, ''), text);
+  // Tidy objects left empty, e.g. `tagsForProject({ })` -> `tagsForProject({})`.
+  return stripped === text ? text : stripped.replace(/\(\{\s+\}\)/g, '({})');
+}
+
+function hasTypeTagFilters(cwd) {
+  return playwrightConfigFiles(cwd).some((f) => {
+    const text = fs.readFileSync(path.join(cwd, f), 'utf8');
+    return stripTypeTagFiltersFromText(text) !== text;
+  });
+}
+
+function stripTypeTagFilters(cwd, { dryRun = false } = {}) {
+  const changed = [];
+  for (const f of playwrightConfigFiles(cwd)) {
+    const full = path.join(cwd, f);
+    const text = fs.readFileSync(full, 'utf8');
+    const updated = stripTypeTagFiltersFromText(text);
+    if (updated !== text) {
+      if (!dryRun) fs.writeFileSync(full, updated);
+      changed.push(f);
+    }
+  }
+  return changed;
+}
+
+/**
  * Before 0.5.0 the CLIs shipped in a separate package with their own binaries
  * (create-/upgrade-stack-tests, upgrade-katalyst-xspec, generate-step-stubs).
  * Point package.json scripts at the single `katalyst-xspec` command instead.
@@ -503,7 +553,7 @@ function getTemplates() {
       clean: 'rm -rf .features-gen node_modules test-results storage cucumber-report playwright-report'
     },
     devDependencies: {
-      '@esimplicitylabs/katalyst-xspec': '^0.6.0',
+      '@esimplicitylabs/katalyst-xspec': '^0.7.0',
       '@playwright/test': '^1.49.0',
       'playwright-bdd': '^9.1.0',
       dotenv: '^16.1.4',
@@ -658,6 +708,7 @@ async function migrate(cwd, options) {
     }
     
     // Backup original steps.ts and fixtures.ts for reference
+    fs.mkdirSync(path.join(backupDir, 'steps'), { recursive: true });
     if (existingStepsTs) {
       fs.writeFileSync(path.join(backupDir, 'steps', 'steps.ts.original'), existingStepsTs);
     }
@@ -732,6 +783,11 @@ async function migrate(cwd, options) {
   }
   if (rewriteLegacyScripts(cwd, { dryRun: options.dryRun })) {
     console.log('  package.json: scripts now use the katalyst-xspec command');
+  }
+  const untagged = stripTypeTagFilters(cwd, { dryRun: options.dryRun });
+  if (untagged.length) {
+    console.log(`  ${untagged.join(', ')}: removed @api/@ui/@hybrid/@tui project tag filters`);
+    if (!options.dryRun) results.updated.push(...untagged);
   }
   if (options.dryRun) {
     console.log('  (dry run - no files actually written)');
@@ -945,6 +1001,10 @@ async function main() {
   if (!installed.legacy && !options.check && rewriteLegacyScripts(cwd)) {
     log('Updated package.json scripts to use the katalyst-xspec command');
   }
+  if (hasTypeTagFilters(cwd)) {
+    log('Note: playwright.config filters projects by @api/@ui/@hybrid/@tui tags, which are no longer');
+    log('needed and silently skip untagged scenarios. Run `katalyst-xspec upgrade --migrate` to remove them.');
+  }
 
   if (installed.legacy) {
     if (options.check) {
@@ -1009,6 +1069,8 @@ module.exports = {
   getInstalledVersion,
   rewriteLegacyImports,
   rewriteLegacyScripts,
+  stripTypeTagFilters,
+  hasTypeTagFilters,
   removeGithubPackagesNpmrc,
   mergePackageJson,
 };

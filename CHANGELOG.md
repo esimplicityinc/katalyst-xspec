@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-10-02
+
+### Breaking Changes
+
+- **The `@api` / `@ui` / `@hybrid` / `@tui` type tags are gone.** Built-in steps are no longer scoped to a tag, so any step works in any scenario. API and UI steps can be mixed freely, and there's no `@hybrid` tag or project to set up. Scaffolded Playwright projects now pick feature files by folder only. Before, a project filter like `tags: '@ui'` silently skipped any scenario that lacked the tag.
+  - **Action required:** run `npx katalyst-xspec upgrade --migrate`. It removes `tags: '@api'`-style filters and `projectTag: '@ui'` from `playwright.config.*`, and plain `upgrade` now warns if they're still there.
+  - Feature files that still have `@api`/`@ui` tags keep working; the tags just don't do anything now.
+  - Your own tags (`@smoke`, `@wip`, …) and `TEST_TAGS` filtering work as before, and scenarios tagged `@Skip` or `@ignore` are still skipped.
+- **Two TUI steps changed** so their wording no longer clashes with UI steps now that tags don't keep them apart:
+  - The TUI copy of `Then I should see text {string}` is removed. Use `Then I should see {string}` (or `… in the terminal`); the wording now always means the UI step.
+  - TUI `When I fill the form:` is renamed **`When I fill the TUI form:`**. The UI step keeps `I fill the form:`.
+
+### Changed
+
+- **`tagsForProject()`:** `projectTag` is now optional, so `tagsForProject()` returns `not @Skip and not @ignore`.
+- **`katalyst-xspec init` names the project after its folder.** For example, `init my-tests` gives `"name": "my-tests"`, and `init .` uses the current folder's name, made npm-safe. Before, every project was called `katalyst-xspec`.
+- **The scaffolded examples pass out of the box.** `init` creates `features/api/example.feature` (JSONPlaceholder) and `features/ui/example.feature` (Sauce Demo). Both use public demo sites with absolute URLs, so a first `npm test` passes with no `.env`. The `localhost:3000` placeholders and the hybrid/TUI examples that failed until configured are no longer scaffolded.
+- **`init` lists `npx playwright install chromium` in its next steps,** and the generated README and the docs cover it.
+- **Docs:** rewritten for the above, including a new quick start, a "Tags" concept page and troubleshooting for scenarios that don't run. Node.js >= 20 is now listed everywhere.
+
+### Fixed
+
+- **`upgrade --migrate` no longer crashes on projects without custom step files.** It failed with `ENOENT … steps/steps.ts.original` because the backup `steps/` folder was only created when custom step files existed, which isn't the case for a freshly scaffolded project.
+
 ## [0.6.0] - 2026-10-02
 
 ### Breaking Changes

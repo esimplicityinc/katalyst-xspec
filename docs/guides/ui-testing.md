@@ -4,7 +4,7 @@ Comprehensive guide to browser-based UI testing with @esimplicitylabs/katalyst-x
 
 ## Overview
 
-UI testing validates browser-based interfaces using Playwright. Use `@ui` tagged steps for user interaction testing.
+UI testing validates browser-based interfaces using Playwright. The UI steps cover user interaction testing and work in any scenario. Run `npx playwright install chromium` once before running UI tests.
 
 ```mermaid
 flowchart LR
@@ -20,7 +20,6 @@ flowchart LR
 ### Basic Navigation
 
 ```gherkin
-@ui
 Scenario: Navigate to page
   Given I navigate to "/login"
   Then the URL should contain "/login"
@@ -29,7 +28,6 @@ Scenario: Navigate to page
 ### Full URL
 
 ```gherkin
-@ui
 Scenario: External navigation
   Given I open "https://example.com" in the browser
 ```
@@ -37,7 +35,6 @@ Scenario: External navigation
 ### Browser Actions
 
 ```gherkin
-@ui
 Scenario: Browser navigation
   Given I navigate to "/page1"
   When I click the link "Next"
@@ -52,7 +49,6 @@ Scenario: Browser navigation
 ### Clicking
 
 ```gherkin
-@ui
 Scenario: Click interactions
   # Click button by name
   When I click the button "Submit"
@@ -64,7 +60,6 @@ Scenario: Click interactions
 ### Advanced Clicking
 
 ```gherkin
-@ui
 Scenario: Click by locator
   # Click element containing text
   When I "click" the "div" element that contains "Click Me"
@@ -93,7 +88,6 @@ Scenario: Click by locator
 ### Filling Fields
 
 ```gherkin
-@ui
 Scenario: Fill form fields
   # By label
   When I fill the field "Email" with "user@example.com"
@@ -106,7 +100,6 @@ Scenario: Fill form fields
 ### Input Modes
 
 ```gherkin
-@ui
 Scenario: Different input methods
   # Type (character by character)
   When I "type" "hello" in the "1st" element with "search" "placeholder"
@@ -121,7 +114,6 @@ Scenario: Different input methods
 ### Dropdowns
 
 ```gherkin
-@ui
 Scenario: Select from dropdown
   Then I fill "United States" into the "Country" dropdown
   
@@ -132,7 +124,6 @@ Scenario: Select from dropdown
 ### Keyboard Input
 
 ```gherkin
-@ui
 Scenario: Keyboard actions
   # Type text
   Then I "type" "search query"
@@ -148,7 +139,6 @@ Scenario: Keyboard actions
 ### Text Visibility
 
 ```gherkin
-@ui
 Scenario: Text assertions
   Then I should see text "Welcome"
   Then I should see text "Hello, {username}"
@@ -157,7 +147,6 @@ Scenario: Text assertions
 ### URL Assertions
 
 ```gherkin
-@ui
 Scenario: URL assertions
   Then the URL should contain "/dashboard"
   Then I verify if the URL "contains" "/dashboard"
@@ -168,7 +157,6 @@ Scenario: URL assertions
 ### Element Visibility
 
 ```gherkin
-@ui
 Scenario: Element visibility
   # Check element with text is visible
   Then I verify that a "button" element with "Submit" text "is" visible
@@ -178,7 +166,6 @@ Scenario: Element visibility
 ### Element State
 
 ```gherkin
-@ui
 Scenario: Element states
   # Immediate check
   Then I verify that "1st" element with "Submit" "text" is "visible"
@@ -203,7 +190,6 @@ Scenario: Element states
 ### New Tab Assertions
 
 ```gherkin
-@ui
 Scenario: New tab opened
   When I click the link "Open in new tab"
   Then I verify if a new tab which URL "contains" "/new-page" opens
@@ -227,7 +213,6 @@ Scenario: New tab opened
 ### Explicit Waits
 
 ```gherkin
-@ui
 Scenario: Wait for conditions
   # Wait fixed time
   Then I wait "2" seconds
@@ -241,7 +226,6 @@ Scenario: Wait for conditions
 Most assertions automatically wait:
 
 ```gherkin
-@ui
 Scenario: Auto-waiting
   # Waits up to timeout for text to appear
   Then I should see text "Loading complete"
@@ -252,7 +236,6 @@ Scenario: Auto-waiting
 ### Save URL
 
 ```gherkin
-@ui
 Scenario: Capture URL
   When I save the current URL as "startPage"
   # Navigate around...
@@ -262,7 +245,6 @@ Scenario: Capture URL
 ### Extract URL Parts
 
 ```gherkin
-@ui
 Scenario: Extract from URL
   # URL: /users/123/profile
   When I get a part of the URL based on "/users/(\d+)/" regular expression and save it as "userId"
@@ -274,7 +256,6 @@ Scenario: Extract from URL
 ### Zoom
 
 ```gherkin
-@ui
 Scenario: Test at different zoom levels
   Then I zoom to "1.5" in the browser
   Then I should see text "Content visible at 150%"
@@ -286,12 +267,10 @@ Scenario: Test at different zoom levels
 ### UI Login
 
 ```gherkin
-@ui
 Scenario: Login via UI
   When I log in as admin in UI
   Then the URL should contain "/dashboard"
 
-@ui
 Scenario: Login via UI as user
   When I log in as user in UI
   Then I should see text "Welcome"
@@ -302,7 +281,6 @@ Scenario: Login via UI as user
 ### Login Flow
 
 ```gherkin
-@ui
 Feature: Login
 
   Scenario: Successful login
@@ -325,7 +303,6 @@ Feature: Login
 ### Form Submission
 
 ```gherkin
-@ui
 Feature: Contact Form
 
   Scenario: Submit contact form
@@ -341,7 +318,6 @@ Feature: Contact Form
 ### Multi-Step Wizard
 
 ```gherkin
-@ui
 Feature: Registration Wizard
 
   Scenario: Complete registration
@@ -368,7 +344,6 @@ Feature: Registration Wizard
 ### Conditional Interactions
 
 ```gherkin
-@ui
 Scenario: Handle optional modal
   Given I navigate to "/dashboard"
   # Click if visible, ignore if not
@@ -407,7 +382,6 @@ When I "click" the "1st" element with "#btn-submit" "locator"
 
 ```gherkin
 # Good - self-contained
-@ui
 Scenario: Edit profile
   Given I navigate to "/login"
   When I log in as user in UI

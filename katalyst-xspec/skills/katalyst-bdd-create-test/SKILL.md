@@ -1,39 +1,42 @@
 ---
 name: katalyst-bdd-create-test
-description: Create BDD tests for the Katalyst framework. Use when writing new feature files, creating test scenarios, choosing test types (@api, @ui, @tui, @hybrid), or implementing common testing patterns like CRUD operations, login flows, form handling, or API+UI verification workflows.
+description: Create BDD tests for the Katalyst framework. Use when writing new feature files, creating test scenarios, choosing where to put a test (features/api, features/ui, features/tui) or mixing API and UI steps, or implementing common testing patterns like CRUD operations, login flows, form handling, or API+UI verification workflows.
 ---
 
 # Katalyst BDD Test Creation Guide
 
 This skill guides you through creating BDD tests with the Katalyst framework.
 
-## Test Type Decision Tree
+## Where to Put a Test
 
-Choose the right tag based on what you're testing:
+Steps are untagged: any step works in any scenario. Do NOT add `@api`/`@ui`/`@hybrid`/`@tui` tags or `{ tags: ... }` on steps. Each Playwright project picks feature files by folder, so just choose the folder:
 
 ```
 What are you testing?
 │
-├─ HTTP API only → @api
+├─ HTTP API only → features/api/
 │  (REST endpoints, JSON responses, status codes)
 │
-├─ Browser UI only → @ui
+├─ Browser UI only → features/ui/
 │  (Pages, forms, buttons, navigation)
 │
-├─ Terminal UI only → @tui
+├─ Terminal UI only → features/tui/ (enable the tui project first)
 │  (CLI apps, interactive terminal programs)
 │
-└─ Multiple layers → @hybrid
+└─ API + UI in one scenario → features/ui/ (it needs a browser)
    (Create via API, verify in UI)
    (Setup data, then test UI flows)
 ```
+
+Tags are optional and only for the user's own grouping (`@smoke`, `@wip`, `@regression`).
 
 ## Feature File Structure
 
 Every feature file follows this structure:
 
 ```gherkin
-@tag
+# Tags are optional; this one is your own grouping
+@smoke
 Feature: Feature Name
   As a [role]
   I want [capability]
@@ -48,14 +51,13 @@ Feature: Feature Name
     Then [expected outcome]
 ```
 
-## Creating API Tests (`@api`)
+## Creating API Tests
 
 ### Step 1: Create Feature File
 
 Location: `features/api/[resource].feature`
 
 ```gherkin
-@api
 Feature: [Resource] API
   As a developer
   I want to test the [Resource] API
@@ -126,14 +128,13 @@ Scenario: Full [resource] lifecycle
 
 See [API Patterns](references/api-patterns.md) for more examples.
 
-## Creating UI Tests (`@ui`)
+## Creating UI Tests
 
 ### Step 1: Create Feature File
 
 Location: `features/ui/[page].feature`
 
 ```gherkin
-@ui
 Feature: [Page Name]
   As a user
   I want to [action on page]
@@ -176,14 +177,13 @@ Scenario: User login
 
 See [UI Patterns](references/ui-patterns.md) for more examples.
 
-## Creating TUI Tests (`@tui`)
+## Creating TUI Tests
 
 ### Step 1: Create Feature File
 
 Location: `features/tui/[command].feature`
 
 ```gherkin
-@tui
 Feature: [CLI Command]
   As a user
   I want to use the [command] CLI
@@ -192,7 +192,7 @@ Feature: [CLI Command]
 
 ### Step 2: Configure TUI in Fixtures
 
-Ensure your `fixtures.ts` has TUI configured:
+TUI is off in the scaffold. Uncomment `registerTuiSteps(test)` in `steps.ts`, the `tuiBdd` project in `playwright.config.ts`, and configure TUI in `fixtures.ts`:
 
 ```typescript
 createTui: () => new TuiTesterAdapter({
@@ -224,14 +224,15 @@ Scenario: Navigate menu
 
 See [TUI Patterns](references/tui-patterns.md) for more examples.
 
-## Creating Hybrid Tests (`@hybrid`)
+## Creating Hybrid Tests (API + UI)
+
+A hybrid test is just a scenario that mixes API and UI steps. No tag or special project is needed.
 
 ### Step 1: Create Feature File
 
-Location: `features/hybrid/[workflow].feature`
+Location: `features/ui/[workflow].feature` (or any folder a project reads)
 
 ```gherkin
-@hybrid
 Feature: [Workflow Name]
   As a tester
   I want to combine API and UI testing
@@ -336,21 +337,23 @@ And I store the value at "token" as "t"
 After creating feature files:
 
 ```bash
-# 1. Generate Playwright tests (REQUIRED)
-npm run gen
+# One-time: browser for UI tests
+npx playwright install chromium
 
-# 2. Run all tests
+# Generate specs and run all tests (npm test runs bddgen first)
 npm test
 
-# 3. Run specific project
-npx playwright test --project=api
-npx playwright test --project=ui
-npx playwright test --project=hybrid
+# Run one project (folder)
+npx playwright test --project api
+npx playwright test --project ui
 
-# 4. Run specific feature
+# Run only scenarios with your own tag
+TEST_TAGS=@smoke npm test
+
+# Run specific feature (after npm run gen)
 npx playwright test features/api/users.feature
 
-# 5. Debug mode
+# Debug mode
 npx playwright test --debug
 ```
 
@@ -358,8 +361,10 @@ npx playwright test --debug
 
 | Mistake | Solution |
 |---------|----------|
-| Forgot to run `npm run gen` | Always run after creating/modifying features |
-| Steps not available | Check you have the correct tag (`@api`, `@ui`, etc.) |
+| Forgot to run `npm run gen` | `npm test` does it; run it yourself before `npx playwright test` |
+| Adding `@api`/`@ui`/`@hybrid` tags | Not needed; steps work everywhere, projects select by folder |
+| Scenario never runs | Check the feature is in a folder a project reads |
+| Step not found | Check exact wording in `katalyst-bdd-step-reference` (TUI: `I fill the TUI form:`) |
 | Hardcoded test data | Use UUID generation for unique data |
 | No cleanup registered | Always register cleanup for created resources |
 | Scenarios depend on each other | Make each scenario independent |

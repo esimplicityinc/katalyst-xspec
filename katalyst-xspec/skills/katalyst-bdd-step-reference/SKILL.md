@@ -1,24 +1,19 @@
 ---
 name: katalyst-bdd-step-reference
-description: Complete reference of all available BDD step definitions in the Katalyst framework. Use when writing feature files, looking up step syntax, understanding what steps are available for a tag, or finding the right step for a specific action like clicking, filling forms, making API calls, or terminal interactions.
+description: Complete reference of all available BDD step definitions in the Katalyst framework. Use when writing feature files, looking up step syntax, checking exact step wording, or finding the right step for a specific action like clicking, filling forms, making API calls, or terminal interactions.
 ---
 
 # Katalyst BDD Step Reference
 
 This skill provides a complete reference of all step definitions available in @esimplicitylabs/katalyst-xspec.
 
-## Tag System
+## Where Steps Work
 
-Steps are enabled based on the feature/scenario tag:
+Built-in steps are untagged. Once registered (`registerApiSteps`, `registerUiSteps`, `registerSharedSteps`, `registerTuiSteps`, ...), **any step works in any scenario**, so a single scenario can mix API, UI and shared steps.
 
-| Tag | Available Steps | Use Case |
-|-----|-----------------|----------|
-| `@api` | API + Shared | HTTP API testing only |
-| `@ui` | UI + Shared | Browser UI testing only |
-| `@tui` | TUI + Shared | Terminal UI testing only |
-| `@hybrid` | API + UI + Shared | Combined API and UI testing |
-
-**Important:** Always tag your feature or scenario. Without a tag, steps may not be available.
+- Do not add `{ tags: ... }` to steps or type tags to scenarios; they are not needed.
+- Playwright projects pick feature files by folder (`features/api/`, `features/ui/`).
+- Tags like `@smoke` or `@wip` are optional, for the user's own filtering (`TEST_TAGS`).
 
 ## Variable Interpolation
 
@@ -31,7 +26,7 @@ When I GET "/users/{userId}"  # Becomes /users/123
 
 ## Quick Reference - Most Common Steps
 
-### API Steps (`@api` or `@hybrid`)
+### API Steps
 
 | Step | Example |
 |------|---------|
@@ -49,7 +44,7 @@ When I GET "/users/{userId}"  # Becomes /users/123
 | `Given I am authenticated as a user via API` | User API authentication |
 | `Given I set header {string} to {string}` | `Given I set header "X-Custom" to "value"` |
 
-### UI Steps (`@ui` or `@hybrid`)
+### UI Steps
 
 | Step | Example |
 |------|---------|
@@ -64,7 +59,7 @@ When I GET "/users/{userId}"  # Becomes /users/123
 | `Then the element {string} should be visible` | `Then the element "#modal" should be visible` |
 | `When I pause for debugging` | Opens Playwright Inspector |
 
-### TUI Steps (`@tui`)
+### TUI Steps
 
 | Step | Example |
 |------|---------|
@@ -73,9 +68,13 @@ When I GET "/users/{userId}"  # Becomes /users/123
 | `When I press {string}` | `When I press "Enter"` |
 | `When I press enter` | Press Enter key |
 | `Then I should see {string}` | `Then I should see "Welcome"` |
+| `Then I should see {string} in the terminal` | `Then I should see "Ready" in the terminal` |
 | `Then the screen should contain {string}` | Assert screen has text |
+| `When I fill the TUI form:` | Data table of `field`/`value` |
 
-### Shared Steps (All Tags)
+TUI has no `I should see text {string}` (that's the UI step), and the TUI form step is `I fill the TUI form:` (UI uses `I fill the form:`).
+
+### Shared Steps
 
 | Step | Example |
 |------|---------|
@@ -106,7 +105,6 @@ For complete step definitions with all parameters and examples:
 ### API CRUD Test
 
 ```gherkin
-@api
 Scenario: Create and fetch user
   Given I am authenticated as an admin via API
   When I POST "/users" with JSON body:
@@ -122,7 +120,6 @@ Scenario: Create and fetch user
 ### UI Login Test
 
 ```gherkin
-@ui
 Scenario: User login
   Given I navigate to "/login"
   When I fill in "Email" with "user@example.com"
@@ -131,10 +128,9 @@ Scenario: User login
   Then I should see text "Dashboard"
 ```
 
-### Hybrid Test (API + UI)
+### Mixed API + UI Test (no tag needed)
 
 ```gherkin
-@hybrid
 Scenario: Create via API, verify in UI
   Given I am authenticated as an admin via API
   When I POST "/users" with JSON body:

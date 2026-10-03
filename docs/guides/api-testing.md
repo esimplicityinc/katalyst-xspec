@@ -4,7 +4,7 @@ Comprehensive guide to testing HTTP APIs with @esimplicitylabs/katalyst-xspec.
 
 ## Overview
 
-API testing validates your HTTP endpoints without browser overhead. Use `@api` tagged steps for fast, reliable backend testing.
+API testing validates your HTTP endpoints without browser overhead. The API steps give you fast, reliable backend testing, and they work in any scenario — including alongside UI steps.
 
 ```mermaid
 flowchart LR
@@ -20,7 +20,6 @@ flowchart LR
 ### GET Requests
 
 ```gherkin
-@api
 Scenario: Fetch a resource
   When I GET "/users/1"
   Then the response status should be 200
@@ -30,7 +29,6 @@ Scenario: Fetch a resource
 ### POST Requests
 
 ```gherkin
-@api
 Scenario: Create a resource
   When I POST "/users" with JSON body:
     """
@@ -45,7 +43,6 @@ Scenario: Create a resource
 ### PATCH Requests
 
 ```gherkin
-@api
 Scenario: Update a resource
   When I PATCH "/users/1" with JSON body:
     """
@@ -59,7 +56,6 @@ Scenario: Update a resource
 ### PUT Requests
 
 ```gherkin
-@api
 Scenario: Replace a resource
   When I PUT "/users/1" with JSON body:
     """
@@ -74,7 +70,6 @@ Scenario: Replace a resource
 ### DELETE Requests
 
 ```gherkin
-@api
 Scenario: Delete a resource
   When I DELETE "/users/1"
   Then the response status should be 204
@@ -85,7 +80,6 @@ Scenario: Delete a resource
 ### Admin Authentication
 
 ```gherkin
-@api
 Scenario: Admin operation
   Given I am authenticated as an admin via API
   When I POST "/admin/users" with JSON body:
@@ -98,7 +92,6 @@ Scenario: Admin operation
 ### User Authentication
 
 ```gherkin
-@api
 Scenario: User operation
   Given I am authenticated as a user via API
   When I GET "/profile"
@@ -108,7 +101,6 @@ Scenario: User operation
 ### Custom Token
 
 ```gherkin
-@api
 Scenario: Use specific token
   Given I set variable "token" to "eyJhbG..."
   Given I set bearer token from variable "token"
@@ -119,7 +111,6 @@ Scenario: Use specific token
 ### Custom Headers
 
 ```gherkin
-@api
 Scenario: Custom authentication
   Given I set header "X-API-Key" to "my-api-key"
   When I GET "/api-key-protected"
@@ -171,7 +162,6 @@ Then the value at "email" should equal "{expectedEmail}"
 ### Storing Response Values
 
 ```gherkin
-@api
 Scenario: Store and reuse values
   When I POST "/users" with JSON body:
     """
@@ -189,7 +179,6 @@ Scenario: Store and reuse values
 ### Generated Data
 
 ```gherkin
-@api
 Scenario: Unique test data
   Given I generate a UUID and store as "uniqueId"
   Given I set variable "email" to "user-{uniqueId}@test.com"
@@ -204,7 +193,6 @@ Scenario: Unique test data
 ### Path Variables
 
 ```gherkin
-@api
 Scenario: Dynamic paths
   Given I set variable "teamId" to "team-123"
   Given I set variable "memberId" to "member-456"
@@ -218,7 +206,6 @@ Scenario: Dynamic paths
 ### Manual Cleanup Registration
 
 ```gherkin
-@api
 Scenario: Create with cleanup
   Given I am authenticated as an admin via API
   When I POST "/users" with JSON body:
@@ -242,7 +229,6 @@ The DefaultCleanupAdapter auto-registers cleanup based on variable names:
 ### Skip Cleanup (Debugging)
 
 ```gherkin
-@api
 Scenario: Debug without cleanup
   Given I disable cleanup
   When I POST "/users" with JSON body: ...
@@ -254,7 +240,6 @@ Scenario: Debug without cleanup
 ### CRUD Operations
 
 ```gherkin
-@api
 Feature: User CRUD
 
   Background:
@@ -290,7 +275,6 @@ Feature: User CRUD
 ### List and Filter
 
 ```gherkin
-@api
 Scenario: List with filters
   When I GET "/users?role=admin&status=active"
   Then the response status should be 200
@@ -300,7 +284,6 @@ Scenario: List with filters
 ### Pagination
 
 ```gherkin
-@api
 Scenario: Paginated results
   When I GET "/users?page=1&limit=10"
   Then the response status should be 200
@@ -311,12 +294,10 @@ Scenario: Paginated results
 ### Error Handling
 
 ```gherkin
-@api
 Scenario: Handle not found
   When I GET "/users/nonexistent"
   Then the response status should be 404
 
-@api
 Scenario: Handle validation error
   When I POST "/users" with JSON body:
     """
@@ -328,7 +309,6 @@ Scenario: Handle validation error
 ### Scenario Outline
 
 ```gherkin
-@api
 Scenario Outline: Create users with different roles
   Given I am authenticated as an admin via API
   When I POST "/users" with JSON body:
@@ -383,7 +363,6 @@ ENV_FILE=.env.staging npm test
 ### Use Backgrounds for Setup
 
 ```gherkin
-@api
 Feature: User API
 
   Background:
@@ -394,7 +373,6 @@ Feature: User API
 ### Isolate Test Data
 
 ```gherkin
-@api
 Scenario: Isolated data
   Given I generate a UUID and store as "testId"
   Given I set variable "email" to "test-{testId}@example.com"
@@ -405,7 +383,6 @@ Scenario: Isolated data
 
 ```gherkin
 # Good - self-contained
-@api
 Scenario: Create and verify user
   Given I am authenticated as admin
   When I POST "/users" ...
@@ -414,7 +391,6 @@ Scenario: Create and verify user
   Then the response status should be 200
 
 # Avoid - depends on other scenarios
-@api
 Scenario: Verify user from previous test
   When I GET "/users/{userId}"  # Where did userId come from?
 ```

@@ -57,7 +57,7 @@ Then:
 3. Move implemented steps to appropriate files
 4. Run `npm run gen` and `npm test`
 
-> **Tip:** While implementing steps incrementally, tag your feature with `@wip` and configure your project to exclude it with `tags: '@api and not @wip'`. This lets you run tests for completed features while working on new ones. See [Managing Work-in-Progress Features](../concepts/tag-system.md#managing-work-in-progress-features).
+> **Tip:** While implementing steps incrementally, tag your feature with `@wip` and exclude it with `tagsForProject({ defaultExcludes: 'not @Skip and not @ignore and not @wip' })`. This lets you run tests for completed features while working on new ones. See [Managing Work-in-Progress Features](../concepts/tag-system.md#managing-work-in-progress-features).
 
 ## Creating Custom Steps
 
@@ -71,7 +71,7 @@ import { interpolate } from '@esimplicitylabs/katalyst-xspec';
 
 const { Given, When, Then } = createBdd(test);
 
-Given('a user exists with email {string}', { tags: '@api' }, 
+Given('a user exists with email {string}', 
   async ({ api, world }, email: string) => {
     const resolvedEmail = interpolate(email, world.vars);
     
@@ -91,7 +91,7 @@ Given('a user exists with email {string}', { tags: '@api' },
   }
 );
 
-When('the user logs in', { tags: '@ui' },
+When('the user logs in',
   async ({ ui, world }) => {
     await ui.goto('/login');
     await ui.fillLabel('Email', world.vars['userEmail']);
@@ -100,7 +100,7 @@ When('the user logs in', { tags: '@ui' },
   }
 );
 
-Then('the user should see their dashboard', { tags: '@ui' },
+Then('the user should see their dashboard',
   async ({ ui }) => {
     await ui.expectText('Dashboard');
     await ui.expectUrlContains('/dashboard');
@@ -232,35 +232,29 @@ Given I am on the homepage as admin
 Given I am on the homepage as user
 ```
 
-## Tagging Steps
+## Step Scope
 
-### Project Tags
-
-```typescript
-// Only available in @api scenarios
-When('I call the API', { tags: '@api' }, async ({ api }) => {
-  // ...
-});
-
-// Only available in @ui scenarios
-When('I click the submit button', { tags: '@ui' }, async ({ ui }) => {
-  // ...
-});
-
-// Available in multiple project types
-When('I verify the data', { tags: '@api or @hybrid' }, async ({ api, world }) => {
-  // ...
-});
-```
-
-### No Tag (Universal)
+Custom steps don't need a `{ tags: ... }` option. Like the built-in steps, a step defined without tags works in any scenario, so one step can use `api`, `ui` and `world` together:
 
 ```typescript
-// Available in all scenarios
+When('I call the API', async ({ api }) => {
+  // ...
+});
+
+When('I click the submit button', async ({ ui }) => {
+  // ...
+});
+
+When('I verify the data', async ({ api, ui, world }) => {
+  // ...
+});
+
 Given('I set the test context', async ({ world }) => {
   world.vars['testContext'] = 'active';
 });
 ```
+
+Avoid giving two steps the same wording; a step text that matches more than one definition is ambiguous.
 
 ## Using World State
 
@@ -305,7 +299,7 @@ Then('the response should have a valid user', async ({ world }) => {
 ```typescript
 import { interpolate, selectPath, registerCleanup } from '@esimplicitylabs/katalyst-xspec';
 
-When('I create and verify a user', { tags: '@api' }, 
+When('I create and verify a user', 
   async ({ api, world }) => {
     // Create
     const email = `test-${Date.now()}@example.com`;
@@ -334,7 +328,7 @@ When('I create and verify a user', { tags: '@api' },
 ### Call Multiple Adapters
 
 ```typescript
-When('I create a user and verify in UI', { tags: '@hybrid' },
+When('I create a user and verify in UI',
   async ({ api, ui, world }) => {
     // API: Create user
     const result = await api.sendJson('POST', '/users', {
@@ -373,7 +367,7 @@ Given('a product {string} exists with price {float}',
   }
 );
 
-When('I add the product to cart', { tags: '@ui' },
+When('I add the product to cart',
   async ({ ui, world }) => {
     await ui.goto(`/products/${world.vars['productId']}`);
     await ui.clickButton('Add to Cart');
@@ -390,7 +384,7 @@ When('I checkout with payment method {string}',
   }
 );
 
-Then('the order should be confirmed', { tags: '@ui' },
+Then('the order should be confirmed',
   async ({ ui, world }) => {
     await ui.expectText('Order Confirmed');
     // Extract order ID from page
@@ -411,7 +405,6 @@ Then('the order total should be {float}',
 ### Usage
 
 ```gherkin
-@hybrid
 Feature: Checkout
 
   Scenario: Purchase a product

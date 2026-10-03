@@ -1,471 +1,162 @@
-# Tag System
+# Tags
 
-Tags organize tests and control which steps and scenarios execute.
+Tags are optional. Use them for your own grouping (`@smoke`, `@wip`, `@regression`, ...) and filtering. They don't decide which steps are available.
 
-## Overview
+## How Scenarios Are Selected
 
-```mermaid
-graph TD
-    subgraph "Project Tags"
-        API["@api"]
-        UI["@ui"]
-        TUI["@tui"]
-        HYB["@hybrid"]
-    end
-    
-    subgraph "Modifier Tags"
-        SKIP["@Skip / @ignore"]
-        SMOKE["@smoke"]
-        SLOW["@slow"]
-        WIP["@wip"]
-    end
-    
-    subgraph "Tag Expression"
-        EXPR["not @Skip and @api and @smoke"]
-    end
-    
-    API --> EXPR
-    SKIP --> EXPR
-    SMOKE --> EXPR
-```
-
-## Project Tags
-
-Project tags determine which test suite a scenario belongs to:
-
-| Tag | Description | Steps Available |
-|-----|-------------|-----------------|
-| `@api` | HTTP API tests | API auth, HTTP, assertions |
-| `@ui` | Browser UI tests | Navigation, forms, assertions |
-| `@tui` | Terminal UI tests | TUI input, output, snapshots |
-| `@hybrid` | Cross-layer tests | All step types |
-
-### Usage
-
-```gherkin
-@api
-Feature: User API
-  # All scenarios use API steps
-
-@ui
-Feature: Login Page
-  # All scenarios use UI steps
-
-@tui
-Feature: CLI Application
-  # All scenarios use TUI steps
-
-@hybrid
-Feature: End-to-End Flow
-  # Scenarios can mix API and UI steps
-```
-
-## Modifier Tags
-
-Modifier tags add metadata or control execution:
-
-### Built-in Modifiers
-
-| Tag | Description |
-|-----|-------------|
-| `@Skip` | Skip this scenario |
-| `@ignore` | Skip this scenario (alias) |
-| `@wip` | Work in progress |
-| `@smoke` | Quick smoke test |
-| `@slow` | Long-running test |
-| `@critical` | Critical path test |
-| `@external` | Requires external service |
-
-### Custom Modifiers
-
-Define your own:
-
-```gherkin
-@api @regression
-Scenario: Complex user workflow
-  ...
-
-@ui @visual
-Scenario: Check page layout
-  ...
-```
-
-## Tag Expressions
-
-Tag expressions filter which tests run.
-
-### Operators
-
-| Operator | Example | Description |
-|----------|---------|-------------|
-| `and` | `@api and @smoke` | Both tags required |
-| `or` | `@smoke or @critical` | Either tag |
-| `not` | `not @Skip` | Tag absent |
-| `()` | `(@smoke or @critical)` | Grouping |
-
-### Examples
-
-```bash
-# Run only API smoke tests
---grep "@api and @smoke"
-
-# Run smoke or critical tests
---grep "@smoke or @critical"
-
-# Exclude slow tests
---grep "not @slow"
-
-# Complex expression
---grep "@api and (@smoke or @critical) and not @external"
-```
-
-## Configuration Helpers
-
-### tagsForProject
-
-Builds tag expressions with default excludes:
+- **Projects pick feature files by folder.** Each Playwright project reads one folder, e.g. `features/api/**/*.feature` or `features/ui/**/*.feature`.
+- **Steps are untagged.** Every built-in step (API, UI, TUI, shared) works in any scenario. A single scenario can mix API and UI steps — that's all a "hybrid" test is.
+- **Tags only filter.** The scaffolded config skips scenarios tagged `@Skip` or `@ignore`, and applies any extra tags you pass via `TEST_TAGS`.
 
 ```typescript
-import { tagsForProject } from '@esimplicitylabs/katalyst-xspec';
-
-// Basic - adds default excludes
-tagsForProject({ projectTag: '@api' })
-// Result: "not @Skip and not @ignore and @api"
-
-// With extra tags
-tagsForProject({ projectTag: '@api', extraTags: '@smoke' })
-// Result: "not @Skip and not @ignore and @api and (@smoke)"
-
-// Custom excludes
-tagsForProject({ 
-  projectTag: '@api', 
-  defaultExcludes: 'not @Skip and not @wip' 
-})
-// Result: "not @Skip and not @wip and @api"
-```
-
-### resolveExtraTags
-
-Normalizes tag input from environment or CLI:
-
-```typescript
-import { resolveExtraTags } from '@esimplicitylabs/katalyst-xspec';
-
-// Tag expression (passed through)
-resolveExtraTags('@smoke or @critical')
-// Result: "@smoke or @critical"
-
-// Comma-separated (converted to OR)
-resolveExtraTags('smoke,critical')
-// Result: "@smoke or @critical"
-
-// Single tag
-resolveExtraTags('smoke')
-// Result: "@smoke"
-
-// Empty/null
-resolveExtraTags('')
-// Result: undefined
-```
-
-## Project Configuration
-
-### Playwright Config
-
-```typescript
-// playwright.config.ts
+// playwright.config.ts (as scaffolded by `katalyst-xspec init`)
 import { defineBddProject } from 'playwright-bdd';
 import { tagsForProject, resolveExtraTags } from '@esimplicitylabs/katalyst-xspec';
 
-const extraTags = resolveExtraTags(process.env.TEST_TAGS);
+const tags = tagsForProject({ extraTags: resolveExtraTags(process.env.TEST_TAGS) });
 
 const apiBdd = defineBddProject({
   name: 'api',
   features: 'features/api/**/*.feature',
   steps: 'features/steps/**/*.ts',
-  tags: tagsForProject({ projectTag: '@api', extraTags }),
+  tags,
 });
 
 const uiBdd = defineBddProject({
   name: 'ui',
   features: 'features/ui/**/*.feature',
   steps: 'features/steps/**/*.ts',
-  tags: tagsForProject({ projectTag: '@ui', extraTags }),
+  tags,
 });
 ```
 
-### Running with Tags
+## Custom Tags
 
-```bash
-# Via environment variable
-TEST_TAGS=@smoke npm test
-
-# Via Playwright grep
-npx playwright test --grep "@smoke"
-
-# Specific project
-npx playwright test --project=api
-
-# Combined
-TEST_TAGS=@critical npx playwright test --project=api
-```
-
-## Step-Level Tags
-
-Steps are tagged to ensure they run in appropriate contexts. Steps use tag expressions to support multiple scenario types:
-
-```typescript
-// Available in @api and @hybrid scenarios
-When('I GET {string}', { tags: '@api or @hybrid' }, async ({ api }, path) => {
-  // ...
-});
-
-// Available in @ui and @hybrid scenarios
-When('I click the button {string}', { tags: '@ui or @hybrid' }, async ({ ui }, name) => {
-  // ...
-});
-
-// Available in @tui scenarios only
-When('I type {string}', { tags: '@tui' }, async ({ tui }, text) => {
-  // ...
-});
-
-// Available everywhere (no tag)
-Given('I set variable {string} to {string}', async ({ world }, name, value) => {
-  // ...
-});
-```
-
-This pattern allows `@hybrid` scenarios to use both API and UI steps in the same test.
-
-## Tag Inheritance
-
-### Feature-Level Tags
-
-Tags on the feature apply to all scenarios:
+Add tags to a feature, rule, or scenario. Tags on a feature or rule apply to every scenario inside it; scenario tags add to them.
 
 ```gherkin
-@api @smoke
-Feature: Quick API Tests
-  # Both @api and @smoke apply to all scenarios
+@smoke
+Feature: Health checks
 
-  Scenario: Health check
-    # Inherits @api and @smoke
-    When I GET "/health"
-
-  Scenario: Version check
-    # Inherits @api and @smoke
-    When I GET "/version"
-```
-
-### Scenario-Level Tags
-
-Tags on scenarios add to (not replace) feature tags:
-
-```gherkin
-@api
-Feature: User API
-
-  @smoke
-  Scenario: Quick health check
-    # Tags: @api, @smoke
-    When I GET "/health"
-
-  @slow @external
-  Scenario: Integration test
-    # Tags: @api, @slow, @external
-    When I POST "/external-sync" ...
-```
-
-### Rule-Level Tags
-
-Tags on Rules apply to scenarios within:
-
-```gherkin
-@api
-Feature: User API
-
-  @admin
-  Rule: Admin operations
-
-    Scenario: Create user
-      # Tags: @api, @admin
-      ...
-
-    Scenario: Delete user
-      # Tags: @api, @admin
-      ...
-
-  @member
-  Rule: Member operations
-
-    Scenario: View profile
-      # Tags: @api, @member
-      ...
-```
-
-## Common Patterns
-
-### Smoke Test Suite
-
-```gherkin
-# features/api/health.feature
-@api @smoke
-Feature: API Health Checks
-
-  Scenario: Health endpoint
+  Scenario: API is up
     When I GET "/health"
     Then the response status should be 200
 
-# features/ui/login.feature  
-@ui @smoke
-Feature: Login Smoke Test
-
-  Scenario: Page loads
-    Given I navigate to "/login"
-    Then I should see text "Sign In"
+  @slow @external
+  Scenario: Sync with partner
+    When I GET "/external-sync"
+    Then the response status should be 200
 ```
+
+Common conventions (none are built in, except `@Skip`/`@ignore`):
+
+| Tag | Typical meaning |
+|-----|-----------------|
+| `@Skip` / `@ignore` | Never run (excluded by the default expression) |
+| `@smoke` | Quick sanity checks |
+| `@wip` | Work in progress |
+| `@regression` | Full regression suite |
+| `@slow` | Long-running |
+| `@external` | Needs a third-party service |
+
+## Filtering with `TEST_TAGS`
 
 ```bash
-# Run all smoke tests
-TEST_TAGS=@smoke npm test
+TEST_TAGS=@smoke npm test                    # one tag
+TEST_TAGS=smoke,critical npm test            # comma list -> "@smoke or @critical"
+TEST_TAGS="@smoke and not @slow" npm test    # full tag expression
 ```
 
-### Skip Work in Progress
+Tag expressions support `and`, `or`, `not` and parentheses.
 
-```gherkin
-@api
-Feature: New Feature
-
-  @wip
-  Scenario: Not ready yet
-    # Skipped by default tag expression
-    ...
-
-  Scenario: Working test
-    # Runs normally
-    ...
-```
-
-### External Dependencies
-
-```gherkin
-@api
-Feature: External Integration
-
-  @external
-  Scenario: Call third-party API
-    # Tag allows filtering when service unavailable
-    When I POST "/external-webhook" ...
-```
+## Running One Area
 
 ```bash
-# Skip external tests
-npx playwright test --grep "not @external"
+npx playwright test --project api            # just features/api
+npx playwright test --project ui             # just features/ui
+npx playwright test --grep "@smoke"          # filter generated tests by tag
+TEST_TAGS=@critical npx playwright test --project api
 ```
 
-### Managing Work-in-Progress Features
+You can also pass a folder or file path to run a subset.
 
-When writing features incrementally, you may have scenarios with missing step definitions. Instead of blocking all test generation, use tags to exclude incomplete work:
+## Configuration Helpers
 
-**Pattern 1: Use `@wip` to exclude incomplete features**
+### tagsForProject
+
+Builds a playwright-bdd `tags` expression: default excludes, an optional project tag, and optional extra tags.
+
+```typescript
+import { tagsForProject } from '@esimplicitylabs/katalyst-xspec';
+
+tagsForProject()
+// "not @Skip and not @ignore"
+
+tagsForProject({ extraTags: '@smoke' })
+// "not @Skip and not @ignore and (@smoke)"
+
+tagsForProject({ projectTag: '@smoke' })
+// "not @Skip and not @ignore and @smoke"
+
+tagsForProject({ defaultExcludes: 'not @Skip and not @ignore and not @wip' })
+// "not @Skip and not @ignore and not @wip"
+```
+
+`projectTag` is optional and not needed for the built-in steps. Use it only if you want a project limited to one of your own tags.
+
+### resolveExtraTags
+
+Normalizes tag input from an environment variable or CLI:
+
+```typescript
+import { resolveExtraTags } from '@esimplicitylabs/katalyst-xspec';
+
+resolveExtraTags('@smoke or @critical')  // "@smoke or @critical" (expression passed through)
+resolveExtraTags('smoke,critical')       // "@smoke or @critical"
+resolveExtraTags('smoke')                // "@smoke"
+resolveExtraTags('')                     // undefined
+```
+
+## Managing Work-in-Progress Features
+
+When writing features incrementally, some scenarios may not have step definitions yet. Tag them `@wip` and exclude that tag so the rest of the suite still generates and runs:
 
 ```gherkin
-@api @wip
+@wip
 Feature: Payment Processing
-  # Step definitions not yet implemented
-  
+
   Scenario: Process credit card payment
     Given the payment gateway is configured
     When I process payment for "order-123"
     Then the transaction should be recorded
 ```
 
-Configure your project to exclude `@wip`:
-
 ```typescript
 // playwright.config.ts
-const apiBdd = defineBddProject({
-  name: 'api',
-  features: 'features/api/**/*.feature',
-  steps: 'features/steps/**/*.ts',
-  tags: '@api and not @wip',  // Exclude work-in-progress
-});
-```
-
-**Pattern 2: Use `@ready` to include only complete features**
-
-```gherkin
-@api @ready
-Feature: User Management
-  # All step definitions implemented
-  
-  Scenario: Create a new user
-    When I POST "/users" with JSON body:
-      """
-      { "email": "test@example.com" }
-      """
-    Then the response status should be 201
-```
-
-```typescript
-// playwright.config.ts
-const apiBdd = defineBddProject({
-  name: 'api',
-  features: 'features/api/**/*.feature',
-  steps: 'features/steps/**/*.ts',
-  tags: '@api and @ready',  // Only generate ready features
+const tags = tagsForProject({
+  defaultExcludes: 'not @Skip and not @ignore and not @wip',
+  extraTags: resolveExtraTags(process.env.TEST_TAGS),
 });
 ```
 
 **Workflow:**
 
-1. Write feature file with `@wip` tag (or without `@ready`)
+1. Write the feature file with `@wip`
 2. Run `npm run gen:stubs` to generate step stubs
-3. Implement step definitions
-4. Remove `@wip` (or add `@ready`) when complete
-5. Run `npm run gen` and `npm test`
+3. Implement the step definitions
+4. Remove `@wip`
+5. Run `npm test`
 
-This approach lets you develop features incrementally while keeping your test suite runnable.
+## Upgrading from 0.6 and Earlier
 
-## Best Practices
+Older versions scoped steps to `@api`, `@ui`, `@hybrid` and `@tui`, and projects filtered on those tags. That is gone:
 
-### Consistent Tagging
-
-```gherkin
-# Good - clear categorization
-@api @smoke @auth
-Scenario: Login returns token
-
-# Avoid - inconsistent
-@API @Smoke @AUTH  # Case inconsistency
-```
-
-### Minimal Tags
-
-```gherkin
-# Good - necessary tags only
-@api @critical
-Scenario: Payment processing
-
-# Avoid - over-tagging
-@api @critical @payment @backend @integration @v2
-Scenario: Payment processing
-```
-
-### Document Custom Tags
-
-```markdown
-## Project Tags
-
-| Tag | Description | Owner |
-|-----|-------------|-------|
-| @payments | Payment service tests | payments-team |
-| @legacy | Legacy API tests | platform-team |
-```
+- Run `npx katalyst-xspec upgrade --migrate` to remove the old `@api`/`@ui`/`@hybrid`/`@tui` filters from `playwright.config.*`.
+- Feature files that still carry `@api`, `@ui`, etc. keep working — the tags are simply ignored. Delete them whenever convenient.
+- Custom steps no longer need `{ tags: ... }`.
 
 ## Related Topics
 
 - [Project Setup](../getting-started/project-setup.md) - Playwright config
-- [API Steps Reference](../reference/steps/api-steps.md) - @api steps
-- [UI Steps Reference](../reference/steps/ui-steps.md) - @ui steps
+- [Configuration Reference](../reference/api/configuration.md) - `tagsForProject`, `resolveExtraTags`
+- [Step Quick Reference](../reference/steps/quick-reference.md)

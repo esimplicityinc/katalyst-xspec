@@ -4,7 +4,7 @@ Combining API and UI testing for comprehensive end-to-end coverage.
 
 ## Overview
 
-Hybrid tests use both API and UI steps in the same scenario, enabling powerful testing patterns like API setup with UI verification.
+Hybrid tests use both API and UI steps in the same scenario, enabling powerful testing patterns like API setup with UI verification. "Hybrid" is just a style of scenario — there is no special tag or project. Every step works in any scenario.
 
 ```mermaid
 flowchart LR
@@ -29,21 +29,14 @@ flowchart LR
 
 ## Configuration
 
-### Tag Your Scenarios
-
-```gherkin
-@hybrid
-Feature: End-to-End Workflows
-```
-
-### Playwright Config
+No extra configuration is needed. Put hybrid scenarios in any folder a project reads (for example `features/ui/`, since they need a browser). If you want them in their own folder, add a project for it:
 
 ```typescript
-const hybridBdd = defineBddProject({
-  name: 'hybrid',
-  features: 'features/hybrid/**/*.feature',
+const e2eBdd = defineBddProject({
+  name: 'e2e',
+  features: 'features/e2e/**/*.feature',
   steps: 'features/steps/**/*.ts',
-  tags: '@hybrid',
+  tags: tagsForProject({ extraTags: resolveExtraTags(process.env.TEST_TAGS) }),
 });
 ```
 
@@ -54,7 +47,6 @@ const hybridBdd = defineBddProject({
 Create test data via API (fast), verify it appears in UI:
 
 ```gherkin
-@hybrid
 Feature: User Management
 
   Scenario: Create user via API, verify in UI
@@ -85,7 +77,6 @@ Feature: User Management
 Perform action in UI, verify via API:
 
 ```gherkin
-@hybrid
 Feature: Profile Update
 
   Scenario: Update profile in UI, verify via API
@@ -109,7 +100,6 @@ Feature: Profile Update
 Skip UI login by setting auth via API:
 
 ```gherkin
-@hybrid
 Feature: Fast UI Tests
 
   Background:
@@ -127,7 +117,6 @@ Feature: Fast UI Tests
 Create multiple entities via API, test UI listing:
 
 ```gherkin
-@hybrid
 Feature: User List
 
   Scenario: Display multiple users
@@ -165,7 +154,6 @@ Feature: User List
 ### Cleanup via API After UI Test
 
 ```gherkin
-@hybrid
 Feature: User Deletion
 
   Scenario: Delete user via UI, verify via API
@@ -191,7 +179,6 @@ Feature: User Deletion
 ## Complete Workflow Example
 
 ```gherkin
-@hybrid
 Feature: Order Processing
 
   Scenario: Complete order workflow
@@ -248,7 +235,6 @@ Feature: Order Processing
 Variables set in API steps are available in UI steps and vice versa:
 
 ```gherkin
-@hybrid
 Scenario: Share variables across layers
   # Set via API response
   Given I am authenticated as an admin via API
@@ -272,7 +258,6 @@ Scenario: Share variables across layers
 ### Strategy 1: API Auth, UI Uses Same Session
 
 ```gherkin
-@hybrid
 Scenario: Shared auth
   Given I am authenticated as an admin via API
   # Bearer token set in world.headers
@@ -284,7 +269,6 @@ Scenario: Shared auth
 ### Strategy 2: Separate Auth Per Layer
 
 ```gherkin
-@hybrid
 Scenario: Separate auth
   # API auth
   Given I am authenticated as an admin via API
@@ -300,7 +284,6 @@ Scenario: Separate auth
 ### Strategy 3: Token Injection
 
 ```gherkin
-@hybrid
 Scenario: Inject API token to UI
   # Get token via API
   Given I am authenticated as an admin via API
@@ -317,7 +300,6 @@ Scenario: Inject API token to UI
 Cleanup registered in API steps still works:
 
 ```gherkin
-@hybrid
 Scenario: Cleanup works across layers
   # Create via API
   Given I am authenticated as an admin via API
@@ -338,7 +320,6 @@ Scenario: Cleanup works across layers
 
 ```gherkin
 # Good - fast setup
-@hybrid
 Background:
   Given I am authenticated as an admin via API
   When I POST "/reset-test-data" with JSON body: {}
@@ -348,7 +329,6 @@ Background:
 
 ```gherkin
 # Good - focused UI test
-@hybrid
 Scenario: Test the delete confirmation dialog
   # Setup via API
   Given I am authenticated as an admin via API
@@ -367,7 +347,6 @@ Scenario: Test the delete confirmation dialog
 
 ```gherkin
 # Good - verify API state matches UI action
-@hybrid
 Scenario: Verify form submission
   Given I navigate to "/settings"
   When I fill the field "Timezone" with "UTC"

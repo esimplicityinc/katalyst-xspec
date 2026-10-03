@@ -7,7 +7,6 @@ Common patterns for TUI (Terminal User Interface) testing with the Katalyst BDD 
 ### Start and Verify
 
 ```gherkin
-@tui
 Scenario: Application starts successfully
   Given I start the TUI application
   When I wait for "Welcome"
@@ -17,7 +16,6 @@ Scenario: Application starts successfully
 ### Execute Command
 
 ```gherkin
-@tui
 Scenario: Run a command
   Given I start the TUI application
   When I type "help"
@@ -28,7 +26,6 @@ Scenario: Run a command
 ### Interactive Input
 
 ```gherkin
-@tui
 Scenario: Respond to prompt
   Given I start the TUI application
   When I wait for "Enter your name:"
@@ -42,7 +39,6 @@ Scenario: Respond to prompt
 ### Menu Navigation
 
 ```gherkin
-@tui
 Scenario: Navigate main menu
   Given I start the TUI application
   When I wait for "Main Menu"
@@ -61,7 +57,6 @@ Scenario: Navigate main menu
 ### Arrow Key Navigation
 
 ```gherkin
-@tui
 Scenario: Navigate with arrow keys
   Given I start the TUI application
   When I wait for "Select option:"
@@ -73,7 +68,6 @@ Scenario: Navigate with arrow keys
 ### Navigate to Specific Item
 
 ```gherkin
-@tui
 Scenario: Select specific menu item
   Given I start the TUI application
   When I wait for "Menu"
@@ -84,7 +78,6 @@ Scenario: Select specific menu item
 ### Back Navigation
 
 ```gherkin
-@tui
 Scenario: Go back to previous screen
   Given I start the TUI application
   When I navigate to "Settings" and select
@@ -98,7 +91,6 @@ Scenario: Go back to previous screen
 ### Fill Single Field
 
 ```gherkin
-@tui
 Scenario: Fill text field
   Given I start the TUI application
   When I wait for "Username:"
@@ -112,11 +104,10 @@ Scenario: Fill text field
 ### Fill Form with Table
 
 ```gherkin
-@tui
 Scenario: Fill complete form
   Given I start the TUI application
   When I wait for "New User"
-  And I fill the form:
+  And I fill the TUI form:
     | Field    | Value            |
     | Name     | John Doe         |
     | Email    | john@example.com |
@@ -128,7 +119,6 @@ Scenario: Fill complete form
 ### Select from Dropdown
 
 ```gherkin
-@tui
 Scenario: Select dropdown value
   Given I start the TUI application
   When I wait for "Configuration"
@@ -143,7 +133,6 @@ Scenario: Select dropdown value
 ### Special Keys
 
 ```gherkin
-@tui
 Scenario: Use special keys
   Given I start the TUI application
   When I press "F1"
@@ -155,7 +144,6 @@ Scenario: Use special keys
 ### Modifier Keys
 
 ```gherkin
-@tui
 Scenario: Keyboard shortcuts
   Given I start the TUI application
   When I press ctrl+s
@@ -171,7 +159,6 @@ Scenario: Keyboard shortcuts
 ### Text Editing
 
 ```gherkin
-@tui
 Scenario: Edit text
   Given I start the TUI application
   When I wait for "Editor"
@@ -254,7 +241,6 @@ Scenario: Long operation
 ### Confirm Dialog
 
 ```gherkin
-@tui
 Scenario: Confirm action
   Given I start the TUI application
   When I type "delete all"
@@ -267,7 +253,6 @@ Scenario: Confirm action
 ### Cancel Dialog
 
 ```gherkin
-@tui
 Scenario: Cancel action
   Given I start the TUI application
   When I type "delete all"
@@ -280,7 +265,6 @@ Scenario: Cancel action
 ### Dismiss Dialog
 
 ```gherkin
-@tui
 Scenario: Dismiss with escape
   Given I start the TUI application
   When I press "F1"
@@ -294,7 +278,6 @@ Scenario: Dismiss with escape
 ### Create Baseline Snapshot
 
 ```gherkin
-@tui
 Scenario: Capture main screen
   Given I start the TUI application
   When I wait for "Dashboard"
@@ -304,7 +287,6 @@ Scenario: Capture main screen
 ### Verify Against Snapshot
 
 ```gherkin
-@tui
 Scenario: Verify screen matches snapshot
   Given I start the TUI application
   When I wait for "Dashboard"
@@ -314,7 +296,6 @@ Scenario: Verify screen matches snapshot
 ### Multiple Snapshots
 
 ```gherkin
-@tui
 Scenario: Capture workflow snapshots
   Given I start the TUI application
   When I wait for "Welcome"
@@ -332,7 +313,6 @@ Scenario: Capture workflow snapshots
 ### Error Messages
 
 ```gherkin
-@tui
 Scenario: Show error on invalid input
   Given I start the TUI application
   When I type "invalid-command"
@@ -343,11 +323,10 @@ Scenario: Show error on invalid input
 ### Validation Errors
 
 ```gherkin
-@tui
 Scenario: Form validation
   Given I start the TUI application
   When I wait for "New User"
-  And I fill the form:
+  And I fill the TUI form:
     | Field | Value         |
     | Email | not-an-email  |
   And I submit the form
@@ -359,7 +338,6 @@ Scenario: Form validation
 ### Restart Application
 
 ```gherkin
-@tui
 Scenario: Application restart
   Given I start the TUI application
   When I wait for "Ready"
@@ -375,7 +353,6 @@ Scenario: Application restart
 ### Quit Application
 
 ```gherkin
-@tui
 Scenario: Graceful quit
   Given I start the TUI application
   When I quit the application
@@ -390,7 +367,6 @@ Scenario: Force quit
 ## Complete Example: CLI Todo App
 
 ```gherkin
-@tui
 Feature: Todo CLI Application
   As a user
   I want to manage todos from the terminal
@@ -446,7 +422,7 @@ Feature: Todo CLI Application
     And I press enter
     Then I should see "Settings"
     
-    When I fill the form:
+    When I fill the TUI form:
       | Field     | Value |
       | Theme     | Dark  |
       | Compact   | Yes   |

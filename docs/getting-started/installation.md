@@ -32,19 +32,33 @@ tmux -V
 The fastest way to get started is using the `katalyst-xspec init` command:
 
 ```bash
-# From your project root
-npx @esimplicitylabs/katalyst-xspec init
+# Scaffold into a new folder
+npx @esimplicitylabs/katalyst-xspec init my-tests
 
-# Or with a custom directory name
+# Or into the current folder
+npx @esimplicitylabs/katalyst-xspec init .
+
+# --dir also works; --force overwrites existing files
 npx @esimplicitylabs/katalyst-xspec init --dir e2e-tests
 ```
 
+Then install dependencies and the browser (one-time, required for UI tests):
+
+```bash
+cd my-tests
+npm install
+npx playwright install chromium
+npm test
+```
+
 This creates a complete test package with:
-- Pre-configured Playwright setup
-- Example feature files
+- Pre-configured Playwright setup (`api` and `ui` projects; `tui` commented out)
+- Two example features (`features/api/example.feature`, `features/ui/example.feature`) that pass with no `.env`
 - Step registration
 - Environment template
 - Utility scripts for upgrading and step generation
+
+The `package.json` name is taken from the target folder (npm-safe, e.g. `My Demo` becomes `my-demo`).
 
 #### Agent Skills (Optional)
 
@@ -55,13 +69,13 @@ The CLI can also install [Agent Skills](../guides/agent-skills.md) for AI-assist
 npx @esimplicitylabs/katalyst-xspec init --with-skills
 
 # Install skills for specific agents
-npx @esimplicitylabs/katalyst-xspec init --with-skills --skills-agents opencode,claude
+npx @esimplicitylabs/katalyst-xspec init --with-skills --skills-agents opencode,claude-code
 
 # Skip skills installation
 npx @esimplicitylabs/katalyst-xspec init --no-skills
 ```
 
-Available agent options: `opencode`, `claude`, `cursor`, `generic`
+Available agent options: `opencode`, `claude-code`, `cursor`, `generic`
 
 ### Method 2: Manual Installation
 
@@ -77,7 +91,13 @@ npm install -D @esimplicitylabs/katalyst-xspec
 npm install -D @playwright/test playwright-bdd typescript
 ```
 
-3. (Optional) Install TUI testing support:
+3. Download the browser used by UI tests:
+
+```bash
+npx playwright install chromium
+```
+
+4. (Optional) Install TUI testing support:
 
 ```bash
 npm install -D tui-tester
@@ -102,7 +122,7 @@ npm install -D @esimplicitylabs/katalyst-xspec@"file:../katalyst-xspec"
 | Package | Version | Required |
 |---------|---------|----------|
 | `@playwright/test` | ^1.49.0 | Yes |
-| `playwright-bdd` | ^8.3.0 | Yes |
+| `playwright-bdd` | ^9.1.0 | Yes |
 | `typescript` | ^5.6.0 | Yes |
 | `tui-tester` | ^1.0.0 | No (optional) |
 
@@ -133,14 +153,17 @@ your-project/
 ├── tsconfig.json
 ├── features/
 │   ├── api/
-│   │   └── *.feature
+│   │   └── example.feature
 │   ├── ui/
-│   │   └── *.feature
+│   │   └── example.feature
 │   └── steps/
 │       ├── fixtures.ts
 │       └── steps.ts
+├── .env.example
 └── .env (optional)
 ```
+
+Each folder under `features/` is read by one Playwright project. Any step works in any scenario.
 
 ## Included Scripts
 
@@ -170,6 +193,14 @@ Ensure you've installed the package:
 
 ```bash
 npm install -D @esimplicitylabs/katalyst-xspec
+```
+
+### "Executable doesn't exist" / browser not found
+
+UI tests need a Playwright browser. Run once:
+
+```bash
+npx playwright install chromium
 ```
 
 ### "tui-tester is not installed"

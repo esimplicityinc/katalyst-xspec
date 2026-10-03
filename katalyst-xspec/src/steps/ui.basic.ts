@@ -6,51 +6,51 @@ import { expectElementAttribute, setFileInputContent } from '../helpers/ui-eleme
 export function registerUiBasicSteps(test: any): void {
   const { Given, When, Then } = createBdd(test as any) as any;
 
-  Given('I navigate to {string}', { tags: '@ui or @hybrid' }, async ({ ui, world }: any, path: string) => {
+  Given('I navigate to {string}', async ({ ui, world }: any, path: string) => {
     await ui.goto(interpolate(path, world.vars));
   });
 
-  When('I click the button {string}', { tags: '@ui or @hybrid' }, async ({ ui, world }: any, name: string) => {
+  When('I click the button {string}', async ({ ui, world }: any, name: string) => {
     await ui.clickButton(interpolate(name, world.vars));
   });
 
   // Alias: "I click the {string} button" (reversed parameter order)
-  When('I click the {string} button', { tags: '@ui or @hybrid' }, async ({ ui, world }: any, name: string) => {
+  When('I click the {string} button', async ({ ui, world }: any, name: string) => {
     await ui.clickButton(interpolate(name, world.vars));
   });
 
-  When('I click the link {string}', { tags: '@ui or @hybrid' }, async ({ ui, world }: any, name: string) => {
+  When('I click the link {string}', async ({ ui, world }: any, name: string) => {
     await ui.clickLink(interpolate(name, world.vars));
   });
 
-  When('I fill the placeholder {string} with {string}', { tags: '@ui or @hybrid' }, async ({ ui, world }: any, placeholder: string, value: string) => {
+  When('I fill the placeholder {string} with {string}', async ({ ui, world }: any, placeholder: string, value: string) => {
     await ui.fillPlaceholder(interpolate(placeholder, world.vars), interpolate(value, world.vars));
   });
 
-  When('I fill the field {string} with {string}', { tags: '@ui or @hybrid' }, async ({ ui, world }: any, label: string, value: string) => {
+  When('I fill the field {string} with {string}', async ({ ui, world }: any, label: string, value: string) => {
     await ui.fillLabel(interpolate(label, world.vars), interpolate(value, world.vars));
   });
 
   // Alias: "I fill in {string} with {string}" (common Cucumber phrasing)
-  When('I fill in {string} with {string}', { tags: '@ui or @hybrid' }, async ({ ui, world }: any, label: string, value: string) => {
+  When('I fill in {string} with {string}', async ({ ui, world }: any, label: string, value: string) => {
     await ui.fillLabel(interpolate(label, world.vars), interpolate(value, world.vars));
   });
 
-  When('I log in as admin in UI', { tags: '@ui or @hybrid' }, async ({ auth, world }: any) => {
+  When('I log in as admin in UI', async ({ auth, world }: any) => {
     await auth.uiLoginAsAdmin(world);
   });
 
-  When('I log in as user in UI', { tags: '@ui or @hybrid' }, async ({ auth, world }: any) => {
+  When('I log in as user in UI', async ({ auth, world }: any) => {
     await auth.uiLoginAsUser(world);
   });
 
   // Element interaction by CSS selector
-  When('I click the element {string}', { tags: '@ui or @hybrid' }, async ({ page, world }: any, selector: string) => {
+  When('I click the element {string}', async ({ page, world }: any, selector: string) => {
     await page.locator(interpolate(selector, world.vars)).click();
   });
 
   // Dropdown selection by CSS selector
-  When('I select {string} from dropdown {string}', { tags: '@ui or @hybrid' }, async ({ page, world }: any, option: string, selector: string) => {
+  When('I select {string} from dropdown {string}', async ({ page, world }: any, option: string, selector: string) => {
     await page.locator(interpolate(selector, world.vars)).selectOption({ label: interpolate(option, world.vars) });
   });
 
@@ -59,7 +59,6 @@ export function registerUiBasicSteps(test: any): void {
   // disk. Content-type is inferred from the file name's extension.
   When(
     'I set the file input {string} to a file named {string} with content {string}',
-    { tags: '@ui or @hybrid' },
     async ({ page, world }: any, selector: string, fileName: string, content: string) => {
       await setFileInputContent(
         page,
@@ -70,36 +69,36 @@ export function registerUiBasicSteps(test: any): void {
     },
   );
 
-  Then('I should see text {string}', { tags: '@ui or @hybrid' }, async ({ ui, world }: any, text: string) => {
+  Then('I should see text {string}', async ({ ui, world }: any, text: string) => {
     await ui.expectText(interpolate(text, world.vars));
   });
 
-  Then('the URL should contain {string}', { tags: '@ui or @hybrid' }, async ({ ui, world }: any, part: string) => {
+  Then('the URL should contain {string}', async ({ ui, world }: any, part: string) => {
     await ui.expectUrlContains(interpolate(part, world.vars));
   });
 
   // Alias: "I should be on page {string}"
-  Then('I should be on page {string}', { tags: '@ui or @hybrid' }, async ({ ui, world }: any, path: string) => {
+  Then('I should be on page {string}', async ({ ui, world }: any, path: string) => {
     await ui.expectUrlContains(interpolate(path, world.vars));
   });
 
   // Element visibility by CSS selector
-  Then('the element {string} should be visible', { tags: '@ui or @hybrid' }, async ({ page, world }: any, selector: string) => {
+  Then('the element {string} should be visible', async ({ page, world }: any, selector: string) => {
     await expect(page.locator(interpolate(selector, world.vars))).toBeVisible();
   });
 
-  Then('the element {string} should not be visible', { tags: '@ui or @hybrid' }, async ({ page, world }: any, selector: string) => {
+  Then('the element {string} should not be visible', async ({ page, world }: any, selector: string) => {
     await expect(page.locator(interpolate(selector, world.vars))).not.toBeVisible();
   });
 
   // Element value assertion by CSS selector
-  Then('the element {string} should have value {string}', { tags: '@ui or @hybrid' }, async ({ page, world }: any, selector: string, value: string) => {
+  Then('the element {string} should have value {string}', async ({ page, world }: any, selector: string, value: string) => {
     await expect(page.locator(interpolate(selector, world.vars))).toHaveValue(interpolate(value, world.vars));
   });
 
   // Arbitrary attribute assertion by CSS selector — e.g. assert a component's
   // data-state ("expanded"/"collapsed"), aria-*, or any HTML attribute value.
-  Then('the element {string} should have attribute {string} equal to {string}', { tags: '@ui or @hybrid' }, async ({ page, world }: any, selector: string, attribute: string, value: string) => {
+  Then('the element {string} should have attribute {string} equal to {string}', async ({ page, world }: any, selector: string, attribute: string, value: string) => {
     await expectElementAttribute(
       page,
       interpolate(selector, world.vars),
@@ -109,11 +108,11 @@ export function registerUiBasicSteps(test: any): void {
   });
 
   // Checkbox state assertions
-  Then('the element {string} should be checked', { tags: '@ui or @hybrid' }, async ({ page, world }: any, selector: string) => {
+  Then('the element {string} should be checked', async ({ page, world }: any, selector: string) => {
     await expect(page.locator(interpolate(selector, world.vars))).toBeChecked();
   });
 
-  Then('the element {string} should not be checked', { tags: '@ui or @hybrid' }, async ({ page, world }: any, selector: string) => {
+  Then('the element {string} should not be checked', async ({ page, world }: any, selector: string) => {
     await expect(page.locator(interpolate(selector, world.vars))).not.toBeChecked();
   });
 }

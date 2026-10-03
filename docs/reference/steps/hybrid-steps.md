@@ -1,6 +1,6 @@
 # Hybrid Steps Reference
 
-Complete reference for `@hybrid` tagged step definitions.
+Reference for the hybrid suite and for mixing API and UI steps in one scenario. "Hybrid" is just a style of scenario — no tag or special project is needed.
 
 ## Registration
 
@@ -18,8 +18,6 @@ registerHybridSuite(test);
 
 Navigates to a path with variable interpolation.
 
-**Tag:** `@hybrid`
-
 **Parameters:**
 | Name | Type | Description |
 |------|------|-------------|
@@ -27,7 +25,6 @@ Navigates to a path with variable interpolation.
 
 **Example:**
 ```gherkin
-@hybrid
 Scenario: Navigate with variables
   Given I set variable "userId" to "123"
   Given I navigate to interpolated path "/users/{userId}/profile"
@@ -37,11 +34,11 @@ Scenario: Navigate with variables
 
 ## Using Hybrid Tests
 
-Hybrid tests combine API and UI steps in the same scenario. All `@api` and `@ui` steps are available in `@hybrid` scenarios.
+Hybrid tests combine API and UI steps in the same scenario. Every built-in step works in any scenario, so no tag is required.
 
 ### Available Step Types
 
-When using `@hybrid` tag, you have access to:
+In any scenario you can combine:
 
 | Category | Examples |
 |----------|----------|
@@ -60,7 +57,6 @@ When using `@hybrid` tag, you have access to:
 ### API Setup, UI Verify
 
 ```gherkin
-@hybrid
 Scenario: Create user via API, verify in UI
   # API Setup
   Given I am authenticated as an admin via API
@@ -79,7 +75,6 @@ Scenario: Create user via API, verify in UI
 ### UI Action, API Verify
 
 ```gherkin
-@hybrid
 Scenario: Update profile in UI, verify via API
   # UI Action
   Given I navigate to "/profile"
@@ -97,7 +92,6 @@ Scenario: Update profile in UI, verify via API
 ### Authenticated Navigation
 
 ```gherkin
-@hybrid
 Scenario: Use API token for faster setup
   Given I am authenticated as an admin via API
   Given I navigate to interpolated path "/admin/dashboard"
@@ -111,7 +105,6 @@ Scenario: Use API token for faster setup
 Variables set in API steps are available in UI steps:
 
 ```gherkin
-@hybrid
 Scenario: Share data between layers
   # Set via API
   Given I am authenticated as an admin via API
@@ -131,7 +124,6 @@ Scenario: Share data between layers
 ## Complete Example
 
 ```gherkin
-@hybrid
 Feature: Order Management
 
   Scenario: Complete order workflow
@@ -183,7 +175,6 @@ Feature: Order Management
 ### Use API for Setup
 
 ```gherkin
-@hybrid
 Background:
   # Fast setup via API
   Given I am authenticated as an admin via API
@@ -196,7 +187,6 @@ Background:
 ### Verify Critical Paths in Both Layers
 
 ```gherkin
-@hybrid
 Scenario: Verify deletion
   # Delete via UI
   Given I navigate to "/users/{userId}"
@@ -212,7 +202,6 @@ Scenario: Verify deletion
 ### Clear Layer Transitions
 
 ```gherkin
-@hybrid
 Scenario: Clear documentation
   # === API Setup ===
   Given I am authenticated as an admin via API

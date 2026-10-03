@@ -19,6 +19,10 @@ npm run build -w @esimplicitylabs/katalyst-xspec
 
 # Scaffold a new test project
 npx @esimplicitylabs/katalyst-xspec init my-tests
+cd my-tests
+npm install
+npx playwright install chromium   # one-time browser download for UI tests
+npm test                          # the scaffolded examples pass with no .env
 ```
 
 ## Documentation
@@ -26,7 +30,7 @@ npx @esimplicitylabs/katalyst-xspec init my-tests
 Full documentation is available in the [`docs/`](./docs/) folder:
 
 - **[Getting Started](./docs/getting-started/)** - Installation, quick start, project setup
-- **[Concepts](./docs/concepts/)** - Architecture, world state, test lifecycle, tag system
+- **[Concepts](./docs/concepts/)** - Architecture, world state, test lifecycle, tags
 - **[Guides](./docs/guides/)** - API, UI, TUI, and hybrid testing guides
 - **[Agent Skills](./docs/guides/agent-skills.md)** - AI-assisted development with OpenCode, Claude Code, Cursor
 - **[Reference](./docs/reference/)** - API reference for ports, adapters, fixtures, and steps
@@ -71,14 +75,9 @@ Feature Files (.feature)
 - **AuthPort** - Authentication handling
 - **CleanupPort** - Test data cleanup
 
-### Tag System
+### Steps and Tags
 
-| Tag | Description |
-|-----|-------------|
-| `@api` | API-only scenarios |
-| `@ui` | Browser UI scenarios |
-| `@tui` | Terminal UI scenarios |
-| `@hybrid` | Cross-layer scenarios |
+Built-in steps are untagged: any step works in any scenario, so one scenario can mix API and UI steps. Playwright projects select feature files by folder (`features/api/`, `features/ui/`). Tags are optional and only for your own grouping (`@smoke`, `@wip`), filtered with `TEST_TAGS`; `@Skip`/`@ignore` scenarios are skipped. See [Tags](./docs/concepts/tag-system.md).
 
 ## Agent Skills
 
@@ -130,10 +129,10 @@ npm run lint --workspaces
 
 ## Requirements
 
-- Node.js >= 18.0.0
+- Node.js >= 20
 - npm >= 9.0.0
 - Playwright >= 1.49.0
-- playwright-bdd >= 8.3.0
+- playwright-bdd >= 9.1.0
 
 ## Installation
 

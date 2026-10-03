@@ -28,7 +28,7 @@ Agent Skills are structured knowledge files that follow the [agentskills.io](htt
 When you scaffold a new project with `katalyst-xspec init`, you'll be prompted to install Agent Skills:
 
 ```bash
-npx @esimplicitylabs/katalyst-xspec init
+npx @esimplicitylabs/katalyst-xspec init my-tests
 
 # Interactive prompts:
 # ? Would you like to install Katalyst BDD Agent Skills? Yes
@@ -51,9 +51,9 @@ npx @esimplicitylabs/katalyst-xspec init --with-skills
 npx @esimplicitylabs/katalyst-xspec init --no-skills
 
 # Install for specific agents only
-npx @esimplicitylabs/katalyst-xspec init --with-skills --skills-agents opencode,claude
+npx @esimplicitylabs/katalyst-xspec init --with-skills --skills-agents opencode,claude-code
 
-# Available agent options: opencode, claude, cursor, generic
+# Available agent options: opencode, claude-code, cursor, generic
 ```
 
 ### Manual Installation
@@ -123,7 +123,7 @@ Covers:
 - Project structure
 - Writing your first test
 - Running tests
-- Understanding tags (@api, @ui, @tui, @hybrid)
+- Optional tags and running one project (`--project`, `TEST_TAGS`)
 
 ### katalyst-bdd-step-reference
 

@@ -1,4 +1,3 @@
-@ui
 Feature: Dropdown
   As a user
   I want to interact with dropdown menus

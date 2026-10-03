@@ -609,5 +609,5 @@ maxFailures: process.env.CI ? 5 : undefined,
 ## Related Topics
 
 - [Project Setup](../getting-started/project-setup.md) - Playwright config
-- [Tag System](../concepts/tag-system.md) - Filtering tests
+- [Tags](../concepts/tag-system.md) - Filtering tests
 - [Troubleshooting](#debugging-ci-failures) - Debug failures

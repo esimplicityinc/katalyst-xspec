@@ -16,7 +16,6 @@ import { registerTuiWizardSteps } from './tui.wizard';
 
 /**
  * Register all API step definitions.
- * Steps are tagged with @api or @hybrid for selective execution.
  */
 export function registerApiSteps(test: any): void {
   registerApiAuthSteps(test);
@@ -26,7 +25,6 @@ export function registerApiSteps(test: any): void {
 
 /**
  * Register all UI step definitions.
- * Steps are tagged with @ui or @hybrid for selective execution.
  *
  * Includes:
  * - Basic UI steps (navigation, clicks, fills)
@@ -69,7 +67,6 @@ export function registerHybridSuite(test: any): void {
 
 /**
  * Register all TUI (Terminal User Interface) step definitions.
- * Steps are tagged with @tui for selective execution.
  *
  * @example
  * ```typescript

@@ -4,7 +4,7 @@ Comprehensive guide to terminal user interface testing with @esimplicitylabs/kat
 
 ## Overview
 
-TUI (Terminal User Interface) testing validates CLI applications and terminal-based interfaces using tmux-based simulation. Use `@tui` tagged steps for terminal testing.
+TUI (Terminal User Interface) testing validates CLI applications and terminal-based interfaces using tmux-based simulation. Register the TUI steps and enable the `tui` project to test terminal apps; TUI steps work in any scenario.
 
 ```mermaid
 flowchart LR
@@ -80,7 +80,6 @@ const tuiBdd = defineBddProject({
   name: 'tui',
   features: 'features/tui/**/*.feature',
   steps: 'features/steps/**/*.ts',
-  tags: '@tui',
 });
 
 export default defineConfig({
@@ -98,7 +97,6 @@ export default defineConfig({
 ### Start and Stop
 
 ```gherkin
-@tui
 Scenario: Basic TUI test
   Given I start the TUI application
   Then I should see "Welcome"
@@ -108,7 +106,6 @@ Scenario: Basic TUI test
 ### Typing Text
 
 ```gherkin
-@tui
 Scenario: Type commands
   Given I start the TUI application
   When I type "hello world"
@@ -119,7 +116,6 @@ Scenario: Type commands
 ### Keyboard Input
 
 ```gherkin
-@tui
 Scenario: Keyboard navigation
   Given I start the TUI application
   When I press "down"
@@ -200,7 +196,6 @@ When I enter "password123" in the "Password" field
 ### Menu Navigation
 
 ```gherkin
-@tui
 Scenario: Navigate menu
   Given I start the TUI application
   When I navigate down 3 times
@@ -215,7 +210,6 @@ Scenario: Navigate menu
 ### Screen Navigation
 
 ```gherkin
-@tui
 Scenario: Navigate screens
   Given I start the TUI application
   When I navigate to "Settings" and select
@@ -232,7 +226,6 @@ Scenario: Navigate screens
 # Wait for text (with timeout)
 Then I should see "Welcome"
 Then I should see "Welcome" in the terminal
-Then I should see text "Loading complete"
 
 # Immediate check
 Then the screen should contain "Menu"
@@ -282,10 +275,9 @@ Then I should not see any of:
 ### Fill Form
 
 ```gherkin
-@tui
 Scenario: Complete form
   Given I start the TUI application
-  When I fill the form:
+  When I fill the TUI form:
     | field    | value            |
     | Username | admin            |
     | Password | secret123        |
@@ -347,7 +339,6 @@ When I dismiss the dialog
 ### Execute CLI Commands
 
 ```gherkin
-@tui
 Scenario: Run commands
   Given I start the TUI application
   When I execute command "help"
@@ -362,7 +353,6 @@ Scenario: Run commands
 ### Take Snapshots
 
 ```gherkin
-@tui
 Scenario: Capture screen state
   Given I start the TUI application
   Then I take a snapshot named "main-menu"
@@ -371,7 +361,6 @@ Scenario: Capture screen state
 ### Compare Snapshots
 
 ```gherkin
-@tui
 Scenario: Verify screen layout
   Given I start the TUI application
   Then the screen should match snapshot "main-menu"
@@ -430,7 +419,6 @@ When I wait for "Loading..." for 30 seconds
 ### CLI Tool Test
 
 ```gherkin
-@tui
 Feature: CLI Tool
 
   Scenario: Help command
@@ -458,7 +446,6 @@ Feature: CLI Tool
 ### TUI Dashboard
 
 ```gherkin
-@tui
 Feature: Dashboard TUI
 
   Background:
@@ -489,7 +476,6 @@ Feature: Dashboard TUI
 ### Menu-Driven Application
 
 ```gherkin
-@tui
 Feature: Menu Application
 
   Scenario: Full menu navigation

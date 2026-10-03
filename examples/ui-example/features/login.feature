@@ -1,4 +1,3 @@
-@ui
 Feature: Login Page
   As a user
   I want to test the login functionality

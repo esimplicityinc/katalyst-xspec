@@ -333,7 +333,6 @@ const project = defineBddProject({
   name: 'api',
   features: 'features/api/**/*.feature',
   steps: 'features/steps/**/*.ts',
-  tags: '@api',
 });
 ```
 

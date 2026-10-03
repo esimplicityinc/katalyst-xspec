@@ -1,4 +1,3 @@
-@hybrid
 Feature: User Journey
   As a tester
   I want to combine API and UI testing

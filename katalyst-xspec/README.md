@@ -12,6 +12,10 @@ Or scaffold a new project:
 
 ```bash
 npx @esimplicitylabs/katalyst-xspec init my-tests
+cd my-tests
+npm install
+npx playwright install chromium   # one-time browser download for UI tests
+npm test
 ```
 
 ## What’s included
@@ -20,7 +24,7 @@ npx @esimplicitylabs/katalyst-xspec init my-tests
 - **Ports**: `ApiPort`, `UiPort`, `AuthPort`, `CleanupPort`.
 - **Adapters**: Playwright API/UI adapters, default cleanup, example auth adapter.
 - **Step registrations**: API (auth/http/assertions), UI (basic + wizard), shared vars/cleanup, hybrid helpers.
-- **Config helpers**: tag expression helpers for project tagging.
+- **Config helpers**: `tagsForProject` / `resolveExtraTags` for optional tag filtering (`@Skip`/`@ignore`, `TEST_TAGS`).
 
 ## Minimal usage
 
@@ -51,7 +55,7 @@ import { registerApiSteps } from '@esimplicitylabs/katalyst-xspec/steps';
 registerApiSteps(test);
 ```
 
-3) Configure Playwright projects with your features/steps globs and tag expressions. Keep `@playwright/test` and `playwright-bdd` aligned with peer ranges.
+3) Configure Playwright projects with your features/steps globs (each project selects feature files by folder; tags are optional). Keep `@playwright/test` and `playwright-bdd` aligned with peer ranges.
 
 ## Publishing (npm)
 
@@ -66,4 +70,4 @@ reaches the registry.
 ## Notes
 - Peer dependencies: `@playwright/test`, `playwright-bdd`, `typescript` must be installed in the consuming repo.
 - Defaults (auth/cleanup) are examples; override via `createBddTest` options for app-specific behavior.
-- Tagging: supports `@api`, `@ui`, `@hybrid`, plus your own (`@smoke`, `@slow`, `@external`); combine with Playwright’s `maxFailures`/reporters as needed.
+- Tagging: steps are untagged and work in any scenario; projects select features by folder. Tags are optional for your own grouping (`@smoke`, `@slow`, `@external`), filtered via `TEST_TAGS`; combine with Playwright’s `maxFailures`/reporters as needed.

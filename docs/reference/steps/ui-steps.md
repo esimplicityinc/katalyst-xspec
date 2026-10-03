@@ -1,6 +1,6 @@
 # UI Steps Reference
 
-Complete reference for all `@ui` tagged step definitions.
+Complete reference for the UI (browser) step definitions. Like all built-in steps, they are untagged and work in any scenario, including alongside API steps.
 
 ## Registration
 
@@ -22,8 +22,6 @@ This registers:
 
 Navigates to a URL path.
 
-**Tag:** `@ui`
-
 **Parameters:**
 | Name | Type | Description |
 |------|------|-------------|
@@ -41,8 +39,6 @@ Given I navigate to "/users/{userId}"
 
 Opens a page by URL.
 
-**Tag:** `@ui`
-
 **Example:**
 ```gherkin
 Given I open "/dashboard" page
@@ -53,8 +49,6 @@ Given I open "/dashboard" page
 ### Given I open {string} in the browser
 
 Opens a URL in the browser.
-
-**Tag:** `@ui`
 
 **Example:**
 ```gherkin
@@ -67,8 +61,6 @@ Given I open "https://example.com" in the browser
 
 Navigates back in browser history.
 
-**Tag:** `@ui`
-
 **Example:**
 ```gherkin
 When I go back in the browser
@@ -79,8 +71,6 @@ When I go back in the browser
 ### When I reload the page
 
 Reloads the current page.
-
-**Tag:** `@ui`
 
 **Example:**
 ```gherkin
@@ -94,8 +84,6 @@ When I reload the page
 ### When I click the button {string}
 
 Clicks a button by accessible name.
-
-**Tag:** `@ui`
 
 **Parameters:**
 | Name | Type | Description |
@@ -115,8 +103,6 @@ When I click the button "{buttonName}"
 
 Alias for `I click the button {string}` with reversed parameter order.
 
-**Tag:** `@ui`
-
 **Example:**
 ```gherkin
 When I click the "Login" button
@@ -128,8 +114,6 @@ When I click the "Submit" button
 ### When I click the element {string}
 
 Clicks an element by CSS selector.
-
-**Tag:** `@ui`
 
 **Parameters:**
 | Name | Type | Description |
@@ -149,8 +133,6 @@ When I click the element ".menu-item:first-child"
 
 Clicks a link by text.
 
-**Tag:** `@ui`
-
 **Parameters:**
 | Name | Type | Description |
 |------|------|-------------|
@@ -167,8 +149,6 @@ When I click the link "Home"
 ### When I {string} the {string} element that contains {string}
 
 Clicks an element containing specific text.
-
-**Tag:** `@ui`
 
 **Parameters:**
 | Name | Type | Description |
@@ -190,8 +170,6 @@ When I "force click" the "button" element that contains "Submit"
 ### When I {string} the {string} element with {string} {string}
 
 Clicks an element by locator method.
-
-**Tag:** `@ui`
 
 **Parameters:**
 | Name | Type | Description |
@@ -216,8 +194,6 @@ When I "force click" the "1st" element with "Email" "label"
 
 Clicks at position (0, 0).
 
-**Tag:** `@ui`
-
 **Example:**
 ```gherkin
 When I click on the top left corner of the page
@@ -228,8 +204,6 @@ When I click on the top left corner of the page
 ### When If its visible, I {string} the {string} element with {string} {string}
 
 Conditionally clicks an element if visible.
-
-**Tag:** `@ui`
 
 **Example:**
 ```gherkin
@@ -243,8 +217,6 @@ When If its visible, I "click" the "1st" element with "Dismiss" "text"
 ### When I fill the placeholder {string} with {string}
 
 Fills an input by placeholder text.
-
-**Tag:** `@ui`
 
 **Parameters:**
 | Name | Type | Description |
@@ -262,8 +234,6 @@ When I fill the placeholder "Enter your email" with "test@example.com"
 ### When I fill the field {string} with {string}
 
 Fills an input by label.
-
-**Tag:** `@ui`
 
 **Parameters:**
 | Name | Type | Description |
@@ -283,8 +253,6 @@ When I fill the field "Password" with "{password}"
 
 Alias for `I fill the field {string} with {string}`. Common Cucumber phrasing.
 
-**Tag:** `@ui`
-
 **Example:**
 ```gherkin
 When I fill in "username" with "tomsmith"
@@ -296,8 +264,6 @@ When I fill in "password" with "secret123"
 ### When I select {string} from dropdown {string}
 
 Selects an option from a dropdown by CSS selector.
-
-**Tag:** `@ui`
 
 **Parameters:**
 | Name | Type | Description |
@@ -317,8 +283,6 @@ When I select "United States" from dropdown "#country-select"
 
 Attaches an in-memory file to an `<input type="file">`, so uploads can be tested without a fixture file on disk. The content type is inferred from the extension: `.csv` → `text/csv`, `.json` → `application/json`, `.xml` → `application/xml`, anything else → `text/plain`.
 
-**Tag:** `@ui`
-
 **Parameters:**
 | Name | Type | Description |
 |------|------|-------------|
@@ -337,8 +301,6 @@ When I set the file input "input[type='file']" to a file named "payload.json" wi
 ### When I {string} {string} in the {string} element with {string} {string}
 
 Performs input action on element.
-
-**Tag:** `@ui`
 
 **Parameters:**
 | Name | Type | Description |
@@ -364,8 +326,6 @@ When I "choose" "Option A" in the "1st" element with "Select..." "placeholder"
 
 Selects a dropdown option.
 
-**Tag:** `@ui`
-
 **Parameters:**
 | Name | Type | Description |
 |------|------|-------------|
@@ -384,8 +344,6 @@ Then I fill "United States" into the "Country" dropdown
 ### Then I {string} {string}
 
 Performs keyboard action.
-
-**Tag:** `@ui`
 
 **Parameters:**
 | Name | Type | Description |
@@ -408,8 +366,6 @@ Then I "press" "Tab"
 
 Performs admin login through UI.
 
-**Tag:** `@ui`
-
 **Example:**
 ```gherkin
 When I log in as admin in UI
@@ -420,8 +376,6 @@ When I log in as admin in UI
 ### When I log in as user in UI
 
 Performs user login through UI.
-
-**Tag:** `@ui`
 
 **Example:**
 ```gherkin
@@ -436,8 +390,6 @@ When I log in as user in UI
 
 Stores current URL in a variable.
 
-**Tag:** `@ui`
-
 **Example:**
 ```gherkin
 When I save the current URL as "startPage"
@@ -450,8 +402,6 @@ Given I navigate to "{startPage}"
 ### When I get a part of the URL based on {string} regular expression and save it as {string}
 
 Extracts URL part using regex.
-
-**Tag:** `@ui`
 
 **Parameters:**
 | Name | Type | Description |
@@ -474,8 +424,6 @@ When I get a part of the URL based on "/users/(\d+)/" regular expression and sav
 
 Asserts text is visible.
 
-**Tag:** `@ui`
-
 **Parameters:**
 | Name | Type | Description |
 |------|------|-------------|
@@ -492,8 +440,6 @@ Then I should see text "Hello, {username}"
 ### Then the URL should contain {string}
 
 Asserts URL contains substring.
-
-**Tag:** `@ui`
 
 **Parameters:**
 | Name | Type | Description |
@@ -512,8 +458,6 @@ Then the URL should contain "{expectedPath}"
 
 Alias for `the URL should contain {string}`.
 
-**Tag:** `@ui`
-
 **Example:**
 ```gherkin
 Then I should be on page "/dashboard"
@@ -525,8 +469,6 @@ Then I should be on page "/secure"
 ### Then the element {string} should be visible
 
 Asserts an element is visible by CSS selector.
-
-**Tag:** `@ui`
 
 **Parameters:**
 | Name | Type | Description |
@@ -546,8 +488,6 @@ Then the element "button[type='submit']" should be visible
 
 Asserts an element is not visible by CSS selector.
 
-**Tag:** `@ui`
-
 **Example:**
 ```gherkin
 Then the element ".loading-spinner" should not be visible
@@ -559,8 +499,6 @@ Then the element "#error" should not be visible
 ### Then the element {string} should have value {string}
 
 Asserts an input element has a specific value.
-
-**Tag:** `@ui`
 
 **Parameters:**
 | Name | Type | Description |
@@ -579,8 +517,6 @@ Then the element "input[name='email']" should have value "test@example.com"
 ### Then the element {string} should have attribute {string} equal to {string}
 
 Asserts an element's attribute has an exact value (auto-retrying). Useful for `data-*` state, `aria-*`, or any HTML attribute.
-
-**Tag:** `@ui`
 
 **Parameters:**
 | Name | Type | Description |
@@ -601,8 +537,6 @@ Then the element "button.menu" should have attribute "aria-expanded" equal to "t
 
 Asserts a checkbox or radio is checked.
 
-**Tag:** `@ui`
-
 **Parameters:**
 | Name | Type | Description |
 |------|------|-------------|
@@ -620,8 +554,6 @@ Then the element "input[type='checkbox']:first-of-type" should be checked
 
 Asserts a checkbox or radio is not checked.
 
-**Tag:** `@ui`
-
 **Example:**
 ```gherkin
 Then the element "#newsletter" should not be checked
@@ -633,8 +565,6 @@ Then the element "input[type='checkbox']:last-of-type" should not be checked
 ### Then I verify if the URL {string} {string}
 
 Asserts URL with mode.
-
-**Tag:** `@ui`
 
 **Parameters:**
 | Name | Type | Description |
@@ -655,8 +585,6 @@ Then I verify if the URL "doesntContain" "/error"
 
 Asserts new tab URL.
 
-**Tag:** `@ui`
-
 **Example:**
 ```gherkin
 When I click the link "Open in new tab"
@@ -668,8 +596,6 @@ Then I verify if a new tab which URL "contains" "/new-page" opens
 ### Then I verify that a {string} element with {string} text {string} visible
 
 Checks element visibility by type and text.
-
-**Tag:** `@ui`
 
 **Parameters:**
 | Name | Type | Description |
@@ -689,8 +615,6 @@ Then I verify that a "div" element with "Error" text "is not" visible
 ### Then I verify that {string} element with {string} {string} is {string}
 
 Checks element state.
-
-**Tag:** `@ui`
 
 **Parameters:**
 | Name | Type | Description |
@@ -715,8 +639,6 @@ Then I verify that "1st" element with "Disabled" "text" is "disabled"
 
 Checks element state with timeout.
 
-**Tag:** `@ui`
-
 **Example:**
 ```gherkin
 Then I verify that "1st" element with "Loading" "text" becomes "hidden" during "10" seconds
@@ -731,8 +653,6 @@ Then I verify that "1st" element with "Submit" "text" becomes "enabled" during "
 
 Waits for specified duration.
 
-**Tag:** `@ui`
-
 **Example:**
 ```gherkin
 Then I wait "2" seconds
@@ -743,8 +663,6 @@ Then I wait "2" seconds
 ### Then I wait for the page to load
 
 Waits for page load states.
-
-**Tag:** `@ui`
 
 **Example:**
 ```gherkin
@@ -760,8 +678,6 @@ Then I wait for the page to load
 
 Sets browser zoom level.
 
-**Tag:** `@ui`
-
 **Example:**
 ```gherkin
 Then I zoom to "1.5" in the browser
@@ -774,7 +690,6 @@ Then I zoom to "1" in the browser
 ## Complete Example
 
 ```gherkin
-@ui
 Feature: Login Page
 
   Scenario: Successful login

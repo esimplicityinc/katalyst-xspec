@@ -4,12 +4,14 @@ Runnable example projects demonstrating @esimplicitylabs/katalyst-xspec usage.
 
 ## Available Examples
 
-| Example | Description | Tags Used |
-|---------|-------------|-----------|
-| [api-example](./api-example/) | REST API testing | `@api` |
-| [ui-example](./ui-example/) | Browser UI testing | `@ui` |
-| [tui-example](./tui-example/) | Terminal UI testing | `@tui` |
-| [full-stack-example](./full-stack-example/) | Combined API + UI + TUI | `@api`, `@ui`, `@tui`, `@hybrid` |
+| Example | Description | Steps Used |
+|---------|-------------|------------|
+| [api-example](./api-example/) | REST API testing | API, shared |
+| [ui-example](./ui-example/) | Browser UI testing | UI, shared |
+| [tui-example](./tui-example/) | Terminal UI testing | TUI, shared |
+| [full-stack-example](./full-stack-example/) | Combined API + UI + TUI | API, UI, TUI, shared |
+
+Steps are untagged, so any step works in any scenario; each project picks feature files by folder.
 
 ## Quick Start
 
@@ -43,9 +45,9 @@ npm test
 
 ## Prerequisites
 
-- Node.js >= 18.0.0
+- Node.js >= 20
 - npm >= 9.0.0
-- Playwright browsers (installed automatically)
+- Playwright browser for UI examples: `npx playwright install chromium`
 
 ## Example Structure
 
@@ -101,6 +103,7 @@ Use the CLI to scaffold a new project:
 npx @esimplicitylabs/katalyst-xspec init my-project
 cd my-project
 npm install
+npx playwright install chromium
 npm test
 ```
 
@@ -109,7 +112,7 @@ npm test
 ### Browser Not Found
 
 ```bash
-npx playwright install
+npx playwright install chromium
 ```
 
 ### Port Already in Use

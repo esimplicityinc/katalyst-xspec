@@ -9,22 +9,23 @@ This skill helps you get started with the @esimplicitylabs/katalyst-xspec BDD te
 
 ## Step 1: Scaffold a New Project
 
-Run the scaffolding command:
+Run the scaffolding command (positional target folder, or `.` for the current folder):
 
 ```bash
-npx @esimplicitylabs/katalyst-xspec init
+npx @esimplicitylabs/katalyst-xspec init my-tests
+cd my-tests
+npm install
+npx playwright install chromium   # REQUIRED once: UI tests fail without the browser
+npm test                          # scaffolded examples pass with no .env
 ```
 
 Options:
-- `--dir <name>` - Create in specific directory
+- `<dir>` or `--dir <name>` - Target directory (`init .` = current folder)
 - `--force` - Overwrite existing files
+- `--with-skills` / `--no-skills` - Install (or skip) agent skills without prompting
+- `--skills-agents opencode,claude-code,cursor,generic` - Which agents get skills
 
-Example:
-```bash
-npx @esimplicitylabs/katalyst-xspec init --dir my-tests
-cd my-tests
-npm install
-```
+The project's `package.json` name comes from the folder name (npm-safe, e.g. `My Demo` -> `my-demo`).
 
 ## Step 2: Understand the Project Structure
 
@@ -34,21 +35,19 @@ The scaffold creates:
 my-tests/
 ├── features/
 │   ├── api/
-│   │   └── 00_api_examples.feature    # API test examples
+│   │   └── example.feature   # JSONPlaceholder: GET /users/1, POST /posts
 │   ├── ui/
-│   │   └── 00_ui_examples.feature     # UI test examples
-│   ├── hybrid/
-│   │   └── 00_hybrid_examples.feature # Combined API+UI tests
-│   ├── tui/
-│   │   └── 00_tui_examples.feature    # Terminal UI tests
+│   │   └── example.feature   # Sauce Demo login (standard_user / secret_sauce)
 │   └── steps/
-│       ├── fixtures.ts                 # Adapter configuration
-│       └── steps.ts                    # Step registration
-├── playwright.config.ts                # BDD project config
-├── .env.example                        # Environment template
-├── tsconfig.json                       # TypeScript config
-└── package.json                        # Dependencies
+│       ├── fixtures.ts       # Adapter configuration
+│       └── steps.ts          # Step registration
+├── playwright.config.ts      # Projects: api, ui (tui commented out)
+├── .env.example              # Environment template
+├── tsconfig.json             # TypeScript config
+└── package.json              # Dependencies
 ```
+
+Each Playwright project reads one folder. Steps are untagged: any step works in any scenario. Do NOT add `@api`/`@ui`/`@hybrid`/`@tui` tags — they are not needed (and are ignored).
 
 ### Key Files
 
@@ -75,17 +74,21 @@ export { test };
 ```typescript
 import { defineBddProject } from 'playwright-bdd';
 
+import { tagsForProject, resolveExtraTags } from '@esimplicitylabs/katalyst-xspec';
+
+const tags = tagsForProject({ extraTags: resolveExtraTags(process.env.TEST_TAGS) });
+
 const apiBdd = defineBddProject({
   name: 'api',
-  features: 'features/api/**/*.feature',
+  features: 'features/api/**/*.feature',   // selected by folder only
   steps: 'features/steps/**/*.ts',
-  tags: '@api',
+  tags,                                     // only skips @Skip/@ignore + applies TEST_TAGS
 });
 ```
 
-## Step 3: Configure Environment
+## Step 3: Point It at Your App
 
-Copy the environment template:
+The examples use absolute URLs to public demo sites. To test your own app, copy the environment template:
 
 ```bash
 cp .env.example .env
@@ -99,9 +102,9 @@ API_BASE_URL=http://localhost:3000
 
 # Authentication (required -- no hardcoded defaults)
 DEFAULT_ADMIN_USERNAME=admin@example.com
-DEFAULT_ADMIN_PASSWORD=admin123
+DEFAULT_ADMIN_PASSWORD=changeme
 DEFAULT_USER_USERNAME=user@example.com
-DEFAULT_USER_PASSWORD=user123
+DEFAULT_USER_PASSWORD=changeme
 API_AUTH_LOGIN_PATH=/auth/login
 
 # UI Configuration
@@ -113,13 +116,15 @@ HEADLESS=true
 # CLEANUP_RULES='[{"varMatch":"user","path":"/api/users/{id}"}]'
 ```
 
-### Required Variables by Test Type
+Then use relative paths in features, e.g. `Given I navigate to "/login"`, `When I GET "/health"`.
 
-| Test Type | Required Variables |
+### Required Variables by Step Type
+
+| Steps used | Required Variables |
 |-----------|-------------------|
-| `@api` | `API_BASE_URL` |
-| `@ui` | `FRONTEND_URL` or `BASE_URL` |
-| `@hybrid` | Both API and UI variables |
+| API steps with relative paths | `API_BASE_URL` |
+| UI steps with relative paths | `FRONTEND_URL` or `BASE_URL` |
+| Both in one scenario | Both API and UI variables |
 | Auth steps | `DEFAULT_*_USERNAME`, `DEFAULT_*_PASSWORD` |
 
 ## Step 4: Write Your First Test
@@ -129,7 +134,6 @@ HEADLESS=true
 Create `features/api/health.feature`:
 
 ```gherkin
-@api
 Feature: Health Check
 
   Scenario: API is healthy
@@ -142,7 +146,6 @@ Feature: Health Check
 Create `features/ui/home.feature`:
 
 ```gherkin
-@ui
 Feature: Home Page
 
   Scenario: Home page loads
@@ -150,12 +153,11 @@ Feature: Home Page
     Then I should see text "Welcome"
 ```
 
-### Hybrid Test
+### Mixed API + UI Test
 
-Create `features/hybrid/workflow.feature`:
+Any scenario can mix API and UI steps — no tag or separate project needed. Put it in a folder a project reads (e.g. `features/ui/`, since it needs a browser). Create `features/ui/workflow.feature`:
 
 ```gherkin
-@hybrid
 Feature: User Workflow
 
   Scenario: Create via API, verify in UI
@@ -173,19 +175,18 @@ Feature: User Workflow
 
 ## Step 5: Run Tests
 
-**IMPORTANT:** You must generate Playwright tests before running.
+`npm test` runs `bddgen && playwright test` (generates specs from features, then runs them). If you call `npx playwright test` directly, run `npm run gen` first.
 
 ```bash
-# 1. Generate tests from feature files (REQUIRED)
-npm run gen
-
-# 2. Run all tests
+# Run all tests
 npm test
 
-# 3. Run specific project
-npx playwright test --project=api
-npx playwright test --project=ui
-npx playwright test --project=hybrid
+# Run one project (folder)
+npx playwright test --project api
+npx playwright test --project ui
+
+# Run only scenarios with your own tag
+TEST_TAGS=@smoke npm test
 ```
 
 ### Common Run Commands
@@ -225,16 +226,14 @@ Open the Playwright report:
 npx playwright show-report
 ```
 
-## Common Tags
+## Optional Tags
+
+Tags are only for your own grouping and filtering (`TEST_TAGS=@smoke npm test`, or `TEST_TAGS=smoke,critical`).
 
 | Tag | Purpose |
 |-----|---------|
-| `@api` | API-only tests |
-| `@ui` | UI-only tests |
-| `@tui` | Terminal UI tests |
-| `@hybrid` | Combined API+UI tests |
 | `@smoke` | Quick smoke tests |
-| `@Skip` | Skip this scenario |
+| `@Skip` / `@ignore` | Skip this scenario (excluded by default) |
 | `@wip` | Work in progress |
 
 ## Quick Reference: Essential Steps
@@ -266,14 +265,15 @@ Given I register cleanup DELETE "/resource/{id}"
 
 | Issue | Solution |
 |-------|----------|
-| "No tests found" | Run `npm run gen` first |
-| Steps not available | Check you have the correct tag |
+| "No tests found" | Run `npm run gen` first; check the feature is in a folder a project reads |
+| "Executable doesn't exist" | Run `npx playwright install chromium` |
+| Step not found | Check exact step wording in `katalyst-bdd-step-reference` (no tags needed) |
 | Auth fails | Verify `.env` credentials |
 | Can't find element | Use `When I pause for debugging` |
 
 ## Next Steps
 
-1. **Create more tests** - Add feature files to `features/api/`, `features/ui/`, etc.
+1. **Create more tests** - Add feature files to `features/api/` or `features/ui/`
 2. **Learn steps** - See full step reference with `katalyst-bdd-step-reference` skill
 3. **Patterns** - Learn test patterns with `katalyst-bdd-create-test` skill
 4. **Custom adapters** - Extend framework with `katalyst-bdd-architecture` skill
@@ -290,3 +290,5 @@ This updates:
 - Package dependencies
 - Configuration templates
 - Step definitions
+
+Upgrading from 0.6 or earlier: run `npx katalyst-xspec upgrade --migrate` to remove old `@api`/`@ui`/`@hybrid`/`@tui` tag filters from `playwright.config.*`. Old tags left in feature files are harmless.

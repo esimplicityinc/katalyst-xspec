@@ -64,6 +64,7 @@ npx katalyst-xspec upgrade --migrate
    - `package.json` - Updates dependencies, keeps your custom scripts
    - `steps.ts` - Adds new step registrations, preserves your custom imports
    - `fixtures.ts` - Updates template, preserves your cleanup rules
+   - `playwright.config.*` - Removes old `@api`/`@ui`/`@hybrid`/`@tui` project tag filters (0.7.0+)
 
 3. **Leaves untouched:**
    - Your feature files
@@ -212,6 +213,14 @@ npx katalyst-xspec upgrade --migrate --backup-dir ./backups/pre-migration
 
 ## Version History
 
+### 0.7.0
+
+- Steps are no longer scoped by type tags: any step works in any scenario, and projects select feature files by folder only.
+- TUI: `Then I should see text {string}` was removed (use `Then I should see {string}` or `Then I should see {string} in the terminal`); `When I fill the form:` was renamed to `When I fill the TUI form:`.
+- `init` scaffolds `features/api/example.feature` and `features/ui/example.feature`, which pass with no `.env`.
+
+**Migration note:** Run `npx katalyst-xspec upgrade --migrate` to drop the old tag filters from `playwright.config.*`. Old `@api`/`@ui` tags left in feature files are ignored and can be deleted.
+
 ### 0.2.3
 
 New features:
@@ -228,7 +237,7 @@ import { resolveWorkers } from '@esimplicitylabs/katalyst-xspec';
 workers: resolveWorkers(),
 ```
 
-### 0.2.0 (Current)
+### 0.2.0
 
 New features:
 - Migration mode (`--migrate`)

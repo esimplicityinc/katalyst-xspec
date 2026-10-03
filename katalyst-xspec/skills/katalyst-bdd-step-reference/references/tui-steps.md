@@ -1,6 +1,6 @@
 # TUI Steps Reference
 
-Complete reference for TUI (Terminal User Interface) steps. Available only in `@tui` scenarios.
+Complete reference for TUI (Terminal User Interface) steps. Steps are untagged and work in any scenario once `registerTuiSteps(test)` is enabled and a TUI adapter is configured.
 
 **Prerequisites:** TUI testing requires `tmux` installed on the system and `tui-tester` configured.
 
@@ -202,8 +202,10 @@ When I select from dropdown "Theme" value "Dark"
 
 ### Fill Form
 
+The TUI form step is `I fill the TUI form:` (the UI step keeps `I fill the form:`).
+
 ```gherkin
-When I fill the form:
+When I fill the TUI form:
   | Field    | Value     |
   | Username | admin     |
   | Password | secret123 |
@@ -223,7 +225,6 @@ When I submit the form with ctrl+s
 ```gherkin
 Then I should see {string}
 Then I should see {string} in the terminal
-Then I should see text {string}
 Then the screen should contain {string}
 ```
 
@@ -233,6 +234,8 @@ Then I should see "Welcome"
 Then I should see "Login successful" in the terminal
 Then the screen should contain "Press Enter to continue"
 ```
+
+Note: there is no TUI `I should see text {string}` step; that wording belongs to the UI steps.
 
 ### Assert Text Not Visible
 
@@ -417,7 +420,6 @@ When I force quit the application
 ## Complete TUI Example
 
 ```gherkin
-@tui
 Feature: CLI Application
 
   Background:
@@ -438,7 +440,7 @@ Feature: CLI Application
 
   Scenario: Fill login form
     When I wait for "Login"
-    When I fill the form:
+    When I fill the TUI form:
       | Field    | Value     |
       | Username | admin     |
       | Password | secret123 |

@@ -228,7 +228,6 @@ Cleanup requests are authenticated with admin credentials:
 ## Complete Example
 
 ```gherkin
-@api
 Feature: User Management with Cleanup
 
   Scenario: Create and cleanup user

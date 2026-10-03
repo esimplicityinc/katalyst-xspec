@@ -6,7 +6,7 @@ Complete guide to setting up your local development environment for contributing
 
 | Requirement | Version | Check Command |
 |------------|---------|---------------|
-| Node.js | >= 18.0.0 | `node --version` |
+| Node.js | >= 20 | `node --version` |
 | npm | >= 9.0.0 | `npm --version` |
 | Git | >= 2.30.0 | `git --version` |
 

@@ -1,6 +1,6 @@
 # TUI Steps Reference
 
-Complete reference for all `@tui` tagged step definitions.
+Complete reference for the TUI (terminal) step definitions. Like all built-in steps, they are untagged and work in any scenario once registered.
 
 ## Registration
 
@@ -22,8 +22,6 @@ This registers:
 
 Starts the TUI application and waits for ready state.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 Given I start the TUI application
@@ -34,8 +32,6 @@ Given I start the TUI application
 ### Given the TUI application is running
 
 Ensures TUI is running, starts if not.
-
-**Tag:** `@tui`
 
 **Example:**
 ```gherkin
@@ -48,8 +44,6 @@ Given the TUI application is running
 
 Restarts the TUI application.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 When I restart the TUI application
@@ -60,8 +54,6 @@ When I restart the TUI application
 ### When I stop the TUI application
 
 Stops the TUI application.
-
-**Tag:** `@tui`
 
 **Example:**
 ```gherkin
@@ -75,8 +67,6 @@ When I stop the TUI application
 ### When I type {string}
 
 Types text into the terminal.
-
-**Tag:** `@tui`
 
 **Parameters:**
 | Name | Type | Description |
@@ -95,8 +85,6 @@ When I type "{command}"
 
 Types text with 50ms delay between characters.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 When I type "password123" slowly
@@ -107,8 +95,6 @@ When I type "password123" slowly
 ### When I press {string}
 
 Presses a keyboard key.
-
-**Tag:** `@tui`
 
 **Parameters:**
 | Name | Type | Description |
@@ -134,8 +120,6 @@ When I press "f1"
 
 Presses the Enter key.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 When I press enter
@@ -146,8 +130,6 @@ When I press enter
 ### When I press tab
 
 Presses the Tab key.
-
-**Tag:** `@tui`
 
 **Example:**
 ```gherkin
@@ -160,8 +142,6 @@ When I press tab
 
 Presses the Escape key.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 When I press escape
@@ -172,8 +152,6 @@ When I press escape
 ### When I press {string} with ctrl
 
 Presses a key with Ctrl modifier.
-
-**Tag:** `@tui`
 
 **Example:**
 ```gherkin
@@ -187,8 +165,6 @@ When I press "s" with ctrl
 
 Presses a key with Alt modifier.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 When I press "f" with alt
@@ -200,8 +176,6 @@ When I press "f" with alt
 
 Presses a key with Shift modifier.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 When I press "tab" with shift
@@ -212,8 +186,6 @@ When I press "tab" with shift
 ### When I press ctrl+{word}
 
 Shorthand for Ctrl+key.
-
-**Tag:** `@tui`
 
 **Example:**
 ```gherkin
@@ -227,8 +199,6 @@ When I press ctrl+s
 
 Shorthand for Alt+key.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 When I press alt+f
@@ -239,8 +209,6 @@ When I press alt+f
 ### When I press ctrl+shift+{word}
 
 Combined Ctrl+Shift+key.
-
-**Tag:** `@tui`
 
 **Example:**
 ```gherkin
@@ -254,8 +222,6 @@ When I press ctrl+shift+s
 ### When I fill the TUI field {string} with {string}
 
 Fills a labeled field in the TUI.
-
-**Tag:** `@tui`
 
 **Parameters:**
 | Name | Type | Description |
@@ -275,8 +241,6 @@ When I fill the TUI field "Password" with "{password}"
 
 Alternative syntax for field input.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 When I enter "admin" in the "Username" field
@@ -290,8 +254,6 @@ When I enter "admin" in the "Username" field
 
 Selects an option.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 When I select "Settings"
@@ -303,8 +265,6 @@ When I select "Settings"
 
 Alternative syntax for selection.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 When I select option "Preferences"
@@ -315,8 +275,6 @@ When I select option "Preferences"
 ### When I select menu item {string}
 
 Selects a menu item.
-
-**Tag:** `@tui`
 
 **Example:**
 ```gherkin
@@ -331,8 +289,6 @@ When I select menu item "Exit"
 
 Presses down arrow multiple times.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 When I navigate down 3 times
@@ -343,8 +299,6 @@ When I navigate down 3 times
 ### When I navigate up {int} times
 
 Presses up arrow multiple times.
-
-**Tag:** `@tui`
 
 **Example:**
 ```gherkin
@@ -357,8 +311,6 @@ When I navigate up 2 times
 
 Waits for text and presses Enter.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 When I navigate to "Settings" and select
@@ -369,8 +321,6 @@ When I navigate to "Settings" and select
 ### When I go back
 
 Presses Escape.
-
-**Tag:** `@tui`
 
 **Example:**
 ```gherkin
@@ -384,8 +334,6 @@ When I go back
 ### When I click at position {int}, {int}
 
 Clicks at screen coordinates.
-
-**Tag:** `@tui`
 
 **Parameters:**
 | Name | Type | Description |
@@ -404,8 +352,6 @@ When I click at position 10, 5
 
 Clicks on text in the terminal.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 When I click on "Submit"
@@ -419,8 +365,6 @@ When I click on "Submit"
 
 Waits for text to appear.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 Then I should see "Welcome"
@@ -433,8 +377,6 @@ Then I should see "Hello, {username}"
 
 Same as above, explicit terminal context.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 Then I should see "Ready" in the terminal
@@ -445,8 +387,6 @@ Then I should see "Ready" in the terminal
 ### Then I should not see {string}
 
 Asserts text is not present.
-
-**Tag:** `@tui`
 
 **Example:**
 ```gherkin
@@ -459,8 +399,6 @@ Then I should not see "Error"
 
 Immediate screen content check.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 Then the screen should contain "Menu"
@@ -472,8 +410,6 @@ Then the screen should contain "Menu"
 
 Regex pattern matching.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 Then the screen should match pattern "Version: \d+\.\d+\.\d+"
@@ -484,8 +420,6 @@ Then the screen should match pattern "Version: \d+\.\d+\.\d+"
 ### Then line {int} should contain {string}
 
 Checks specific line content.
-
-**Tag:** `@tui`
 
 **Parameters:**
 | Name | Type | Description |
@@ -505,8 +439,6 @@ Then line 5 should contain "{expected}"
 
 Checks first line content.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 Then the first line should contain "Application Name"
@@ -518,8 +450,6 @@ Then the first line should contain "Application Name"
 
 Checks last line content.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 Then the last line should contain "Status: Ready"
@@ -530,8 +460,6 @@ Then the last line should contain "Status: Ready"
 ### Then I should see all of:
 
 Checks multiple texts are present.
-
-**Tag:** `@tui`
 
 **Example:**
 ```gherkin
@@ -546,8 +474,6 @@ Then I should see all of:
 ### Then I should not see any of:
 
 Checks multiple texts are absent.
-
-**Tag:** `@tui`
 
 **Example:**
 ```gherkin
@@ -565,8 +491,6 @@ Then I should not see any of:
 
 Waits for text to appear.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 When I wait for "Ready"
@@ -578,8 +502,6 @@ When I wait for "Ready"
 
 Waits with explicit timeout.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 When I wait for "Loading complete" for 30 seconds
@@ -590,8 +512,6 @@ When I wait for "Loading complete" for 30 seconds
 ### When I wait {int} seconds
 
 Waits for specified duration.
-
-**Tag:** `@tui`
 
 **Example:**
 ```gherkin
@@ -606,8 +526,6 @@ When I wait 2 seconds
 
 Compares screen to saved snapshot.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 Then the screen should match snapshot "main-menu"
@@ -619,8 +537,6 @@ Then the screen should match snapshot "main-menu"
 
 Saves current screen as snapshot.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 Then I take a snapshot named "login-screen"
@@ -630,15 +546,13 @@ Then I take a snapshot named "login-screen"
 
 ## Form Steps
 
-### When I fill the form:
+### When I fill the TUI form:
 
-Fills multiple form fields from data table.
-
-**Tag:** `@tui`
+Fills multiple form fields from data table. (Renamed from `I fill the form:` in 0.7.0; the UI step keeps that wording.)
 
 **Example:**
 ```gherkin
-When I fill the form:
+When I fill the TUI form:
   | field    | value            |
   | Username | admin            |
   | Password | secret           |
@@ -651,8 +565,6 @@ When I fill the form:
 
 Presses Enter to submit.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 When I submit the form
@@ -663,8 +575,6 @@ When I submit the form
 ### When I submit the form with ctrl+s
 
 Submits with Ctrl+S.
-
-**Tag:** `@tui`
 
 **Example:**
 ```gherkin
@@ -679,8 +589,6 @@ When I submit the form with ctrl+s
 
 Types command and presses Enter.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 When I execute command "help"
@@ -692,8 +600,6 @@ When I execute command "list {filter}"
 ### When I run {string}
 
 Same as execute command.
-
-**Tag:** `@tui`
 
 **Example:**
 ```gherkin
@@ -708,8 +614,6 @@ When I run "npm test"
 
 Types 'y' and presses Enter.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 When I confirm the dialog
@@ -721,8 +625,6 @@ When I confirm the dialog
 
 Types 'n' and presses Enter.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 When I cancel the dialog
@@ -733,8 +635,6 @@ When I cancel the dialog
 ### When I dismiss the dialog
 
 Presses Escape.
-
-**Tag:** `@tui`
 
 **Example:**
 ```gherkin
@@ -749,8 +649,6 @@ When I dismiss the dialog
 
 Presses 'q'.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 When I quit the application
@@ -761,8 +659,6 @@ When I quit the application
 ### When I force quit the application
 
 Presses Ctrl+C.
-
-**Tag:** `@tui`
 
 **Example:**
 ```gherkin
@@ -777,8 +673,6 @@ When I force quit the application
 
 Clears the screen.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 When I clear the terminal
@@ -790,8 +684,6 @@ When I clear the terminal
 
 Resizes terminal dimensions.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 When I resize the terminal to 120x40
@@ -802,8 +694,6 @@ When I resize the terminal to 120x40
 ### When I capture the screen
 
 Stores screen in variable.
-
-**Tag:** `@tui`
 
 **Example:**
 ```gherkin
@@ -817,8 +707,6 @@ When I capture the screen
 
 Outputs screen to console.
 
-**Tag:** `@tui`
-
 **Example:**
 ```gherkin
 Then I print the screen
@@ -829,7 +717,6 @@ Then I print the screen
 ## Complete Example
 
 ```gherkin
-@tui
 Feature: CLI Application
 
   Background:

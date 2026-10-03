@@ -1,12 +1,14 @@
 type TagsForProjectInput = {
-  projectTag: string;
+  /** Optional tag a project is limited to, e.g. '@smoke'. Not needed for the built-in steps. */
+  projectTag?: string;
+  /** Extra tag expression, typically from `resolveExtraTags(process.env.TEST_TAGS)`. */
   extraTags?: string;
   defaultExcludes?: string;
 };
 
-export function tagsForProject({ projectTag, extraTags, defaultExcludes = 'not @Skip and not @ignore' }: TagsForProjectInput): string {
-  if (extraTags) return `${defaultExcludes} and ${projectTag} and (${extraTags})`;
-  return `${defaultExcludes} and ${projectTag}`;
+/** Build a playwright-bdd `tags` expression: default excludes, optional project tag, optional extra tags. */
+export function tagsForProject({ projectTag, extraTags, defaultExcludes = 'not @Skip and not @ignore' }: TagsForProjectInput = {}): string {
+  return [defaultExcludes, projectTag, extraTags && `(${extraTags})`].filter(Boolean).join(' and ');
 }
 
 export function resolveExtraTags(raw?: string | null): string | undefined {

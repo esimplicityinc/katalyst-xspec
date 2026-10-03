@@ -73,7 +73,7 @@ Add entry to `CHANGELOG.md`:
 ### Added
 - TUI testing support with TuiPort and TuiTesterAdapter
 - New step definitions for terminal UI testing
-- `@tui` tag for TUI-only scenarios
+- `registerTuiSteps` for terminal UI scenarios
 
 ### Changed
 - Updated Playwright peer dependency to ^1.49.0

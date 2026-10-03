@@ -13,7 +13,7 @@ A comprehensive BDD testing framework built on Playwright, providing reusable fi
 - [Architecture](./concepts/architecture.md) - Ports & adapters pattern
 - [World State](./concepts/world-state.md) - Variables, headers, cleanup
 - [Test Lifecycle](./concepts/test-lifecycle.md) - Fixtures, hooks, teardown
-- [Tag System](./concepts/tag-system.md) - @api, @ui, @tui, @hybrid
+- [Tags](./concepts/tag-system.md) - Optional tags, filtering, folders
 
 ### Guides
 - [API Testing](./guides/api-testing.md) - HTTP API testing
@@ -35,10 +35,10 @@ A comprehensive BDD testing framework built on Playwright, providing reusable fi
 - [Configuration](./reference/api/configuration.md) - Environment variables
 
 #### Step Reference
-- [API Steps](./reference/steps/api-steps.md) - @api tagged steps
-- [UI Steps](./reference/steps/ui-steps.md) - @ui tagged steps
-- [TUI Steps](./reference/steps/tui-steps.md) - @tui tagged steps
-- [Hybrid Steps](./reference/steps/hybrid-steps.md) - @hybrid tagged steps
+- [API Steps](./reference/steps/api-steps.md) - HTTP requests & assertions
+- [UI Steps](./reference/steps/ui-steps.md) - Browser interaction
+- [TUI Steps](./reference/steps/tui-steps.md) - Terminal interaction
+- [Hybrid Steps](./reference/steps/hybrid-steps.md) - Mixing API and UI steps
 - [Shared Steps](./reference/steps/shared-steps.md) - Variables & cleanup
 
 ### Contributing
@@ -100,12 +100,12 @@ graph TB
 | **BDD Support** | Cucumber/Gherkin syntax via playwright-bdd |
 | **Auto Cleanup** | Resources cleaned up automatically after tests |
 | **Variable Interpolation** | `{varName}` syntax in step parameters |
-| **Tag Filtering** | Run specific test types with @api, @ui, @tui tags |
+| **Any Step, Any Scenario** | Mix API, UI and shared steps freely; projects select features by folder |
+| **Tag Filtering** | Optional custom tags (`@smoke`, `@wip`) filtered via `TEST_TAGS` |
 
 ## Quick Example
 
 ```gherkin
-@api
 Feature: User Management API
 
   Scenario: Create and verify user

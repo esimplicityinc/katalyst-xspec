@@ -7,7 +7,6 @@ Common patterns for UI testing with the Katalyst BDD framework.
 ### Basic Navigation
 
 ```gherkin
-@ui
 Scenario: Navigate to page
   Given I navigate to "/dashboard"
   Then I should see text "Dashboard"
@@ -17,7 +16,6 @@ Scenario: Navigate to page
 ### Navigation with Auth
 
 ```gherkin
-@ui
 Scenario: Navigate after login
   Given I am authenticated in UI as "user"
   Given I navigate to "/profile"
@@ -27,7 +25,6 @@ Scenario: Navigate after login
 ### Back Navigation
 
 ```gherkin
-@ui
 Scenario: Go back to previous page
   Given I navigate to "/page1"
   When I click the link "Go to Page 2"
@@ -41,7 +38,6 @@ Scenario: Go back to previous page
 ### Simple Login Form
 
 ```gherkin
-@ui
 Scenario: User login
   Given I navigate to "/login"
   When I fill in "Email" with "user@example.com"
@@ -54,7 +50,6 @@ Scenario: User login
 ### Login with Fetch Intercept (Bypassing Auth)
 
 ```gherkin
-@ui
 Scenario: Test page as authenticated user
   Given I am authenticated in UI as "admin"
   Given I navigate to "/admin/dashboard"
@@ -64,7 +59,6 @@ Scenario: Test page as authenticated user
 ### Login with Specific Roles
 
 ```gherkin
-@ui
 Scenario: Test with multiple roles
   Given I am authenticated in UI as "admin,manager,editor"
   Given I navigate to "/settings"
@@ -75,7 +69,6 @@ Scenario: Test with multiple roles
 ### Login with Tenant
 
 ```gherkin
-@ui
 Scenario: Multi-tenant login
   Given I am authenticated in UI as "admin" for tenant "acme-corp"
   Given I navigate to "/dashboard"
@@ -87,7 +80,6 @@ Scenario: Multi-tenant login
 ### Simple Form Fill
 
 ```gherkin
-@ui
 Scenario: Fill contact form
   Given I navigate to "/contact"
   When I fill in "Name" with "John Doe"
@@ -100,7 +92,6 @@ Scenario: Fill contact form
 ### Form with Data Table
 
 ```gherkin
-@ui
 Scenario: Fill registration form
   Given I navigate to "/register"
   When I fill the form:
@@ -117,7 +108,6 @@ Scenario: Fill registration form
 ### Form with Dropdowns
 
 ```gherkin
-@ui
 Scenario: Fill form with dropdown
   Given I navigate to "/settings"
   When I fill in "Display Name" with "John"
@@ -130,7 +120,6 @@ Scenario: Fill form with dropdown
 ### Clear and Fill Form
 
 ```gherkin
-@ui
 Scenario: Update existing form data
   Given I navigate to "/profile/edit"
   When I clear and fill the form:
@@ -144,7 +133,6 @@ Scenario: Update existing form data
 ### Form Validation
 
 ```gherkin
-@ui
 Scenario: Form shows validation errors
   Given I navigate to "/register"
   When I fill in "Email" with "invalid-email"
@@ -245,7 +233,6 @@ Then I verify that "first" element with "test ID" "result" becomes "visible" dur
 ### Modal Interaction
 
 ```gherkin
-@ui
 Scenario: Confirm deletion in modal
   Given I navigate to "/items"
   When I click the button "Delete"
@@ -259,7 +246,6 @@ Scenario: Confirm deletion in modal
 ### Cancel Modal
 
 ```gherkin
-@ui
 Scenario: Cancel modal
   Given I navigate to "/items"
   When I click the button "Delete"
@@ -273,7 +259,6 @@ Scenario: Cancel modal
 ### Tab Interaction
 
 ```gherkin
-@ui
 Scenario: Switch between tabs
   Given I navigate to "/settings"
   Then the "General" tab should be active
@@ -285,7 +270,6 @@ Scenario: Switch between tabs
 ### Sidebar Navigation
 
 ```gherkin
-@ui
 Scenario: Sidebar navigation
   Given I navigate to "/app"
   Then the sidebar should be visible
@@ -298,7 +282,6 @@ Scenario: Sidebar navigation
 ### Test Mobile View
 
 ```gherkin
-@ui
 Scenario: Mobile navigation
   Given the viewport is "mobile" size
   Given I navigate to "/home"
@@ -310,7 +293,6 @@ Scenario: Mobile navigation
 ### Test Custom Viewport
 
 ```gherkin
-@ui
 Scenario: Test at specific resolution
   Given the viewport is 1920x1080
   Given I navigate to "/dashboard"
@@ -362,7 +344,6 @@ Then I log all cookies
 ## Complete Example: E-commerce Checkout
 
 ```gherkin
-@ui
 Feature: Checkout Flow
   As a customer
   I want to complete checkout

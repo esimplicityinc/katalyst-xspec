@@ -1,6 +1,6 @@
 # API Steps Reference
 
-Complete reference for API steps. Available in `@api` and `@hybrid` scenarios.
+Complete reference for API steps. Steps are untagged and work in any scenario (including alongside UI steps).
 
 ## HTTP Method Steps
 
@@ -207,7 +207,6 @@ And I store the value at "items[0].id" as "firstItemId"
 ## Complete API Example
 
 ```gherkin
-@api
 Feature: User Management API
 
   Background:

@@ -7,7 +7,6 @@ Common patterns for API testing with the Katalyst BDD framework.
 ### List Resources
 
 ```gherkin
-@api
 Scenario: List all [resources]
   Given I am authenticated as an admin via API
   When I GET "/[endpoint]"
@@ -18,7 +17,6 @@ Scenario: List all [resources]
 ### Get Single Resource
 
 ```gherkin
-@api
 Scenario: Get [resource] by ID
   Given I am authenticated as an admin via API
   When I GET "/[endpoint]/1"
@@ -30,7 +28,6 @@ Scenario: Get [resource] by ID
 ### Create Resource
 
 ```gherkin
-@api
 Scenario: Create [resource]
   Given I am authenticated as an admin via API
   Given I generate a UUID and store as "runId"
@@ -50,7 +47,6 @@ Scenario: Create [resource]
 ### Update Resource (Full)
 
 ```gherkin
-@api
 Scenario: Update [resource] with PUT
   Given I am authenticated as an admin via API
   # First create the resource
@@ -75,7 +71,6 @@ Scenario: Update [resource] with PUT
 ### Update Resource (Partial)
 
 ```gherkin
-@api
 Scenario: Partial update with PATCH
   Given I am authenticated as an admin via API
   When I PATCH "/[endpoint]/{resourceId}" with JSON body:
@@ -89,7 +84,6 @@ Scenario: Partial update with PATCH
 ### Delete Resource
 
 ```gherkin
-@api
 Scenario: Delete [resource]
   Given I am authenticated as an admin via API
   # Create resource to delete
@@ -155,7 +149,6 @@ Scenario: Login and use token
 ### Not Found
 
 ```gherkin
-@api
 Scenario: Resource not found
   Given I am authenticated as an admin via API
   When I GET "/[endpoint]/99999"
@@ -165,7 +158,6 @@ Scenario: Resource not found
 ### Validation Error
 
 ```gherkin
-@api
 Scenario: Invalid data returns 400
   Given I am authenticated as an admin via API
   When I POST "/[endpoint]" with JSON body:
@@ -179,7 +171,6 @@ Scenario: Invalid data returns 400
 ### Unauthorized
 
 ```gherkin
-@api
 Scenario: Unauthorized access
   # No authentication
   When I GET "/admin/users"
@@ -189,7 +180,6 @@ Scenario: Unauthorized access
 ### Forbidden
 
 ```gherkin
-@api
 Scenario: User cannot access admin endpoint
   Given I am authenticated as a user via API
   When I GET "/admin/settings"
@@ -246,7 +236,6 @@ Then the value at "created_at" should match "^\d{4}-\d{2}-\d{2}"
 ### Pagination
 
 ```gherkin
-@api
 Scenario: Paginated list
   Given I am authenticated as an admin via API
   When I GET "/[endpoint]?page=1&limit=10"
@@ -260,7 +249,6 @@ Scenario: Paginated list
 ### Search/Filter
 
 ```gherkin
-@api
 Scenario: Filter by status
   Given I am authenticated as an admin via API
   When I GET "/[endpoint]?status=active"
@@ -271,7 +259,6 @@ Scenario: Filter by status
 ### Bulk Operations
 
 ```gherkin
-@api
 Scenario: Bulk create
   Given I am authenticated as an admin via API
   When I POST "/[endpoint]/bulk" with JSON body:
@@ -291,7 +278,6 @@ Scenario: Bulk create
 ### File Upload (Form Data)
 
 ```gherkin
-@api
 Scenario: Upload file
   Given I am authenticated as an admin via API
   Given I set header "Content-Type" to "multipart/form-data"
@@ -301,7 +287,6 @@ Scenario: Upload file
 ## Complete Example: User Management API
 
 ```gherkin
-@api
 Feature: User Management API
   As an admin
   I want to manage users via API

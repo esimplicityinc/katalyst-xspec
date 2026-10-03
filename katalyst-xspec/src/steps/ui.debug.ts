@@ -2,7 +2,6 @@
  * UI Debug Step Definitions
  *
  * Steps for debugging and troubleshooting UI tests.
- * Tagged with @ui or @hybrid for selective execution.
  */
 
 import { createBdd } from 'playwright-bdd';
@@ -19,7 +18,6 @@ export function registerDebugSteps(test: any): void {
    */
   When(
     'I capture the page HTML as {string}',
-    { tags: '@ui or @hybrid' },
     async ({ page, world }: any, varName: string) => {
       const content = await page.content();
       world.vars[varName] = content;
@@ -34,7 +32,6 @@ export function registerDebugSteps(test: any): void {
    */
   Then(
     'I log the current URL',
-    { tags: '@ui or @hybrid' },
     async ({ page }: any) => {
       console.log(`[DEBUG] Current URL: ${page.url()}`);
     }
@@ -48,7 +45,6 @@ export function registerDebugSteps(test: any): void {
    */
   Then(
     'I log the page title',
-    { tags: '@ui or @hybrid' },
     async ({ page }: any) => {
       const title = await page.title();
       console.log(`[DEBUG] Page title: ${title}`);
@@ -63,7 +59,6 @@ export function registerDebugSteps(test: any): void {
    */
   When(
     'I save a screenshot as {string}',
-    { tags: '@ui or @hybrid' },
     async ({ page, world }: any, filename: string) => {
       const resolvedFilename = interpolate(filename, world.vars);
       await page.screenshot({ path: resolvedFilename });
@@ -79,7 +74,6 @@ export function registerDebugSteps(test: any): void {
    */
   When(
     'I save a full page screenshot as {string}',
-    { tags: '@ui or @hybrid' },
     async ({ page, world }: any, filename: string) => {
       const resolvedFilename = interpolate(filename, world.vars);
       await page.screenshot({ path: resolvedFilename, fullPage: true });
@@ -96,7 +90,6 @@ export function registerDebugSteps(test: any): void {
    */
   When(
     'I pause for debugging',
-    { tags: '@ui or @hybrid' },
     async ({ page }: any) => {
       console.log('[DEBUG] Pausing for debugging. Press "Resume" in Playwright Inspector to continue.');
       await page.pause();
@@ -111,7 +104,6 @@ export function registerDebugSteps(test: any): void {
    */
   Then(
     'I print visible text',
-    { tags: '@ui or @hybrid' },
     async ({ page }: any) => {
       const text = await page.innerText('body');
       const truncated = text.length > 2000 ? `${text.substring(0, 2000)}...(truncated)` : text;
@@ -127,7 +119,6 @@ export function registerDebugSteps(test: any): void {
    */
   Then(
     'I count elements matching {string}',
-    { tags: '@ui or @hybrid' },
     async ({ page, world }: any, selector: string) => {
       const resolvedSelector = interpolate(selector, world.vars);
       const count = await page.locator(resolvedSelector).count();
@@ -143,7 +134,6 @@ export function registerDebugSteps(test: any): void {
    */
   Then(
     'I print browser console messages',
-    { tags: '@ui or @hybrid' },
     async ({ page }: any) => {
       // Note: This captures messages going forward, not historical
       console.log('[DEBUG] Browser console messages will be captured from this point.');
@@ -161,7 +151,6 @@ export function registerDebugSteps(test: any): void {
    */
   When(
     'I capture viewport size',
-    { tags: '@ui or @hybrid' },
     async ({ page, world }: any) => {
       const viewport = page.viewportSize();
       if (viewport) {
@@ -182,7 +171,6 @@ export function registerDebugSteps(test: any): void {
    */
   Then(
     'I log all cookies',
-    { tags: '@ui or @hybrid' },
     async ({ page }: any) => {
       const context = page.context();
       const cookies = await context.cookies();
@@ -201,7 +189,6 @@ export function registerDebugSteps(test: any): void {
    */
   Then(
     'I log localStorage',
-    { tags: '@ui or @hybrid' },
     async ({ page }: any) => {
       const storage = await page.evaluate(() => {
         const items: Record<string, string> = {};
@@ -229,7 +216,6 @@ export function registerDebugSteps(test: any): void {
    */
   When(
     'I highlight element {string}',
-    { tags: '@ui or @hybrid' },
     async ({ page, world }: any, selector: string) => {
       const resolvedSelector = interpolate(selector, world.vars);
       await page.evaluate((sel: string) => {

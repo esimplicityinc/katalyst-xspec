@@ -148,3 +148,55 @@ describe('rewriteLegacyScripts', () => {
     assert.equal(rewriteLegacyScripts(dir), false);
   });
 });
+
+describe('stripTypeTagFilters', () => {
+  const { stripTypeTagFilters, hasTypeTagFilters } = require('../cli/upgrade.cjs');
+  let dir;
+  beforeEach(() => {
+    dir = fs.mkdtempSync(path.join(os.tmpdir(), 'kx-tags-'));
+  });
+  afterEach(() => {
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('removes type-tag-only project filters and projectTag from tagsForProject', () => {
+    write(dir, 'playwright.config.ts', [
+      "const api = defineBddProject({",
+      "  name: 'api',",
+      "  features: 'features/api/**/*.feature',",
+      "  tags: '@api',",
+      "});",
+      "const ui = defineBddProject({ name: 'ui', tags: \"@ui\" });",
+      "const h = defineBddProject({",
+      "  tags: tagsForProject({ projectTag: '@hybrid', extraTags }),",
+      "});",
+      "const t = defineBddProject({ tags: tagsForProject({ projectTag: '@tui' }) });",
+      "const s = defineBddProject({ tags: '@smoke' });",
+      '',
+    ].join('\n'));
+
+    assert.equal(hasTypeTagFilters(dir), true);
+    assert.deepEqual(stripTypeTagFilters(dir), ['playwright.config.ts']);
+    assert.equal(fs.readFileSync(path.join(dir, 'playwright.config.ts'), 'utf8'), [
+      "const api = defineBddProject({",
+      "  name: 'api',",
+      "  features: 'features/api/**/*.feature',",
+      "});",
+      "const ui = defineBddProject({ name: 'ui' });",
+      "const h = defineBddProject({",
+      "  tags: tagsForProject({ extraTags }),",
+      "});",
+      "const t = defineBddProject({ tags: tagsForProject({}) });",
+      "const s = defineBddProject({ tags: '@smoke' });",
+      '',
+    ].join('\n'));
+    assert.equal(hasTypeTagFilters(dir), false);
+  });
+
+  it('dry-run reports without writing; no config is a no-op', () => {
+    assert.deepEqual(stripTypeTagFilters(dir), []);
+    write(dir, 'playwright.config.ts', "defineBddProject({ tags: '@ui' });\n");
+    assert.deepEqual(stripTypeTagFilters(dir, { dryRun: true }), ['playwright.config.ts']);
+    assert.match(fs.readFileSync(path.join(dir, 'playwright.config.ts'), 'utf8'), /@ui/);
+  });
+});

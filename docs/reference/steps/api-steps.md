@@ -1,6 +1,6 @@
 # API Steps Reference
 
-Complete reference for all `@api` tagged step definitions.
+Complete reference for the API step definitions. Like all built-in steps, they are untagged and work in any scenario, including alongside UI steps.
 
 ## Registration
 
@@ -23,8 +23,6 @@ This registers:
 
 Authenticates as admin user, setting bearer token in headers.
 
-**Tag:** `@api`
-
 **Behavior:**
 1. POSTs credentials to login endpoint
 2. Extracts `access_token` from response
@@ -37,7 +35,6 @@ Authenticates as admin user, setting bearer token in headers.
 
 **Example:**
 ```gherkin
-@api
 Scenario: Admin operation
   Given I am authenticated as an admin via API
   When I GET "/admin/users"
@@ -50,8 +47,6 @@ Scenario: Admin operation
 
 Authenticates as standard user.
 
-**Tag:** `@api`
-
 **Environment Variables:**
 - `DEFAULT_USER_USERNAME` / `NON_ADMIN_USERNAME`
 - `DEFAULT_USER_PASSWORD` / `NON_ADMIN_PASSWORD`
@@ -59,7 +54,6 @@ Authenticates as standard user.
 
 **Example:**
 ```gherkin
-@api
 Scenario: User operation
   Given I am authenticated as a user via API
   When I GET "/profile"
@@ -72,8 +66,6 @@ Scenario: User operation
 
 Sets bearer token from a stored variable.
 
-**Tag:** `@api`
-
 **Parameters:**
 | Name | Type | Description |
 |------|------|-------------|
@@ -81,7 +73,6 @@ Sets bearer token from a stored variable.
 
 **Example:**
 ```gherkin
-@api
 Scenario: Use stored token
   Given I set variable "token" to "eyJhbG..."
   Given I set bearer token from variable "token"
@@ -96,8 +87,6 @@ Scenario: Use stored token
 ### When I GET {string}
 
 Sends HTTP GET request.
-
-**Tag:** `@api`
 
 **Parameters:**
 | Name | Type | Description |
@@ -125,8 +114,6 @@ When I GET "/search?q={searchTerm}"
 
 Sends HTTP DELETE request.
 
-**Tag:** `@api`
-
 **Parameters:**
 | Name | Type | Description |
 |------|------|-------------|
@@ -142,8 +129,6 @@ When I DELETE "/users/{userId}"
 ### When I POST {string} with JSON body:
 
 Sends HTTP POST request with JSON body.
-
-**Tag:** `@api`
 
 **Parameters:**
 | Name | Type | Description |
@@ -169,8 +154,6 @@ When I POST "/users" with JSON body:
 
 Sends HTTP PATCH request with JSON body.
 
-**Tag:** `@api`
-
 **Parameters:**
 | Name | Type | Description |
 |------|------|-------------|
@@ -192,8 +175,6 @@ When I PATCH "/users/{userId}" with JSON body:
 ### When I PUT {string} with JSON body:
 
 Sends HTTP PUT request with JSON body.
-
-**Tag:** `@api`
 
 **Parameters:**
 | Name | Type | Description |
@@ -220,8 +201,6 @@ When I PUT "/users/{userId}" with JSON body:
 
 Asserts the HTTP status code.
 
-**Tag:** `@api`
-
 **Parameters:**
 | Name | Type | Description |
 |------|------|-------------|
@@ -241,8 +220,6 @@ Then the response status should be 404
 
 Asserts response is a JSON array.
 
-**Tag:** `@api`
-
 **Example:**
 ```gherkin
 When I GET "/users"
@@ -256,8 +233,6 @@ Then the response should be a JSON array
 
 Asserts response is a JSON object.
 
-**Tag:** `@api`
-
 **Example:**
 ```gherkin
 When I GET "/users/1"
@@ -270,8 +245,6 @@ Then the response should be a JSON object
 ### Then the value at {string} should equal {string}
 
 Asserts a value at a JSONPath equals expected.
-
-**Tag:** `@api`
 
 **Parameters:**
 | Name | Type | Description |
@@ -299,8 +272,6 @@ Then the value at "id" should equal "{expectedId}"
 
 Stores a response value in a variable.
 
-**Tag:** `@api`
-
 **Parameters:**
 | Name | Type | Description |
 |------|------|-------------|
@@ -319,7 +290,6 @@ Then I store the value at "items[0].id" as "firstItemId"
 ## Complete Example
 
 ```gherkin
-@api
 Feature: User API
 
   Background:

@@ -2,7 +2,6 @@
  * TUI Wizard Step Definitions
  *
  * Advanced step definitions for terminal user interface testing.
- * Tagged with @tui for selective execution.
  * Aligned with ui.wizard.ts patterns for consistency.
  */
 
@@ -16,25 +15,25 @@ export function registerTuiWizardSteps(test: any): void {
   // Navigation Steps (menu/screen navigation)
   // ═══════════════════════════════════════════════════════════════════════════
 
-  When('I navigate down {int} times', { tags: '@tui' }, async ({ tui }: any, times: number) => {
+  When('I navigate down {int} times', async ({ tui }: any, times: number) => {
     for (let i = 0; i < times; i++) {
       await tui.pressKey('down');
     }
   });
 
-  When('I navigate up {int} times', { tags: '@tui' }, async ({ tui }: any, times: number) => {
+  When('I navigate up {int} times', async ({ tui }: any, times: number) => {
     for (let i = 0; i < times; i++) {
       await tui.pressKey('up');
     }
   });
 
-  When('I navigate to {string} and select', { tags: '@tui' }, async ({ tui, world }: any, option: string) => {
+  When('I navigate to {string} and select', async ({ tui, world }: any, option: string) => {
     const target = interpolate(option, world.vars);
     await tui.waitForText(target);
     await tui.pressKey('enter');
   });
 
-  When('I go back', { tags: '@tui' }, async ({ tui }: any) => {
+  When('I go back', async ({ tui }: any) => {
     await tui.pressKey('escape');
   });
 
@@ -42,7 +41,7 @@ export function registerTuiWizardSteps(test: any): void {
   // Form Steps (multi-field forms)
   // ═══════════════════════════════════════════════════════════════════════════
 
-  When('I fill the form:', { tags: '@tui' }, async ({ tui, world }: any, dataTable: any) => {
+  When('I fill the TUI form:', async ({ tui, world }: any, dataTable: any) => {
     const rows = dataTable.hashes();
 
     for (const row of rows) {
@@ -54,11 +53,11 @@ export function registerTuiWizardSteps(test: any): void {
     }
   });
 
-  When('I submit the form', { tags: '@tui' }, async ({ tui }: any) => {
+  When('I submit the form', async ({ tui }: any) => {
     await tui.pressKey('enter');
   });
 
-  When('I submit the form with ctrl+s', { tags: '@tui' }, async ({ tui }: any) => {
+  When('I submit the form with ctrl+s', async ({ tui }: any) => {
     await tui.pressKey('s', { ctrl: true });
   });
 
@@ -66,17 +65,17 @@ export function registerTuiWizardSteps(test: any): void {
   // Menu Steps
   // ═══════════════════════════════════════════════════════════════════════════
 
-  When('I select menu item {string}', { tags: '@tui' }, async ({ tui, world }: any, item: string) => {
+  When('I select menu item {string}', async ({ tui, world }: any, item: string) => {
     const target = interpolate(item, world.vars);
     await tui.waitForText(target);
     await tui.selectOption(target);
   });
 
-  When('I open the menu', { tags: '@tui' }, async ({ tui }: any) => {
+  When('I open the menu', async ({ tui }: any) => {
     await tui.pressKey('m', { alt: true });
   });
 
-  When('I select from dropdown {string} value {string}', { tags: '@tui' }, async ({ tui, world }: any, dropdown: string, value: string) => {
+  When('I select from dropdown {string} value {string}', async ({ tui, world }: any, dropdown: string, value: string) => {
     const dropdownLabel = interpolate(dropdown, world.vars);
     const selectedValue = interpolate(value, world.vars);
 
@@ -90,27 +89,28 @@ export function registerTuiWizardSteps(test: any): void {
   // Keyboard Shortcut Steps
   // ═══════════════════════════════════════════════════════════════════════════
 
-  When('I press ctrl+{word}', { tags: '@tui' }, async ({ tui }: any, key: string) => {
+  // Regex so `ctrl+shift+s` only matches the ctrl+shift step below.
+  When(/^I press ctrl\+([^+\s]+)$/, async ({ tui }: any, key: string) => {
     await tui.pressKey(key, { ctrl: true });
   });
 
-  When('I press alt+{word}', { tags: '@tui' }, async ({ tui }: any, key: string) => {
+  When('I press alt+{word}', async ({ tui }: any, key: string) => {
     await tui.pressKey(key, { alt: true });
   });
 
-  When('I press shift+{word}', { tags: '@tui' }, async ({ tui }: any, key: string) => {
+  When('I press shift+{word}', async ({ tui }: any, key: string) => {
     await tui.pressKey(key, { shift: true });
   });
 
-  When('I press ctrl+shift+{word}', { tags: '@tui' }, async ({ tui }: any, key: string) => {
+  When('I press ctrl+shift+{word}', async ({ tui }: any, key: string) => {
     await tui.pressKey(key, { ctrl: true, shift: true });
   });
 
-  When('I quit the application', { tags: '@tui' }, async ({ tui }: any) => {
+  When('I quit the application', async ({ tui }: any) => {
     await tui.pressKey('q');
   });
 
-  When('I force quit the application', { tags: '@tui' }, async ({ tui }: any) => {
+  When('I force quit the application', async ({ tui }: any) => {
     await tui.pressKey('c', { ctrl: true });
   });
 
@@ -118,7 +118,7 @@ export function registerTuiWizardSteps(test: any): void {
   // Screen Region Steps
   // ═══════════════════════════════════════════════════════════════════════════
 
-  Then('line {int} should contain {string}', { tags: '@tui' }, async ({ tui, world }: any, lineNum: number, text: string) => {
+  Then('line {int} should contain {string}', async ({ tui, world }: any, lineNum: number, text: string) => {
     const lines = await tui.getScreenLines();
     const expectedText = interpolate(text, world.vars);
     const lineIndex = lineNum - 1; // Convert to 0-based index
@@ -132,7 +132,7 @@ export function registerTuiWizardSteps(test: any): void {
     }
   });
 
-  Then('the first line should contain {string}', { tags: '@tui' }, async ({ tui, world }: any, text: string) => {
+  Then('the first line should contain {string}', async ({ tui, world }: any, text: string) => {
     const lines = await tui.getScreenLines();
     const expectedText = interpolate(text, world.vars);
 
@@ -141,7 +141,7 @@ export function registerTuiWizardSteps(test: any): void {
     }
   });
 
-  Then('the last line should contain {string}', { tags: '@tui' }, async ({ tui, world }: any, text: string) => {
+  Then('the last line should contain {string}', async ({ tui, world }: any, text: string) => {
     const lines = await tui.getScreenLines();
     const expectedText = interpolate(text, world.vars);
     const lastLine = lines[lines.length - 1] || '';
@@ -155,7 +155,7 @@ export function registerTuiWizardSteps(test: any): void {
   // Multi-text Assertion Steps
   // ═══════════════════════════════════════════════════════════════════════════
 
-  Then('I should see all of:', { tags: '@tui' }, async ({ tui, world }: any, dataTable: any) => {
+  Then('I should see all of:', async ({ tui, world }: any, dataTable: any) => {
     const rows = dataTable.raw();
 
     for (const row of rows) {
@@ -164,7 +164,7 @@ export function registerTuiWizardSteps(test: any): void {
     }
   });
 
-  Then('I should not see any of:', { tags: '@tui' }, async ({ tui, world }: any, dataTable: any) => {
+  Then('I should not see any of:', async ({ tui, world }: any, dataTable: any) => {
     const rows = dataTable.raw();
 
     for (const row of rows) {
@@ -177,12 +177,12 @@ export function registerTuiWizardSteps(test: any): void {
   // Debug/Capture Steps
   // ═══════════════════════════════════════════════════════════════════════════
 
-  When('I capture the screen', { tags: '@tui' }, async ({ tui, world }: any) => {
+  When('I capture the screen', async ({ tui, world }: any) => {
     const capture = await tui.captureScreen();
     world.vars['lastScreenCapture'] = capture.text;
   });
 
-  Then('I print the screen', { tags: '@tui' }, async ({ tui }: any) => {
+  Then('I print the screen', async ({ tui }: any) => {
     const text = await tui.getScreenText();
     console.log('=== Screen Content ===');
     console.log(text);
@@ -193,13 +193,13 @@ export function registerTuiWizardSteps(test: any): void {
   // Command Execution Steps (for CLI apps)
   // ═══════════════════════════════════════════════════════════════════════════
 
-  When('I execute command {string}', { tags: '@tui' }, async ({ tui, world }: any, command: string) => {
+  When('I execute command {string}', async ({ tui, world }: any, command: string) => {
     const cmd = interpolate(command, world.vars);
     await tui.typeText(cmd);
     await tui.pressKey('enter');
   });
 
-  When('I run {string}', { tags: '@tui' }, async ({ tui, world }: any, command: string) => {
+  When('I run {string}', async ({ tui, world }: any, command: string) => {
     const cmd = interpolate(command, world.vars);
     await tui.typeText(cmd);
     await tui.pressKey('enter');
@@ -209,17 +209,17 @@ export function registerTuiWizardSteps(test: any): void {
   // Confirmation Dialog Steps
   // ═══════════════════════════════════════════════════════════════════════════
 
-  When('I confirm the dialog', { tags: '@tui' }, async ({ tui }: any) => {
+  When('I confirm the dialog', async ({ tui }: any) => {
     await tui.typeText('y');
     await tui.pressKey('enter');
   });
 
-  When('I cancel the dialog', { tags: '@tui' }, async ({ tui }: any) => {
+  When('I cancel the dialog', async ({ tui }: any) => {
     await tui.typeText('n');
     await tui.pressKey('enter');
   });
 
-  When('I dismiss the dialog', { tags: '@tui' }, async ({ tui }: any) => {
+  When('I dismiss the dialog', async ({ tui }: any) => {
     await tui.pressKey('escape');
   });
 }
