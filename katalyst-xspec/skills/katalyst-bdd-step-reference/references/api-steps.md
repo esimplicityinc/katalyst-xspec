@@ -88,21 +88,29 @@ When I DELETE "/users/{userId}"
 
 ## Authentication Steps
 
-### Admin Authentication
+### Log in as a role
+
+```gherkin
+Given I am authenticated as {string} via API
+```
+
+**Example:**
+```gherkin
+Given I am authenticated as "pm" via API
+```
+
+Reads `AUTH_<ROLE>_USERNAME` / `AUTH_<ROLE>_PASSWORD` (role upper-cased, spaces/dashes become `_`), POSTs them to `API_AUTH_LOGIN_PATH` (default `/auth/login`), and sends the returned token as `Authorization: Bearer ...` on later API steps. Cookie sessions work too. Login settings: `API_AUTH_BODY` (`form`|`json`), `API_AUTH_USERNAME_FIELD`, `API_AUTH_PASSWORD_FIELD`, `API_AUTH_TOKEN_PATH`.
+
+If credentials are missing, the step fails with a message naming the variables to set.
+
+### Admin / user shorthand
 
 ```gherkin
 Given I am authenticated as an admin via API
-```
-
-Uses `DEFAULT_ADMIN_USERNAME` and `DEFAULT_ADMIN_PASSWORD` env variables.
-
-### User Authentication
-
-```gherkin
 Given I am authenticated as a user via API
 ```
 
-Uses `DEFAULT_USER_USERNAME` and `DEFAULT_USER_PASSWORD` env variables.
+Same as the roles `"admin"` and `"user"` (`AUTH_ADMIN_*`, `AUTH_USER_*`; older `DEFAULT_ADMIN_*`, `DEFAULT_USER_*`, `NON_ADMIN_*` also work).
 
 ### Set Bearer Token
 
@@ -210,7 +218,7 @@ And I store the value at "items[0].id" as "firstItemId"
 Feature: User Management API
 
   Background:
-    Given I am authenticated as an admin via API
+    Given I am authenticated as "admin" via API
 
   Scenario: Full CRUD lifecycle
     # Create

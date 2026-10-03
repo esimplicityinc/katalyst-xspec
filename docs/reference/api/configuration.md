@@ -4,42 +4,57 @@ Environment variables and configuration helpers.
 
 ## Environment Variables
 
-### API Configuration
+### Where tests point
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `API_BASE_URL` | `'http://localhost:3000'` | Base URL for API requests |
-| `TARGET_BASE_URL` | - | Alternative API base URL |
-| `TARGET_PORT` | - | Port for localhost URL construction |
-| `KATALYST_XSPEC_FORCE_IPV4` | `true` | Set to `false` (or `0`) to stop rewriting `http://*.localhost` API targets to `127.0.0.1`. See [`resolveApiRequestTarget`](./utilities.md#resolveapirequesttarget). The pre-0.4 name `STACK_TESTS_FORCE_IPV4` also works. |
+| `FRONTEND_URL` | `http://localhost:3000` | Base URL for UI steps (relative paths like `/login`) |
+| `API_BASE_URL` | the frontend URL | Base URL for API steps. Leave unset when the API is on the same origin (`/api/...`). |
+| `BASE_URL` | - | Older alias for `FRONTEND_URL` |
+| `TARGET_BASE_URL` | - | Older alias for `API_BASE_URL` |
+| `TARGET_PORT` | - | API at `http://localhost:<port>` |
+| `HEADLESS` | `true` | `false` shows the browser |
+| `KATALYST_XSPEC_QUIET` | - | `true` stops the `katalyst-xspec targets: …` line printed at the start of each run |
+| `KATALYST_XSPEC_FORCE_IPV4` | `true` | `false` (or `0`) stops rewriting `http://*.localhost` API targets to `127.0.0.1`. See [`resolveApiRequestTarget`](./utilities.md#resolveapirequesttarget). `STACK_TESTS_FORCE_IPV4` also works. |
 
-**Priority:** `API_BASE_URL` > `TARGET_BASE_URL` > the project's `baseURL` (only for projects whose name contains `api`) > `TARGET_PORT` > default
+**API base URL order:** `API_BASE_URL` > `TARGET_BASE_URL` > `baseURL` of a project whose name contains `api` > `TARGET_PORT` > the project's `baseURL` (any project, i.e. the frontend URL) > `http://localhost:3000`.
+
+Absolute URLs in steps (`When I GET "https://…"`) always go exactly where they say.
+
+The scaffolded `playwright.config.ts` resolves these once and prints them:
+
+```typescript
+import { resolveTargets, logTargets } from '@esimplicitylabs/katalyst-xspec';
+
+const targets = logTargets(resolveTargets()); // katalyst-xspec targets: UI … | API …
+export default defineConfig({ use: { baseURL: targets.frontendUrl } /* ... */ });
+```
+
+`resolveTargets(env?)` returns `{ frontendUrl, frontendSource, apiBaseUrl, apiSource }`; `logTargets` prints them in the main process only (not in workers or `bddgen`).
 
 ### Authentication
 
+See the [Authentication guide](../../guides/authentication.md) for how these fit together.
+
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `DEFAULT_ADMIN_USERNAME` | - | Admin login username (required for auth) |
-| `DEFAULT_ADMIN_EMAIL` | - | Alternative admin username |
-| `DEFAULT_ADMIN_PASSWORD` | - | Admin login password (required for auth) |
-| `DEFAULT_USER_USERNAME` | - | Standard user username |
-| `NON_ADMIN_USERNAME` | - | Alternative user username |
-| `DEFAULT_USER_PASSWORD` | - | Standard user password |
-| `NON_ADMIN_PASSWORD` | - | Alternative user password |
-| `API_AUTH_LOGIN_PATH` | `'/auth/login'` | Login endpoint path |
+| `AUTH_<ROLE>_USERNAME` / `AUTH_<ROLE>_PASSWORD` | - | Credentials for a role, e.g. `AUTH_ADMIN_*`, `AUTH_PM_*` |
+| `DEFAULT_ADMIN_USERNAME` / `DEFAULT_ADMIN_EMAIL` / `DEFAULT_ADMIN_PASSWORD` | - | Older names for the `admin` role |
+| `DEFAULT_USER_USERNAME` / `DEFAULT_USER_PASSWORD`, `NON_ADMIN_USERNAME` / `NON_ADMIN_PASSWORD` | - | Older names for the `user` role |
+| `API_AUTH_LOGIN_PATH` | `/auth/login` | API login endpoint |
+| `API_AUTH_BODY` | `form` | `form` or `json` |
+| `API_AUTH_USERNAME_FIELD` | `username` | Body field for the username |
+| `API_AUTH_PASSWORD_FIELD` | `password` | Body field for the password |
+| `API_AUTH_TOKEN_PATH` | common names | Where the token is in the response, e.g. `data.jwt` |
+| `UI_LOGIN_PATH` | `/login` | Login page |
+| `UI_USERNAME_FIELD` | `Username` | Label, placeholder or `name` of the username field |
+| `UI_PASSWORD_FIELD` | `Password` | Label, placeholder or `name` of the password field |
+| `UI_LOGIN_BUTTON` | `Login` | Submit button text |
+| `UI_LOGIN_SUCCESS_URL` | - | URL part that means "logged in" (default: left the login page) |
+| `UI_LOGIN_SUCCESS_TEXT` | - | Text that means "logged in" |
+| `UI_LOGIN_TIMEOUT` | `10000` | Milliseconds to wait for the login to finish |
+| `UI_SESSION_REUSE` | `true` | `false`: `I am logged in as` submits the form every time |
 | `CLEANUP_AUTH_TOKEN` | - | Static bearer token for cleanup (skips login) |
-
-### UI Configuration
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `FRONTEND_URL` | `'http://localhost:3000'` | Frontend base URL |
-| `BASE_URL` | - | Alternative frontend URL |
-| `HEADLESS` | `'true'` | Run browser headless |
-| `UI_LOGIN_PATH` | `'/login'` | UI login page path |
-| `UI_USERNAME_FIELD` | `'Username'` | Login form username field placeholder |
-| `UI_PASSWORD_FIELD` | `'Password'` | Login form password field placeholder |
-| `UI_LOGIN_BUTTON` | `'Login'` | Login form submit button text |
 
 ### Cleanup Configuration
 
@@ -300,10 +315,19 @@ console.log(`Running on ${getCpuCount()} CPU cores`);
 // playwright.config.ts
 import { defineConfig } from '@playwright/test';
 import { defineBddProject, cucumberReporter } from 'playwright-bdd';
-import { tagsForProject, resolveExtraTags, resolveWorkers } from '@esimplicitylabs/katalyst-xspec';
+import {
+  tagsForProject,
+  resolveExtraTags,
+  resolveWorkers,
+  resolveTargets,
+  logTargets,
+} from '@esimplicitylabs/katalyst-xspec';
 import dotenv from 'dotenv';
 
 dotenv.config();
+
+// FRONTEND_URL / API_BASE_URL, printed once: "katalyst-xspec targets: UI … | API …"
+const targets = logTargets(resolveTargets());
 
 // Get extra tags from environment
 const extraTags = resolveExtraTags(process.env.TEST_TAGS);
@@ -346,7 +370,7 @@ export default defineConfig({
   ],
   
   use: {
-    baseURL: process.env.FRONTEND_URL || 'http://localhost:3000',
+    baseURL: targets.frontendUrl,
     headless: process.env.HEADLESS !== 'false',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
@@ -363,21 +387,29 @@ export default defineConfig({
 ### .env Example
 
 ```bash
-# API Configuration
-API_BASE_URL=http://localhost:3000
-API_AUTH_LOGIN_PATH=/auth/login
-
-# Authentication - Admin
-DEFAULT_ADMIN_USERNAME=admin@example.com
-DEFAULT_ADMIN_PASSWORD=changeme
-
-# Authentication - User
-DEFAULT_USER_USERNAME=user@example.com
-DEFAULT_USER_PASSWORD=changeme
-
-# UI Configuration
+# Where to test
 FRONTEND_URL=http://localhost:3000
+# API_BASE_URL=http://localhost:4000   # only if the API is on another origin
 HEADLESS=true
+
+# Who logs in (any role: AUTH_<ROLE>_USERNAME / AUTH_<ROLE>_PASSWORD)
+AUTH_ADMIN_USERNAME=admin@example.com
+AUTH_ADMIN_PASSWORD=changeme
+AUTH_USER_USERNAME=user@example.com
+AUTH_USER_PASSWORD=changeme
+
+# API login (defaults shown)
+# API_AUTH_LOGIN_PATH=/auth/login
+# API_AUTH_BODY=form
+# API_AUTH_USERNAME_FIELD=username
+# API_AUTH_PASSWORD_FIELD=password
+# API_AUTH_TOKEN_PATH=access_token
+
+# UI login (defaults shown)
+# UI_LOGIN_PATH=/login
+# UI_USERNAME_FIELD=Username
+# UI_PASSWORD_FIELD=Password
+# UI_LOGIN_BUTTON=Login
 
 # Cleanup
 CLEANUP_ALLOW_ALL=false
@@ -396,8 +428,7 @@ DEBUG=false
 ### Multiple Environments
 
 ```bash
-# .env.development
-API_BASE_URL=http://localhost:3000
+# .env.development (API on the same origin: no API_BASE_URL needed)
 FRONTEND_URL=http://localhost:3000
 
 # .env.staging
@@ -470,3 +501,4 @@ TEST_TAGS=@smoke npx playwright test --project=api
 - [Project Setup](../../getting-started/project-setup.md) - Full configuration
 - [Tags](../../concepts/tag-system.md) - Tag filtering details
 - [CI/CD Integration](../../guides/ci-cd.md) - CI configuration
+- [Authentication](../../guides/authentication.md) - Roles and login settings

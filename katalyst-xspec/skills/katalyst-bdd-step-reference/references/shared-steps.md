@@ -250,7 +250,7 @@ type World = {
 Feature: User Management
 
   Background:
-    Given I am authenticated as an admin via API
+    Given I am authenticated as "admin" via API
     Given I generate a UUID and store as "runId"
 
   Scenario: Create user with cleanup
@@ -298,7 +298,7 @@ Feature: User Onboarding
     Given I set variable "userName" to "Test User {testId}"
     
     # API: Create user
-    Given I am authenticated as an admin via API
+    Given I am authenticated as "admin" via API
     When I POST "/admin/users" with JSON body:
       """
       {

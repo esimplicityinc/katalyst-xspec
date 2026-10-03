@@ -146,7 +146,7 @@ Headers are automatically included in API requests.
 Given I set header "X-Custom-Header" to "value"
 
 # Authentication sets Authorization header
-Given I am authenticated as an admin via API
+Given I am authenticated as "admin" via API
 # Sets: Authorization: Bearer <token>
 ```
 
@@ -348,7 +348,7 @@ Given I register cleanup DELETE "/users/{userId}"
 ```gherkin
 # Good - authenticate once per scenario
 Background:
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
 
 # Avoid - authenticating in every step
 ```

@@ -28,7 +28,7 @@ const test = createBddTest({
 ### Environment Variables
 
 ```bash
-API_BASE_URL=http://localhost:3000
+API_BASE_URL=http://localhost:3000   # optional: defaults to FRONTEND_URL (older alias TARGET_BASE_URL)
 ```
 
 ### Features
@@ -62,8 +62,7 @@ const test = createBddTest({
 ### Environment Variables
 
 ```bash
-FRONTEND_URL=http://localhost:3000
-BASE_URL=http://localhost:3000
+FRONTEND_URL=http://localhost:3000   # older alias BASE_URL
 HEADLESS=true
 ```
 
@@ -73,6 +72,7 @@ HEADLESS=true
 - Automatic waiting for elements
 - Multiple click modes (normal, force, dispatch)
 - Screenshot and debugging support
+- Login helpers used by `UniversalAuthAdapter` (optional on `UiPort`): `fillField(name, value, { timeoutMs })` (label, placeholder or `name`), `waitForUrl(predicate, timeoutMs)`, `waitForText(text, timeoutMs)`, `saveSession()`, `restoreSession(state)`
 
 ## TuiTesterAdapter
 
@@ -146,9 +146,12 @@ Implements `AuthPort` for both API and UI authentication.
 ### Constructor
 
 ```typescript
-class UniversalAuthAdapter implements AuthPort {
-  constructor(private readonly deps: { api: ApiPort; ui: UiPort }) {}
-}
+new UniversalAuthAdapter({
+  api,                 // ApiPort
+  ui,                  // UiPort
+  roles?,              // { pm: { username, password } } - overrides AUTH_<ROLE>_* env vars
+  env?,                // settings source, default process.env
+})
 ```
 
 ### Configuration
@@ -164,32 +167,48 @@ const test = createBddTest({
 ### Environment Variables
 
 ```bash
-# Admin credentials
-DEFAULT_ADMIN_USERNAME=admin@example.com
-DEFAULT_ADMIN_PASSWORD=changeme
+# Credentials per role (any role name; "project manager" -> AUTH_PROJECT_MANAGER_*)
+AUTH_ADMIN_USERNAME=admin@example.com
+AUTH_ADMIN_PASSWORD=changeme
+AUTH_PM_USERNAME=pm@example.com
+AUTH_PM_PASSWORD=secret
+# admin/user also accept the older DEFAULT_ADMIN_*, DEFAULT_USER_*, NON_ADMIN_*
 
-# User credentials
-DEFAULT_USER_USERNAME=user@example.com
-DEFAULT_USER_PASSWORD=user123
-
-# Auth endpoint
+# API login (defaults)
 API_AUTH_LOGIN_PATH=/auth/login
+API_AUTH_BODY=form            # or json
+API_AUTH_USERNAME_FIELD=username
+API_AUTH_PASSWORD_FIELD=password
+# API_AUTH_TOKEN_PATH=data.jwt  # default tries access_token, token, accessToken, data.*
+
+# UI login (defaults)
+UI_LOGIN_PATH=/login
+UI_USERNAME_FIELD=Username    # label, placeholder or name
+UI_PASSWORD_FIELD=Password
+UI_LOGIN_BUTTON=Login
+# UI_LOGIN_SUCCESS_URL / UI_LOGIN_SUCCESS_TEXT / UI_LOGIN_TIMEOUT=10000 / UI_SESSION_REUSE=true
 ```
 
 ### Behavior
 
-**API Authentication:**
-1. POSTs to `API_AUTH_LOGIN_PATH`
-2. Stores token in `world.headers['Authorization']`
-3. If credentials not set, skips silently with `console.warn`
+**API login (`apiLoginAs(world, role)`):**
+1. POSTs the role's credentials to `API_AUTH_LOGIN_PATH` (form or JSON)
+2. Reads the token and sets `world.headers.Authorization = Bearer <token>`; with no token but a `Set-Cookie`, keeps the cookie session
+3. Fails with status, response body and the settings to check on error. Never starts a browser.
 
-**UI Authentication:**
-1. Navigates to `UI_LOGIN_PATH` (default: `/login`)
-2. Fills fields by placeholder (configurable via `UI_USERNAME_FIELD`, `UI_PASSWORD_FIELD`)
-3. Clicks login button (configurable via `UI_LOGIN_BUTTON`)
-4. If credentials not set, skips silently with `console.warn`
+**UI login (`uiLoginAs(world, role, { reuseSession })`):**
+1. Navigates to `UI_LOGIN_PATH`
+2. Fills username/password fields matched by label, placeholder or `name`
+3. Clicks `UI_LOGIN_BUTTON` and waits to leave the login page (or for `UI_LOGIN_SUCCESS_URL` / `UI_LOGIN_SUCCESS_TEXT`); fails if it doesn't
+4. With `reuseSession` (used by `Given I am logged in as`), saves cookies + localStorage per role per worker and restores them later
 
-> **Note:** No hardcoded default credentials are used. All credentials must be set via env vars.
+**Missing credentials fail** with `MissingCredentialsError` naming the variables to set (no hardcoded defaults, no silent skip).
+
+`apiLoginAsAdmin` / `apiLoginAsUser` / `uiLoginAsAdmin` / `uiLoginAsUser` are the roles `admin` / `user`. `credentialsFor(role)` returns resolved credentials; `clearUiSessions()` forgets saved sessions.
+
+### Extending
+
+Subclass and override `protected apiLogin(world, role, creds)` or `protected uiLogin(world, role, creds)` (e.g. SSO or a multi-step form). `this.api`, `this.ui`, `this.roles`, `this.env` are available. Role lookup, steps and session reuse keep working.
 
 ## DefaultCleanupAdapter
 

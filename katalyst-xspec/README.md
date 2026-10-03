@@ -22,7 +22,7 @@ npm test
 
 - **Fixtures**: `createBddTest` wiring world, api/ui/auth/cleanup adapters.
 - **Ports**: `ApiPort`, `UiPort`, `AuthPort`, `CleanupPort`.
-- **Adapters**: Playwright API/UI adapters, default cleanup, example auth adapter.
+- **Adapters**: Playwright API/UI adapters, default cleanup, `UniversalAuthAdapter` (role-based API and UI login).
 - **Step registrations**: API (auth/http/assertions), UI (basic + wizard), shared vars/cleanup, hybrid helpers.
 - **Config helpers**: `tagsForProject` / `resolveExtraTags` for optional tag filtering (`@Skip`/`@ignore`, `TEST_TAGS`).
 
@@ -56,6 +56,20 @@ registerApiSteps(test);
 ```
 
 3) Configure Playwright projects with your features/steps globs (each project selects feature files by folder; tags are optional). Keep `@playwright/test` and `playwright-bdd` aligned with peer ranges.
+
+## Logging in
+
+Set credentials per role in `.env` (`AUTH_ADMIN_USERNAME` / `AUTH_ADMIN_PASSWORD`, `AUTH_PM_USERNAME` / ..., any role name) and use the role in features:
+
+```gherkin
+Given I am authenticated as "pm" via API
+Given I am logged in as "pm"
+When I log in as "pm" in UI
+```
+
+Missing credentials fail the step with a message naming the variables. Login endpoint, body format, token location and form fields are set with `API_AUTH_*` / `UI_*` variables; see the [Authentication guide](https://github.com/esimplicityinc/katalyst-xspec/blob/main/docs/guides/authentication.md).
+
+`FRONTEND_URL` sets where UI steps go; `API_BASE_URL` is optional (API calls go to `FRONTEND_URL` without it).
 
 ## Publishing (npm)
 

@@ -100,34 +100,38 @@ Old `@api`/`@ui` tags left in feature files are harmless.
 
 ## Issue 3: Authentication Failures
 
-### API Auth Fails (401)
+### Login step fails
 
-**Check `.env` variables (all required -- no hardcoded defaults):**
+Role login steps (`Given I am authenticated as "pm" via API`, `Given I am logged in as "pm"`, `When I log in as "pm" in UI`, and the older admin/user steps) read `AUTH_<ROLE>_USERNAME` / `AUTH_<ROLE>_PASSWORD` (role upper-cased, spaces/dashes become `_`). Since 0.8, missing credentials **fail the step** with a message naming the variables; they no longer warn and continue logged out. Match the error message:
+
+| Message | Fix |
+|---------|-----|
+| `No username for role "x"` | Set `AUTH_X_USERNAME` / `AUTH_X_PASSWORD` (check the role spelling) |
+| `API login as "x" failed: POST /auth/login returned 401` | Wrong credentials, or wrong `API_AUTH_BODY` (`form`/`json`) / `API_AUTH_USERNAME_FIELD` / `API_AUTH_PASSWORD_FIELD`; the message includes the response body |
+| `returned 404` | Wrong `API_AUTH_LOGIN_PATH`, or the API base URL is wrong; check the `katalyst-xspec targets:` line printed at the start of the run |
+| `returned 200 but no token found` | Set `API_AUTH_TOKEN_PATH` to where the token is (e.g. `data.jwt`) |
+| `No username field "Username" on /login` | Set `UI_USERNAME_FIELD` to the field's label, placeholder or `name`, or fix `UI_LOGIN_PATH` |
+| `UI login as "x" stayed on /login` | Wrong credentials, or the app doesn't change URL after login: set `UI_LOGIN_SUCCESS_TEXT` (or `UI_LOGIN_SUCCESS_URL`) |
+| Logged out in a later scenario | A previous scenario ended the shared session: use `When I log in as "x" in UI` there, or `UI_SESSION_REUSE=false` |
+| `UI login needs the browser` | A custom step called `auth.uiLoginAs` without the `ui` fixture: add `ui` to its parameters (`async ({ auth, ui, world }) => ...`) |
+
+**Typical `.env`:**
 ```bash
-# Required for admin auth
-DEFAULT_ADMIN_USERNAME=admin@example.com
-DEFAULT_ADMIN_PASSWORD=changeme
+AUTH_ADMIN_USERNAME=admin@example.com
+AUTH_ADMIN_PASSWORD=changeme
+# Older names still work for admin/user: DEFAULT_ADMIN_*, DEFAULT_USER_*, NON_ADMIN_*
 
-# Required for user auth
-DEFAULT_USER_USERNAME=user@example.com
-DEFAULT_USER_PASSWORD=changeme
-
-# Auth endpoint path
-API_AUTH_LOGIN_PATH=/auth/login
+# API login (defaults shown)
+# API_AUTH_LOGIN_PATH=/auth/login
+# API_AUTH_BODY=form
+# API_AUTH_TOKEN_PATH=access_token
 ```
 
-> **Important:** If these env vars are not set, auth methods will skip silently with a `console.warn`. Check your test output for messages like `apiLoginAsAdmin skipped: DEFAULT_ADMIN_USERNAME and DEFAULT_ADMIN_PASSWORD are not set`.
-
-**Debug:** Add logging to see what's being sent:
-```gherkin
-# Check your variables are loaded
-Given I set variable "debug" to "true"
-Then I log all feature flags
-```
+Full settings: docs/guides/authentication.md.
 
 ### UI Auth Fails
 
-For `Given I am authenticated in UI as "admin"`:
+For `Given I am authenticated in UI as "admin"` (header-based, not `I am logged in as`):
 - This uses fetch intercept, not actual login
 - Ensure your app accepts the intercepted auth headers
 - Check the auth adapter configuration
@@ -275,9 +279,9 @@ Given I disable cleanup
 ```
 
 ### Check 3: API Base URL Set
-Cleanup uses the API base URL:
+Cleanup uses the API base URL (`API_BASE_URL`, or `FRONTEND_URL` when it isn't set). Check the `katalyst-xspec targets: UI … | API …` line at the start of the run:
 ```bash
-# In .env
+# In .env (only if the API is on another origin than FRONTEND_URL)
 API_BASE_URL=http://localhost:3000
 ```
 
@@ -411,26 +415,31 @@ npx playwright test --ui
 ## Environment Variable Checklist
 
 ```bash
-# API Testing
-API_BASE_URL=http://localhost:3000
-
-# UI Testing
-FRONTEND_URL=http://localhost:3000
-BASE_URL=http://localhost:3000
+# Where to test
+FRONTEND_URL=http://localhost:3000        # older alias: BASE_URL
+# API_BASE_URL=http://localhost:4000      # optional; defaults to FRONTEND_URL
 HEADLESS=true
 
-# Authentication (required -- no hardcoded defaults)
-DEFAULT_ADMIN_USERNAME=admin@example.com
-DEFAULT_ADMIN_PASSWORD=changeme
-DEFAULT_USER_USERNAME=user@example.com
-DEFAULT_USER_PASSWORD=changeme
-API_AUTH_LOGIN_PATH=/auth/login
+# Who logs in: one pair per role used in features (no hardcoded defaults)
+AUTH_ADMIN_USERNAME=admin@example.com
+AUTH_ADMIN_PASSWORD=changeme
+# AUTH_PM_USERNAME=pm@example.com
+# AUTH_PM_PASSWORD=changeme
 
-# UI Login Customization (optional)
+# API login (optional, defaults shown)
+# API_AUTH_LOGIN_PATH=/auth/login
+# API_AUTH_BODY=form
+# API_AUTH_USERNAME_FIELD=username
+# API_AUTH_PASSWORD_FIELD=password
+# API_AUTH_TOKEN_PATH=access_token
+
+# UI login (optional, defaults shown)
 # UI_LOGIN_PATH=/login
-# UI_USERNAME_FIELD=Username
+# UI_USERNAME_FIELD=Username              # label, placeholder or name
 # UI_PASSWORD_FIELD=Password
 # UI_LOGIN_BUTTON=Login
+# UI_LOGIN_SUCCESS_TEXT=Welcome
+# UI_SESSION_REUSE=true
 
 # Cleanup Auth (optional -- alternative to login-based auth)
 # CLEANUP_AUTH_TOKEN=your-admin-token

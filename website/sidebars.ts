@@ -45,6 +45,7 @@ const sidebars: SidebarsConfig = {
         "guides/ui-testing",
         "guides/tui-testing",
         "guides/hybrid-testing",
+        "guides/authentication",
         "guides/custom-adapters",
         "guides/custom-steps",
         "guides/ci-cd",

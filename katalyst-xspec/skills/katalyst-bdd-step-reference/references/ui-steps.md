@@ -348,7 +348,28 @@ Then the element "#terms" should be checked
 Then the element "#newsletter" should not be checked
 ```
 
-## UI Authentication Steps
+## UI Login Steps
+
+```gherkin
+Given I am logged in as {string}
+When I log in as {string} in UI
+When I log in as admin in UI
+When I log in as user in UI
+```
+
+**Examples:**
+```gherkin
+Given I am logged in as "pm"
+When I log in as "pm" in UI
+```
+
+- `I am logged in as "<role>"` fills the login form once per role per worker, then restores the saved cookies + localStorage in later scenarios (`UI_SESSION_REUSE=false` disables).
+- `I log in as "<role>" in UI` always submits the form (use when testing login).
+- `admin` / `user` variants are shorthand for those roles.
+- Credentials: `AUTH_<ROLE>_USERNAME` / `AUTH_<ROLE>_PASSWORD`. Missing credentials fail the step with a message naming the variables. Staying on the login page also fails.
+- Settings: `UI_LOGIN_PATH` (`/login`), `UI_USERNAME_FIELD` (`Username`), `UI_PASSWORD_FIELD` (`Password`) match the field's label, placeholder or `name`; `UI_LOGIN_BUTTON` (`Login`), `UI_LOGIN_SUCCESS_URL`, `UI_LOGIN_SUCCESS_TEXT`, `UI_LOGIN_TIMEOUT` (`10000`).
+
+## UI Authentication Steps (header-based)
 
 ### Auth with Fetch Intercept
 

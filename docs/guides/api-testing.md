@@ -77,11 +77,22 @@ Scenario: Delete a resource
 
 ## Authentication
 
+Log in by role name. Credentials come from `AUTH_<ROLE>_USERNAME` / `AUTH_<ROLE>_PASSWORD`; login settings (`API_AUTH_*`) are in the [Authentication guide](./authentication.md).
+
+### Any Role
+
+```gherkin
+Scenario: Project manager lists projects
+  Given I am authenticated as "pm" via API
+  When I GET "/projects"
+  Then the response status should be 200
+```
+
 ### Admin Authentication
 
 ```gherkin
 Scenario: Admin operation
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   When I POST "/admin/users" with JSON body:
     """
     { "email": "admin-created@example.com" }
@@ -93,7 +104,7 @@ Scenario: Admin operation
 
 ```gherkin
 Scenario: User operation
-  Given I am authenticated as a user via API
+  Given I am authenticated as "user" via API
   When I GET "/profile"
   Then the response status should be 200
 ```
@@ -207,7 +218,7 @@ Scenario: Dynamic paths
 
 ```gherkin
 Scenario: Create with cleanup
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   When I POST "/users" with JSON body:
     """
     { "email": "temp@example.com" }
@@ -243,7 +254,7 @@ Scenario: Debug without cleanup
 Feature: User CRUD
 
   Background:
-    Given I am authenticated as an admin via API
+    Given I am authenticated as "admin" via API
 
   Scenario: Create, Read, Update, Delete
     # Create
@@ -310,7 +321,7 @@ Scenario: Handle validation error
 
 ```gherkin
 Scenario Outline: Create users with different roles
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   When I POST "/users" with JSON body:
     """
     { "email": "<email>", "role": "<role>" }
@@ -331,17 +342,17 @@ Scenario Outline: Create users with different roles
 
 ```bash
 # .env
-API_BASE_URL=http://localhost:3000
-API_AUTH_LOGIN_PATH=/auth/login
+API_BASE_URL=http://localhost:3000   # optional: defaults to FRONTEND_URL
+# API_AUTH_LOGIN_PATH=/auth/login     # default
 
-DEFAULT_ADMIN_USERNAME=admin@example.com
-DEFAULT_ADMIN_PASSWORD=changeme
+AUTH_ADMIN_USERNAME=admin@example.com
+AUTH_ADMIN_PASSWORD=changeme
 
-DEFAULT_USER_USERNAME=user@example.com
-DEFAULT_USER_PASSWORD=user123
+AUTH_USER_USERNAME=user@example.com
+AUTH_USER_PASSWORD=user123
 ```
 
-> **Note:** All credentials must be explicitly set. If env vars are missing, auth methods skip silently with a `console.warn`.
+> **Note:** If a role's credentials are missing, the login step fails with a message naming the variables to set. If the login endpoint returns an error or no token, the step fails with the status, the response and the settings to check.
 
 ### Multiple Environments
 
@@ -366,7 +377,7 @@ ENV_FILE=.env.staging npm test
 Feature: User API
 
   Background:
-    Given I am authenticated as an admin via API
+    Given I am authenticated as "admin" via API
     # Runs before each scenario
 ```
 

@@ -185,7 +185,7 @@ flowchart TD
 if (!world.skipCleanup && world.cleanup.length > 0) {
   for (const item of [...world.cleanup].reverse()) {
     // getCleanupAuth is configurable via createBddTest({ getCleanupAuth })
-    // Default: form-based login using DEFAULT_ADMIN_* env vars
+    // Default: API login as the "admin" role (AUTH_ADMIN_* / DEFAULT_ADMIN_*) with the API_AUTH_* settings
     // Also supports: CLEANUP_AUTH_TOKEN, createOidcCleanupAuth(), or custom callback
     const adminHeaders = await getCleanupAuth(apiRequest);
     const headers = { ...adminHeaders, ...(item.headers || {}) };
@@ -335,7 +335,7 @@ Background steps run **before each scenario**:
 Feature: User API
 
   Background:
-    Given I am authenticated as an admin via API
+    Given I am authenticated as "admin" via API
     # Runs before every scenario
 
   Scenario: Create user

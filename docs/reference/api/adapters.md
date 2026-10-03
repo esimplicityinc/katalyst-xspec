@@ -117,6 +117,18 @@ const test = createBddTest({
 | `title` | `getByTitle()` |
 | `locator` | `locator()` |
 
+### Login helpers
+
+`PlaywrightUiAdapter` also implements the optional [`UiPort` login methods](./ports.md#optional-login-methods) used by `UniversalAuthAdapter`:
+
+| Method | Behavior |
+|--------|----------|
+| `fillField(name, value, { timeoutMs })` | Tries exact label, exact placeholder, label, placeholder, then `[name="…"]`; returns `false` if none appears |
+| `waitForUrl(predicate, timeoutMs)` | `true` once the page URL satisfies `predicate`, `false` on timeout |
+| `waitForText(text, timeoutMs)` | `true` once `text` is visible, `false` on timeout |
+| `saveSession()` | `page.context().storageState()` (cookies + localStorage) |
+| `restoreSession(state)` | Adds the saved cookies and localStorage to the current context |
+
 ---
 
 ## TuiTesterAdapter
@@ -194,13 +206,20 @@ import { UniversalAuthAdapter } from '@esimplicitylabs/katalyst-xspec';
 ### Constructor
 
 ```typescript
-new UniversalAuthAdapter(deps: { api: ApiPort; ui: UiPort })
+new UniversalAuthAdapter(options: {
+  api: ApiPort;
+  ui: UiPort;
+  roles?: Record<string, Partial<Credentials>>; // { pm: { username, password } }
+  env?: Record<string, string | undefined>;     // default: process.env
+})
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `deps.api` | `ApiPort` | API adapter for token-based auth |
-| `deps.ui` | `UiPort` | UI adapter for form-based auth |
+| Option | Type | Description |
+|--------|------|-------------|
+| `api` | `ApiPort` | API adapter used for API login |
+| `ui` | `UiPort` | UI adapter used for form login |
+| `roles` | `Record<string, Partial<Credentials>>` | Credentials per role. Take precedence over `AUTH_<ROLE>_*`. |
+| `env` | `Record<string, string \| undefined>` | Where settings are read from. Defaults to `process.env`. |
 
 ### Usage
 
@@ -208,40 +227,81 @@ new UniversalAuthAdapter(deps: { api: ApiPort; ui: UiPort })
 import { createBddTest, UniversalAuthAdapter } from '@esimplicitylabs/katalyst-xspec';
 
 const test = createBddTest({
-  createAuth: ({ api, ui }) => new UniversalAuthAdapter({ api, ui }),
+  createAuth: ({ api, ui }) =>
+    new UniversalAuthAdapter({
+      api,
+      ui,
+      roles: { pm: { username: 'pm@example.com', password: process.env.PM_PASSWORD } },
+    }),
 });
 ```
 
-### Environment Variables
+The default `createBddTest()` already uses `new UniversalAuthAdapter({ api, ui })`.
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `DEFAULT_ADMIN_USERNAME` | - | Admin email/username (required for auth) |
-| `DEFAULT_ADMIN_EMAIL` | - | Alternative admin username |
-| `DEFAULT_ADMIN_PASSWORD` | - | Admin password (required for auth) |
-| `DEFAULT_USER_USERNAME` | - | User email/username (required for user auth) |
-| `DEFAULT_USER_PASSWORD` | - | User password (required for user auth) |
-| `NON_ADMIN_USERNAME` | - | Alternative user username |
-| `NON_ADMIN_PASSWORD` | - | Alternative user password |
-| `API_AUTH_LOGIN_PATH` | `'/auth/login'` | Login endpoint |
-| `UI_LOGIN_PATH` | `'/login'` | UI login page path |
-| `UI_USERNAME_FIELD` | `'Username'` | Login form username field placeholder |
-| `UI_PASSWORD_FIELD` | `'Password'` | Login form password field placeholder |
-| `UI_LOGIN_BUTTON` | `'Login'` | Login form submit button text |
+### Roles and credentials
 
-> **Note:** If credentials are not configured, login methods will skip silently and log a warning. No hardcoded defaults are used.
+Any role name works. For role `R`, credentials come from `roles` in code, then `AUTH_<R>_USERNAME` / `AUTH_<R>_PASSWORD` (upper-cased; spaces and dashes become `_`). `admin` and `user` also accept the older `DEFAULT_ADMIN_*` and `DEFAULT_USER_*` / `NON_ADMIN_*` names.
 
-### API Login Flow
+Missing credentials throw `MissingCredentialsError`, which fails the step with a message naming the variables to set.
 
-1. POST to login endpoint with credentials
-2. Extract `access_token` from response
-3. Set `Authorization: Bearer <token>` in world.headers
+### Settings
 
-### UI Login Flow
+API login reads `API_AUTH_LOGIN_PATH`, `API_AUTH_BODY`, `API_AUTH_USERNAME_FIELD`, `API_AUTH_PASSWORD_FIELD` and `API_AUTH_TOKEN_PATH`. UI login reads `UI_LOGIN_PATH`, `UI_USERNAME_FIELD`, `UI_PASSWORD_FIELD`, `UI_LOGIN_BUTTON`, `UI_LOGIN_SUCCESS_URL`, `UI_LOGIN_SUCCESS_TEXT`, `UI_LOGIN_TIMEOUT` and `UI_SESSION_REUSE`. Defaults and examples are in the [Authentication guide](../../guides/authentication.md) and the [Configuration reference](./configuration.md#authentication).
 
-1. Navigate to `UI_LOGIN_PATH` (default: `/login`)
-2. Fill username and password fields (by placeholder text)
-3. Click login button
+### Methods
+
+| Method | Description |
+|--------|-------------|
+| `apiLoginAs(world, role)` | API login as `role` |
+| `uiLoginAs(world, role, { reuseSession? })` | UI login as `role`, optionally reusing a saved session |
+| `apiLoginAsAdmin` / `apiLoginAsUser` / `uiLoginAsAdmin` / `uiLoginAsUser` | Same, for the `admin` / `user` roles |
+| `apiSetBearer(world, token)` | Set `Authorization: Bearer <token>` in `world.headers` |
+| `credentialsFor(role)` | Resolved `{ username, password }` for a role (throws `MissingCredentialsError`) |
+
+### API login flow
+
+1. POST the credentials to `API_AUTH_LOGIN_PATH` as a form (or JSON with `API_AUTH_BODY=json`)
+2. A non-2xx response fails with the status, the response body and the settings to check
+3. Read the token (`API_AUTH_TOKEN_PATH`, or the first of `access_token`, `token`, `accessToken`, `data.access_token`, `data.token`, `data.accessToken`) and set `Authorization: Bearer <token>`
+4. No token but a `Set-Cookie` header: the cookie session is kept by the request context. Neither: fails.
+
+API login does not start a browser.
+
+### UI login flow
+
+1. Navigate to `UI_LOGIN_PATH` (default `/login`)
+2. Fill the username and password fields, matched by label, placeholder or `name`
+3. Click `UI_LOGIN_BUTTON`
+4. Wait until the page leaves the login page (or shows `UI_LOGIN_SUCCESS_TEXT`, or reaches `UI_LOGIN_SUCCESS_URL`); fail if it doesn't
+
+With `reuseSession`, the session is saved after the first login per role per worker and restored later. `clearUiSessions()` forgets saved sessions.
+
+### Extending
+
+Subclass and override only the part that differs. Role lookup, the steps, and session reuse keep working.
+
+```typescript
+import { UniversalAuthAdapter, type Credentials, type World } from '@esimplicitylabs/katalyst-xspec';
+
+export class MyAuth extends UniversalAuthAdapter {
+  protected async uiLogin(world: World, role: string, creds: Credentials) {
+    await this.ui.goto('/');
+    await this.ui.clickButton('Sign in with SSO');
+    await this.ui.fillLabel('Email address', creds.username);
+    await this.ui.fillLabel('Password', creds.password);
+    await this.ui.clickButton('Verify');
+    await this.ui.expectUrlContains('/home');
+  }
+}
+```
+
+| Protected member | Description |
+|------------------|-------------|
+| `apiLogin(world, role, creds)` | POST the login and keep the token/cookie |
+| `uiLogin(world, role, creds)` | Fill and submit the form, then check it worked |
+| `api`, `ui`, `roles`, `env` | Constructor options |
+
+See [Extending the login](../../guides/authentication.md#extending-the-login).
 
 ---
 
@@ -338,7 +398,7 @@ When `allowHeuristic: true` (or `CLEANUP_ALLOW_ALL=true`), cleanup is registered
 
 ## Cleanup Authentication
 
-By default, cleanup operations authenticate using a form-based API login (same credentials as `DEFAULT_ADMIN_USERNAME` / `DEFAULT_ADMIN_PASSWORD`). You can customize this with:
+By default, cleanup operations log in to the API as the `admin` role (`AUTH_ADMIN_*`, or the older `DEFAULT_ADMIN_*`), using the same `API_AUTH_*` settings. If no admin credentials are set, cleanup runs unauthenticated (best effort). You can customize this with:
 
 ### Static Token
 

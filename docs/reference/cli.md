@@ -64,7 +64,7 @@ npx katalyst-xspec upgrade [options]
 |--------|-------------|
 | `-c`, `--check` | Report whether an update is available; change nothing |
 | `-v`, `--version <ver>` | Install a specific version |
-| `--migrate` | Refresh the scaffolding (config, `steps.ts`, `fixtures.ts`) while keeping your custom files; backs up first |
+| `--migrate` | Refresh the scaffolding (`package.json` scripts, `steps.ts`) while keeping your custom step files and `fixtures.ts`; backs up first |
 | `--dry-run` | With `--migrate`, show what would change |
 | `--backup-dir <dir>` | Where `--migrate` writes its backup (default: a temp folder) |
 | `--update-skills` | Update installed Agent Skills to the bundled version |

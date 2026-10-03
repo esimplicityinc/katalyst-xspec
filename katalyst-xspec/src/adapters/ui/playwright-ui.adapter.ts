@@ -5,6 +5,7 @@ import type {
   UiInputMode,
   UiLocatorMethod,
   UiPort,
+  UiSessionState,
   UiUrlAssertMode,
 } from '../../ports/ui.port';
 
@@ -205,6 +206,71 @@ export class PlaywrightUiAdapter implements UiPort {
         const neverMethod: never = method;
         throw new Error(`Unsupported locator method: ${neverMethod}`);
       }
+    }
+  }
+
+  async fillField(name: string, value: string, options: { timeoutMs?: number } = {}): Promise<boolean> {
+    const candidates = [
+      this.page.getByLabel(name, { exact: true }),
+      this.page.getByPlaceholder(name, { exact: true }),
+      this.page.getByLabel(name),
+      this.page.getByPlaceholder(name),
+      this.page.locator(`[name="${name.replace(/"/g, '\\"')}"]`),
+    ];
+    const any = candidates.reduce((acc, loc) => acc.or(loc));
+    try {
+      await any.first().waitFor({ state: 'visible', timeout: options.timeoutMs ?? 10_000 });
+    } catch {
+      return false;
+    }
+    for (const loc of candidates) {
+      if ((await loc.count()) > 0) {
+        await loc.first().fill(value);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  async waitForUrl(predicate: (url: string) => boolean, timeoutMs: number): Promise<boolean> {
+    try {
+      await this.page.waitForURL((u) => predicate(u.toString()), { timeout: timeoutMs });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async waitForText(text: string, timeoutMs: number): Promise<boolean> {
+    try {
+      await this.page.getByText(text).first().waitFor({ state: 'visible', timeout: timeoutMs });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async saveSession(): Promise<UiSessionState> {
+    return (await this.page.context().storageState()) as unknown as UiSessionState;
+  }
+
+  async restoreSession(state: UiSessionState): Promise<void> {
+    const context = this.page.context();
+    if (state.cookies.length) await context.addCookies(state.cookies as any);
+    if (state.origins.some((o) => o.localStorage.length)) {
+      // Seed localStorage once per tab, so later app changes (e.g. logout) stick.
+      await context.addInitScript((origins: UiSessionState['origins']) => {
+        try {
+          if (sessionStorage.getItem('__katalyst_xspec_session_restored')) return;
+          for (const o of origins) {
+            if (o.origin !== location.origin) continue;
+            for (const { name, value } of o.localStorage) localStorage.setItem(name, value);
+          }
+          sessionStorage.setItem('__katalyst_xspec_session_restored', '1');
+        } catch {
+          /* storage unavailable (e.g. about:blank) */
+        }
+      }, state.origins);
     }
   }
 

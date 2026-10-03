@@ -18,3 +18,7 @@ export * from './config';
 export * from './workers';
 export * from './paths';
 export * from './network';
+export * from './targets';
+export * from './auth/credentials';
+export { buildApiLoginRequest, extractToken, type ApiLoginRequest } from './auth/api-login';
+export { apiLoginAsRole, uiLoginAsRole } from './auth/login-steps';

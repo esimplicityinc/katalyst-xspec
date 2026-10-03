@@ -42,4 +42,28 @@ export interface UiPort {
     state: UiElementState,
     seconds: number,
   ): Promise<void>;
+
+  // ── Optional: used by UniversalAuthAdapter for UI login. Custom UiPort
+  //    implementations can omit them; login then falls back to fillPlaceholder
+  //    and skips the success check and session reuse. ─────────────────────────
+
+  /**
+   * Fill a field found by (in order) exact label, exact placeholder, label,
+   * placeholder, or name attribute. Resolves false if none appears in time.
+   */
+  fillField?(name: string, value: string, options?: { timeoutMs?: number }): Promise<boolean>;
+  /** Wait until the URL satisfies `predicate`; resolves false on timeout. */
+  waitForUrl?(predicate: (url: string) => boolean, timeoutMs: number): Promise<boolean>;
+  /** Wait until `text` is visible; resolves false on timeout. */
+  waitForText?(text: string, timeoutMs: number): Promise<boolean>;
+  /** Snapshot cookies + localStorage (Playwright storageState). */
+  saveSession?(): Promise<UiSessionState>;
+  /** Apply a snapshot from saveSession() to the current browser context. */
+  restoreSession?(state: UiSessionState): Promise<void>;
 }
+
+/** Opaque browser session snapshot (Playwright `storageState()` shape). */
+export type UiSessionState = {
+  cookies: Array<Record<string, unknown>>;
+  origins: Array<{ origin: string; localStorage: Array<{ name: string; value: string }> }>;
+};

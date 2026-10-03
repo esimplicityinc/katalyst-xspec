@@ -63,7 +63,7 @@ npx katalyst-xspec upgrade --migrate
 2. **Merges configurations (preserving your customizations):**
    - `package.json` - Updates dependencies, keeps your custom scripts
    - `steps.ts` - Adds new step registrations, preserves your custom imports
-   - `fixtures.ts` - Updates template, preserves your cleanup rules
+   - `fixtures.ts` - Kept as is (it holds your adapter wiring); the current template is saved next to the backup as `fixtures.ts.template` so you can compare
    - `playwright.config.*` - Removes old `@api`/`@ui`/`@hybrid`/`@tui` project tag filters (0.7.0+)
 
 3. **Leaves untouched:**
@@ -93,7 +93,7 @@ $ npx katalyst-xspec upgrade --migrate --dry-run
 [katalyst-xspec upgrade] Phase 3: Merging configurations...
   package.json: merged (preserving custom scripts/dependencies)
   steps.ts: merged (2 custom imports preserved)
-  fixtures.ts: merged (cleanup rules preserved)
+  fixtures.ts: kept (template saved as /tmp/katalyst-xspec-backup-1234567890/steps/fixtures.ts.template)
 
 [katalyst-xspec upgrade] Phase 4: Writing updated files...
   Updated 3 files
@@ -211,7 +211,53 @@ Specify a custom backup directory:
 npx katalyst-xspec upgrade --migrate --backup-dir ./backups/pre-migration
 ```
 
+## Upgrading to 0.8
+
+0.8 adds role-based login and makes `API_BASE_URL` optional. Your existing `.env` keeps working; one behavior change may surface misconfiguration that was hidden before.
+
+**Breaking: missing credentials now fail.** Before 0.8, a login step with no credentials set printed a warning and continued logged out. Now it fails with a message naming the variables to set, e.g. `No username for role "admin". Set AUTH_ADMIN_USERNAME in .env (DEFAULT_ADMIN_USERNAME or DEFAULT_ADMIN_EMAIL also work)…`. A UI login that stays on the login page also fails now. If scenarios start failing after the upgrade, set the credentials they need.
+
+**Optional: rename credential variables.** `DEFAULT_ADMIN_*`, `DEFAULT_USER_*` and `NON_ADMIN_*` still work. The new names are `AUTH_<ROLE>_USERNAME` / `AUTH_<ROLE>_PASSWORD` for any role:
+
+| Before | After |
+|--------|-------|
+| `DEFAULT_ADMIN_USERNAME` / `DEFAULT_ADMIN_EMAIL` | `AUTH_ADMIN_USERNAME` |
+| `DEFAULT_ADMIN_PASSWORD` | `AUTH_ADMIN_PASSWORD` |
+| `DEFAULT_USER_USERNAME` / `NON_ADMIN_USERNAME` | `AUTH_USER_USERNAME` |
+| `DEFAULT_USER_PASSWORD` / `NON_ADMIN_PASSWORD` | `AUTH_USER_PASSWORD` |
+
+**`API_BASE_URL` falls back to `FRONTEND_URL`.** When no API URL is set, API requests now go to the frontend URL in every project, not `http://localhost:3000`. Scenarios in `features/ui/` that mix API and UI steps now reach the app. If you relied on the old default, set `API_BASE_URL=http://localhost:3000`. Each run prints `katalyst-xspec targets: UI … | API …` so you can check.
+
+**Custom steps that log in through the UI need `ui`.** The `auth` fixture no longer starts a browser. A custom step calling `auth.uiLoginAsAdmin(world)` or `auth.uiLoginAs(world, role)` must list `ui` in its fixtures: `async ({ auth, ui, world }) => …`. Otherwise it fails with `UI login needs the browser`.
+
+**New steps** (old ones still work):
+
+```gherkin
+Given I am authenticated as "pm" via API
+Given I am logged in as "pm"
+When I log in as "pm" in UI
+```
+
+Also new: `API_AUTH_BODY`, `API_AUTH_USERNAME_FIELD`, `API_AUTH_PASSWORD_FIELD`, `API_AUTH_TOKEN_PATH`, cookie-session API login, UI fields matched by label/placeholder/`name`, `UI_LOGIN_SUCCESS_URL` / `UI_LOGIN_SUCCESS_TEXT`, and UI session reuse. Custom `AuthPort`s keep compiling; implement the optional `apiLoginAs` / `uiLoginAs` to support any role. See the [Authentication guide](./authentication.md).
+
+Newly scaffolded projects get a `.env.example` with "Where to test" / "Who logs in" / login settings sections, and a `playwright.config.ts` that prints the targets. To do the same in an existing project (optional), set `use.baseURL` from `resolveTargets()`:
+
+```typescript
+import { resolveTargets, logTargets } from '@esimplicitylabs/katalyst-xspec';
+
+const targets = logTargets(resolveTargets());
+// in defineConfig: use: { baseURL: targets.frontendUrl, ... }
+```
+
 ## Version History
+
+### 0.8.0
+
+- Role-based login: `AUTH_<ROLE>_*` credentials, new role steps, configurable API and UI login, UI session reuse.
+- Missing or wrong credentials fail the step with a message naming what to fix.
+- `API_BASE_URL` is optional and falls back to `FRONTEND_URL`; `resolveTargets()` / `logTargets()` print the targets.
+
+See [Upgrading to 0.8](#upgrading-to-08).
 
 ### 0.7.0
 

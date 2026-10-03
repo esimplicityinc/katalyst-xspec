@@ -1,6 +1,7 @@
 import { createBdd } from 'playwright-bdd';
 import { expect } from '@playwright/test';
 import { interpolate } from '../utils';
+import { uiLoginAsRole } from '../auth/login-steps';
 import { expectElementAttribute, setFileInputContent } from '../helpers/ui-element';
 
 export function registerUiBasicSteps(test: any): void {
@@ -36,12 +37,27 @@ export function registerUiBasicSteps(test: any): void {
     await ui.fillLabel(interpolate(label, world.vars), interpolate(value, world.vars));
   });
 
-  When('I log in as admin in UI', async ({ auth, world }: any) => {
-    await auth.uiLoginAsAdmin(world);
+  // Logs in through the form once per role, then reuses the saved session
+  // (cookies + localStorage) in later scenarios. UI_SESSION_REUSE=false disables.
+  Given('I am logged in as {string}', async ({ auth, ui, world }: any, role: string) => {
+    void ui; // binds the browser for the auth adapter
+    await uiLoginAsRole(auth, world, role, { reuseSession: true });
   });
 
-  When('I log in as user in UI', async ({ auth, world }: any) => {
-    await auth.uiLoginAsUser(world);
+  // Always submits the login form (use when testing the login itself).
+  When('I log in as {string} in UI', async ({ auth, ui, world }: any, role: string) => {
+    void ui;
+    await uiLoginAsRole(auth, world, role);
+  });
+
+  When('I log in as admin in UI', async ({ auth, ui, world }: any) => {
+    void ui;
+    await uiLoginAsRole(auth, world, 'admin');
+  });
+
+  When('I log in as user in UI', async ({ auth, ui, world }: any) => {
+    void ui;
+    await uiLoginAsRole(auth, world, 'user');
   });
 
   // Element interaction by CSS selector

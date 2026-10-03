@@ -16,7 +16,7 @@ Hybrid tests are scenarios that mix API and UI steps. No tag is needed — every
 ```gherkin
 Scenario: Create user via API, verify in admin panel
   # API: Create test data
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   Given I generate a UUID and store as "testId"
   When I POST "/admin/users" with JSON body:
     """
@@ -40,7 +40,7 @@ Scenario: Create user via API, verify in admin panel
 ```gherkin
 Scenario: Test order workflow with pre-created product
   # API: Create product
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   Given I generate a UUID and store as "productId"
   When I POST "/admin/products" with JSON body:
     """
@@ -67,7 +67,7 @@ Scenario: Test order workflow with pre-created product
 ```gherkin
 Scenario: API update reflects in UI
   # API: Create and update
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   When I POST "/users" with JSON body:
     """
     { "name": "Original Name" }
@@ -95,7 +95,7 @@ Scenario: API update reflects in UI
 ```gherkin
 Scenario: Use API-created ID in UI navigation
   # API: Create resource
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   When I POST "/projects" with JSON body:
     """
     { "name": "Test Project" }
@@ -120,7 +120,7 @@ Scenario: Verify API data in UI
   Given I set variable "testName" to "Hybrid User {runId}"
   
   # API: Create with variables
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   When I POST "/users" with JSON body:
     """
     {
@@ -140,12 +140,29 @@ Scenario: Verify API data in UI
 
 ## Authentication Patterns
 
+### Same Role in API and UI
+
+```gherkin
+Scenario: PM creates via API, sees it in UI
+  Given I am authenticated as "pm" via API
+  When I POST "/api/projects" with JSON body:
+    """
+    { "name": "Apollo" }
+    """
+  Then the response status should be 201
+  Given I am logged in as "pm"
+  Given I navigate to "/projects"
+  Then I should see text "Apollo"
+```
+
+Both steps read `AUTH_PM_USERNAME` / `AUTH_PM_PASSWORD`. Relative API paths go to `API_BASE_URL`, or to `FRONTEND_URL` when it isn't set, so a same-origin app needs only `FRONTEND_URL`.
+
 ### Separate API and UI Auth
 
 ```gherkin
 Scenario: Different auth for API vs UI
   # API: Admin creates data
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   When I POST "/admin/announcements" with JSON body:
     """
     { "message": "Test announcement", "audience": "all" }
@@ -185,7 +202,7 @@ Scenario: Get token from API, use in UI
 ```gherkin
 Scenario: Complete order processing workflow
   # API: Setup - Create customer and product
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   Given I generate a UUID and store as "runId"
   
   When I POST "/customers" with JSON body:
@@ -221,7 +238,7 @@ Scenario: Complete order processing workflow
 
 ```gherkin
 Scenario: Real-time sync between API and UI
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   Given I generate a UUID and store as "runId"
   
   # API: Create initial data
@@ -258,7 +275,7 @@ Scenario: Real-time sync between API and UI
 Feature: User Settings
   
   Background:
-    Given I am authenticated as an admin via API
+    Given I am authenticated as "admin" via API
     Given I generate a UUID and store as "testId"
     
     # Create fresh user for each test
@@ -292,7 +309,7 @@ Feature: User Settings
 
 ```gherkin
 Scenario: Dashboard with multiple data types
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   Given I generate a UUID and store as "runId"
   
   # Create multiple related resources
@@ -330,7 +347,7 @@ Scenario: Dashboard with multiple data types
 ```gherkin
 Scenario: UI shows error when API resource deleted
   # API: Create and immediately delete
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   When I POST "/items" with JSON body:
     """
     { "name": "Temporary Item" }
@@ -360,7 +377,7 @@ Feature: User Onboarding
     Given I set variable "userName" to "New User {testId}"
     
     # Step 1: Admin creates user invitation via API
-    Given I am authenticated as an admin via API
+    Given I am authenticated as "admin" via API
     When I POST "/admin/invitations" with JSON body:
       """
       {
@@ -386,7 +403,7 @@ Feature: User Onboarding
     And the URL should contain "/dashboard"
     
     # Step 3: Verify user created via API
-    Given I am authenticated as an admin via API
+    Given I am authenticated as "admin" via API
     When I GET "/admin/users?email={userEmail}"
     Then the response status should be 200
     And the value at "[0].name" should equal "{userName}"

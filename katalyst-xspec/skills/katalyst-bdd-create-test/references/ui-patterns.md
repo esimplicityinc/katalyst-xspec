@@ -35,6 +35,17 @@ Scenario: Go back to previous page
 
 ## Login Patterns
 
+### Log in as a Role (real login form, session reused)
+
+```gherkin
+Scenario: Project manager dashboard
+  Given I am logged in as "pm"
+  Given I navigate to "/dashboard"
+  Then I should see text "Projects"
+```
+
+Uses `AUTH_PM_USERNAME` / `AUTH_PM_PASSWORD` and the `UI_LOGIN_*` settings. Use `When I log in as "pm" in UI` when testing the login itself (always submits the form).
+
 ### Simple Login Form
 
 ```gherkin

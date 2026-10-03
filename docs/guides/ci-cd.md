@@ -41,9 +41,10 @@ jobs:
       - name: Run tests
         run: npm test
         env:
-          API_BASE_URL: ${{ secrets.API_BASE_URL }}
-          DEFAULT_ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
-          DEFAULT_ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          FRONTEND_URL: ${{ vars.FRONTEND_URL }}
+          API_BASE_URL: ${{ vars.API_BASE_URL }}   # optional: defaults to FRONTEND_URL
+          AUTH_ADMIN_USERNAME: ${{ secrets.AUTH_ADMIN_USERNAME }}
+          AUTH_ADMIN_PASSWORD: ${{ secrets.AUTH_ADMIN_PASSWORD }}
       
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -463,14 +464,14 @@ export default defineConfig({
 
 ```bash
 # CI environment variables
-API_BASE_URL=https://api.staging.example.com
 FRONTEND_URL=https://staging.example.com
+API_BASE_URL=https://api.staging.example.com   # omit if the API is on the same origin
 
-DEFAULT_ADMIN_USERNAME=admin@test.com
-DEFAULT_ADMIN_PASSWORD=TestAdmin123
-
-DEFAULT_USER_USERNAME=user@test.com
-DEFAULT_USER_PASSWORD=TestUser123
+# One pair per role used in features: AUTH_<ROLE>_USERNAME / AUTH_<ROLE>_PASSWORD
+AUTH_ADMIN_USERNAME=admin@test.com
+AUTH_ADMIN_PASSWORD=TestAdmin123
+AUTH_PM_USERNAME=pm@test.com
+AUTH_PM_PASSWORD=TestPm123
 
 # CI-specific
 CI=true
@@ -487,12 +488,15 @@ HEADLESS=true
 # GitHub Actions - use secrets
 env:
   API_BASE_URL: ${{ secrets.API_BASE_URL }}
-  DEFAULT_ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+  AUTH_ADMIN_USERNAME: ${{ secrets.AUTH_ADMIN_USERNAME }}
+  AUTH_ADMIN_PASSWORD: ${{ secrets.AUTH_ADMIN_PASSWORD }}
 
 # GitLab CI - use CI/CD variables
 variables:
   API_BASE_URL: $API_BASE_URL  # Defined in GitLab settings
 ```
+
+Store each role's credentials as `AUTH_<ROLE>_USERNAME` / `AUTH_<ROLE>_PASSWORD` secrets and expose them as environment variables of the same name. If one is missing, the login step fails with a message naming it. The `katalyst-xspec targets: UI … | API …` line at the start of the log shows which URLs the run used. See the [Authentication guide](./authentication.md).
 
 ## Parallel Execution
 
@@ -563,7 +567,7 @@ npx playwright show-trace trace.zip
 
 ```bash
 # Don't use production credentials
-DEFAULT_ADMIN_USERNAME=ci-admin@test.com
+AUTH_ADMIN_USERNAME=ci-admin@test.com
 ```
 
 ### 2. Clean Test Data

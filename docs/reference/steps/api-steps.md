@@ -19,19 +19,44 @@ This registers:
 
 ## Authentication Steps
 
-### Given I am authenticated as an admin via API
+### Given I am authenticated as {string} via API
 
-Authenticates as admin user, setting bearer token in headers.
+Logs in to the API as a named role. Later API steps in the scenario send the token (or session cookie).
+
+See the [Authentication guide](../../guides/authentication.md) for all settings.
+
+**Parameters:**
+| Name | Type | Description |
+|------|------|-------------|
+| role | string | Any role name, e.g. `admin`, `pm`. Supports `{var}` interpolation. |
 
 **Behavior:**
-1. POSTs credentials to login endpoint
-2. Extracts `access_token` from response
-3. Sets `Authorization: Bearer <token>` in world.headers
+1. Reads `AUTH_<ROLE>_USERNAME` / `AUTH_<ROLE>_PASSWORD` (or `roles` passed to `UniversalAuthAdapter`)
+2. POSTs them to `API_AUTH_LOGIN_PATH` (default `/auth/login`) as a form, or JSON with `API_AUTH_BODY=json`
+3. Reads the token from the response (`API_AUTH_TOKEN_PATH`, default `access_token`, `token`, ...) and sets `Authorization: Bearer <token>` in `world.headers`. If there's no token but a cookie was set, the cookie session is used.
+
+If credentials are missing, the step fails with a message naming the variables to set. A failed login fails with the status, the response, and the settings to check.
 
 **Environment Variables:**
-- `DEFAULT_ADMIN_USERNAME` / `DEFAULT_ADMIN_EMAIL`
-- `DEFAULT_ADMIN_PASSWORD`
-- `API_AUTH_LOGIN_PATH`
+- `AUTH_<ROLE>_USERNAME` / `AUTH_<ROLE>_PASSWORD`
+- `API_AUTH_LOGIN_PATH`, `API_AUTH_BODY`, `API_AUTH_USERNAME_FIELD`, `API_AUTH_PASSWORD_FIELD`, `API_AUTH_TOKEN_PATH`
+
+**Example:**
+```gherkin
+Scenario: Project manager lists projects
+  Given I am authenticated as "pm" via API
+  When I GET "/projects"
+  Then the response status should be 200
+```
+
+---
+
+### Given I am authenticated as an admin via API
+
+Shorthand for `Given I am authenticated as "admin" via API`.
+
+**Environment Variables:**
+- `AUTH_ADMIN_USERNAME` / `AUTH_ADMIN_PASSWORD` (older `DEFAULT_ADMIN_USERNAME` / `DEFAULT_ADMIN_EMAIL` / `DEFAULT_ADMIN_PASSWORD` also work)
 
 **Example:**
 ```gherkin
@@ -45,12 +70,10 @@ Scenario: Admin operation
 
 ### Given I am authenticated as a user via API
 
-Authenticates as standard user.
+Shorthand for `Given I am authenticated as "user" via API`.
 
 **Environment Variables:**
-- `DEFAULT_USER_USERNAME` / `NON_ADMIN_USERNAME`
-- `DEFAULT_USER_PASSWORD` / `NON_ADMIN_PASSWORD`
-- `API_AUTH_LOGIN_PATH`
+- `AUTH_USER_USERNAME` / `AUTH_USER_PASSWORD` (older `DEFAULT_USER_*` / `NON_ADMIN_*` also work)
 
 **Example:**
 ```gherkin
@@ -293,7 +316,7 @@ Then I store the value at "items[0].id" as "firstItemId"
 Feature: User API
 
   Background:
-    Given I am authenticated as an admin via API
+    Given I am authenticated as "admin" via API
 
   Scenario: Complete CRUD flow
     # Generate unique email

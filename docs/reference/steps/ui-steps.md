@@ -362,9 +362,52 @@ Then I "press" "Tab"
 
 ## Authentication Steps
 
+These log in through your app's login form. See the [Authentication guide](../../guides/authentication.md) for the `UI_*` settings. If credentials are missing, the step fails with a message naming the variables to set; if the page is still on the login page afterwards, the step fails too.
+
+### Given I am logged in as {string}
+
+Logs in through the UI as a named role, reusing the session. The form is submitted the first time a worker needs the role; the cookies and localStorage are saved and restored in later scenarios. `UI_SESSION_REUSE=false` makes it submit the form every time.
+
+**Parameters:**
+| Name | Type | Description |
+|------|------|-------------|
+| role | string | Any role name. Reads `AUTH_<ROLE>_USERNAME` / `AUTH_<ROLE>_PASSWORD`. |
+
+**Environment Variables:**
+- `AUTH_<ROLE>_USERNAME` / `AUTH_<ROLE>_PASSWORD`
+- `UI_LOGIN_PATH`, `UI_USERNAME_FIELD`, `UI_PASSWORD_FIELD`, `UI_LOGIN_BUTTON`, `UI_LOGIN_SUCCESS_URL`, `UI_LOGIN_SUCCESS_TEXT`, `UI_LOGIN_TIMEOUT`, `UI_SESSION_REUSE`
+
+`UI_USERNAME_FIELD` / `UI_PASSWORD_FIELD` match the field's label, placeholder, or `name` attribute.
+
+**Example:**
+```gherkin
+Scenario: Project manager sees the dashboard
+  Given I am logged in as "pm"
+  When I navigate to "/dashboard"
+  Then I should see text "Projects"
+```
+
+---
+
+### When I log in as {string} in UI
+
+Logs in through the UI as a named role. Always submits the form (no session reuse); use it when the login itself is under test.
+
+**Parameters:**
+| Name | Type | Description |
+|------|------|-------------|
+| role | string | Any role name |
+
+**Example:**
+```gherkin
+When I log in as "pm" in UI
+```
+
+---
+
 ### When I log in as admin in UI
 
-Performs admin login through UI.
+Shorthand for `When I log in as "admin" in UI` (reads `AUTH_ADMIN_*`; older `DEFAULT_ADMIN_*` also work).
 
 **Example:**
 ```gherkin
@@ -375,7 +418,7 @@ When I log in as admin in UI
 
 ### When I log in as user in UI
 
-Performs user login through UI.
+Shorthand for `When I log in as "user" in UI` (reads `AUTH_USER_*`; older `DEFAULT_USER_*` / `NON_ADMIN_*` also work).
 
 **Example:**
 ```gherkin

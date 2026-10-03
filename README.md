@@ -25,6 +25,18 @@ npx playwright install chromium   # one-time browser download for UI tests
 npm test                          # the scaffolded examples pass with no .env
 ```
 
+### Log in by role
+
+Put credentials per role in `.env` (`AUTH_<ROLE>_USERNAME` / `AUTH_<ROLE>_PASSWORD`, e.g. `AUTH_PM_*`) and use the role name in features:
+
+```gherkin
+Given I am authenticated as "pm" via API   # API calls carry the token or session
+Given I am logged in as "pm"               # browser logged in, session reused
+When I log in as "pm" in UI                # always submits the login form
+```
+
+Login paths and field names are configurable; see the [Authentication guide](./docs/guides/authentication.md).
+
 ## Documentation
 
 Full documentation is available in the [`docs/`](./docs/) folder:
@@ -32,6 +44,7 @@ Full documentation is available in the [`docs/`](./docs/) folder:
 - **[Getting Started](./docs/getting-started/)** - Installation, quick start, project setup
 - **[Concepts](./docs/concepts/)** - Architecture, world state, test lifecycle, tags
 - **[Guides](./docs/guides/)** - API, UI, TUI, and hybrid testing guides
+- **[Authentication](./docs/guides/authentication.md)** - Log in by role through the API or UI
 - **[Agent Skills](./docs/guides/agent-skills.md)** - AI-assisted development with OpenCode, Claude Code, Cursor
 - **[Reference](./docs/reference/)** - API reference for ports, adapters, fixtures, and steps
 - **[Contributing](./docs/contributing/)** - How to contribute to the project

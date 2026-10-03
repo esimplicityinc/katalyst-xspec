@@ -3,6 +3,8 @@ import { expect } from '@playwright/test';
 import type { APIRequestContext, Page, PlaywrightTestArgs, PlaywrightWorkerArgs } from '@playwright/test';
 import { initWorld, type World } from './world';
 import { resolveApiRequestTarget } from './network';
+import { resolveApiBaseUrl } from './targets';
+import { buildApiLoginRequest, extractToken } from './auth/api-login';
 import type { ApiPort } from './ports/api.port';
 import type { UiPort } from './ports/ui.port';
 import type { AuthPort } from './ports/auth.port';
@@ -25,10 +27,8 @@ export type CleanupAuthProvider = (request: APIRequestContext) => Promise<Record
 /**
  * Default cleanup auth: attempts a form-based login to the API.
  *
- * Reads credentials from env vars:
- * - DEFAULT_ADMIN_USERNAME / DEFAULT_ADMIN_EMAIL
- * - DEFAULT_ADMIN_PASSWORD
- * - API_AUTH_LOGIN_PATH (default: '/auth/login')
+ * Uses the "admin" role credentials (AUTH_ADMIN_USERNAME / AUTH_ADMIN_PASSWORD,
+ * or DEFAULT_ADMIN_*) and the same API_AUTH_* settings as the API login steps.
  *
  * If a static CLEANUP_AUTH_TOKEN is set, uses that directly (no login needed).
  * If credentials are not configured, returns empty headers (cleanup runs unauthenticated).
@@ -46,19 +46,20 @@ async function defaultGetAdminHeaders(request: APIRequestContext): Promise<Recor
     return { Authorization: `Bearer ${staticToken}` };
   }
 
-  const username = process.env.DEFAULT_ADMIN_USERNAME || process.env.DEFAULT_ADMIN_EMAIL;
-  const password = process.env.DEFAULT_ADMIN_PASSWORD;
+  const username =
+    process.env.AUTH_ADMIN_USERNAME || process.env.DEFAULT_ADMIN_USERNAME || process.env.DEFAULT_ADMIN_EMAIL;
+  const password = process.env.AUTH_ADMIN_PASSWORD || process.env.DEFAULT_ADMIN_PASSWORD;
 
   if (!username || !password) {
-    // No credentials configured -- skip auth silently
+    // No credentials configured -- cleanup runs unauthenticated.
     return {};
   }
 
-  const loginPath = process.env.API_AUTH_LOGIN_PATH || '/auth/login';
-  const body = new URLSearchParams({ username, password }).toString();
-  const resp = await request.post(loginPath, {
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' },
-    data: body,
+  // Same settings as the API login steps (API_AUTH_LOGIN_PATH, API_AUTH_BODY, ...).
+  const req = buildApiLoginRequest({ username, password });
+  const resp = await request.post(req.path, {
+    headers: { Accept: 'application/json' },
+    ...(req.body === 'json' ? { data: req.fields } : { form: req.fields }),
   });
 
   if (!resp.ok()) {
@@ -67,14 +68,17 @@ async function defaultGetAdminHeaders(request: APIRequestContext): Promise<Recor
     return {};
   }
 
-  const json = (await resp.json()) as any;
-  const token = json?.access_token;
-  if (typeof token === 'string' && token) {
+  const json = await resp.json().catch(() => undefined);
+  const token = extractToken(json);
+  if (token) {
     cachedAdminToken = token;
     return { Authorization: `Bearer ${token}` };
   }
 
-  console.warn('cleanup auth: no access_token in response');
+  // Cookie session: the request context now carries it.
+  if (resp.headers()['set-cookie']) return {};
+
+  console.warn('cleanup auth: no token in login response (set API_AUTH_TOKEN_PATH)');
   cachedAdminToken = undefined;
   return {};
 }
@@ -90,6 +94,10 @@ export type TuiFactory = () => TuiPort | undefined;
 export type CreateBddTestOptions = {
   createApi?: (ctx: CreateContext) => ApiPort;
   createUi?: (ctx: CreateContext) => UiPort;
+  /**
+   * Build the auth adapter. `ui` is available to UI login methods once a step
+   * requests the `ui` fixture; API login never starts a browser.
+   */
   createAuth?: (ctx: CreateContext & { api: ApiPort; ui: UiPort }) => AuthPort;
   createCleanup?: (ctx: CreateContext) => CleanupPort;
   /**
@@ -123,6 +131,30 @@ export type CreateBddTestOptions = {
   worldFactory?: () => World;
 };
 
+/**
+ * A UiPort that forwards to the scenario's real UI adapter once a step has
+ * requested the `ui` fixture. Used so `auth` doesn't force a browser to start.
+ */
+function lazyUi(binding: { current?: UiPort }): UiPort {
+  return new Proxy({} as UiPort, {
+    get(_target, prop) {
+      const ui = binding.current as any;
+      if (!ui) {
+        if (prop === 'then') return undefined; // not a thenable
+        throw new Error(
+          'UI login needs the browser: add `ui` to the step\'s fixtures, e.g. ' +
+            "When('...', async ({ auth, ui, world }) => auth.uiLoginAs(world, 'admin')).",
+        );
+      }
+      const value = ui[prop];
+      return typeof value === 'function' ? value.bind(ui) : value;
+    },
+    has(_target, prop) {
+      return binding.current ? prop in (binding.current as object) : false;
+    },
+  });
+}
+
 export function createBddTest(options: CreateBddTestOptions = {}) {
   const {
     createApi = ({ apiRequest }) => new PlaywrightApiAdapter(apiRequest),
@@ -142,7 +174,14 @@ export function createBddTest(options: CreateBddTestOptions = {}) {
     cleanup: CleanupPort;
     tui: TuiPort | undefined;
     apiRequest: APIRequestContext;
+    uiBinding: { current?: UiPort };
   }>({
+    // Lets `auth` reach the UI adapter without depending on `page`, so API-only
+    // scenarios that log in never start a browser.
+    uiBinding: async ({}, use) => {
+      await use({});
+    },
+
     world: async ({ apiRequest }, use) => {
       const w = worldFactory();
       await use(w);
@@ -179,15 +218,10 @@ export function createBddTest(options: CreateBddTestOptions = {}) {
     },
 
     apiRequest: async ({ playwright }, use, testInfo) => {
-      const projectName = String(testInfo.project.name || '');
-      const baseURLFromProject = testInfo.project.use?.baseURL as string | undefined;
-
-      const baseURL =
-        process.env.API_BASE_URL ||
-        process.env.TARGET_BASE_URL ||
-        (projectName.includes('api') ? baseURLFromProject : undefined) ||
-        (process.env.TARGET_PORT ? `http://localhost:${process.env.TARGET_PORT}` : undefined) ||
-        'http://localhost:3000';
+      const baseURL = resolveApiBaseUrl({
+        projectName: String(testInfo.project.name || ''),
+        projectBaseURL: testInfo.project.use?.baseURL as string | undefined,
+      });
 
       // Forces IPv4 for http *.localhost targets (kind ingress); see network.ts.
       const ctx = await playwright.request.newContext(resolveApiRequestTarget(baseURL));
@@ -206,12 +240,14 @@ export function createBddTest(options: CreateBddTestOptions = {}) {
       await use(createCleanup({ apiRequest } as CreateContext));
     },
 
-    ui: async ({ page }, use) => {
-      await use(createUi({ page } as CreateContext));
+    ui: async ({ page, uiBinding }, use) => {
+      const ui = createUi({ page } as CreateContext);
+      uiBinding.current = ui;
+      await use(ui);
     },
 
-    auth: async ({ api, ui }, use) => {
-      await use(createAuth({ api, ui } as CreateContext & { api: ApiPort; ui: UiPort }));
+    auth: async ({ api, apiRequest, uiBinding }, use) => {
+      await use(createAuth({ api, apiRequest, ui: lazyUi(uiBinding) } as CreateContext & { api: ApiPort; ui: UiPort }));
     },
 
     /**

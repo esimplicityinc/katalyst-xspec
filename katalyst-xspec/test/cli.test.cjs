@@ -91,6 +91,24 @@ describe('katalyst-xspec init', () => {
     }
   });
 
+  it('config resolves and logs targets; .env.example documents URLs and role-based auth', () => {
+    const { cwd, r } = scaffold('t');
+    try {
+      assert.equal(r.status, 0, r.stderr);
+      const config = read(cwd, 't', 'playwright.config.ts');
+      assert.match(config, /const targets = logTargets\(resolveTargets\(\)\)/);
+      assert.match(config, /baseURL: targets\.frontendUrl/);
+      const env = read(cwd, 't', '.env.example');
+      for (const key of ['FRONTEND_URL', 'API_BASE_URL', 'AUTH_ADMIN_USERNAME', 'AUTH_ADMIN_PASSWORD', 'API_AUTH_BODY', 'API_AUTH_TOKEN_PATH', 'UI_LOGIN_PATH', 'UI_SESSION_REUSE']) {
+        assert.match(env, new RegExp(key), key);
+      }
+      assert.doesNotMatch(env, /DEFAULT_ADMIN_/);
+      assert.match(read(cwd, 't', 'features/steps/fixtures.ts'), /roles:/);
+    } finally {
+      fs.rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it('example features target public sites, so a fresh project passes without a .env', () => {
     const { cwd, r } = scaffold('t');
     try {
@@ -123,6 +141,26 @@ describe('katalyst-xspec upgrade --migrate', () => {
       assert.equal(r.status, 0, r.stdout + r.stderr);
       assert.doesNotMatch(fs.readFileSync(cfg, 'utf8'), /tags: '@ui'/);
       assert.ok(fs.existsSync(path.join(backupDir, 'steps', 'steps.ts.original')));
+    } finally {
+      fs.rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('katalyst-xspec upgrade --migrate keeps customised fixtures', () => {
+  const fs = require('node:fs');
+  const os = require('node:os');
+  it('does not overwrite a fixtures.ts that wires a custom auth adapter', () => {
+    const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'kx-migrate-fx-'));
+    try {
+      assert.equal(spawnSync(process.execPath, [BIN, 'init', '.', '--no-skills'], { cwd, encoding: 'utf8' }).status, 0);
+      const fx = path.join(cwd, 'features', 'steps', 'fixtures.ts');
+      const custom = fs.readFileSync(fx, 'utf8').replace('new UniversalAuthAdapter({ api, ui, roles: {} })', 'new MyAuth({ api, ui })');
+      fs.writeFileSync(fx, custom);
+      const r = spawnSync(process.execPath, [BIN, 'upgrade', '--migrate', '--backup-dir', path.join(cwd, '.bk')], { cwd, encoding: 'utf8' });
+      assert.equal(r.status, 0, r.stdout + r.stderr);
+      assert.equal(fs.readFileSync(fx, 'utf8'), custom);
+      assert.match(r.stdout, /fixtures\.ts: kept/);
     } finally {
       fs.rmSync(cwd, { recursive: true, force: true });
     }

@@ -68,7 +68,7 @@ Feature: [Resource] API
 
 ```gherkin
 Background:
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
 ```
 
 ### Step 3: Write Scenarios
@@ -164,7 +164,17 @@ Scenario: Submit [form name]
   Then I should see text "Success"
 ```
 
-**Pattern: Login Flow**
+**Pattern: Log in as a role** (preferred when the login isn't what you're testing)
+```gherkin
+Scenario: Project manager sees projects
+  Given I am logged in as "pm"
+  When I navigate to "/projects"
+  Then I should see text "Projects"
+```
+
+`Given I am logged in as "<role>"` fills the app's login form with `AUTH_<ROLE>_USERNAME` / `AUTH_<ROLE>_PASSWORD` once per worker and reuses the session afterwards. Use `When I log in as "<role>" in UI` to always submit the form. For API calls use `Given I am authenticated as "<role>" via API`. Any role name works; tell the user which `AUTH_<ROLE>_*` variables to add to `.env`. Login paths and field names are configured with `API_AUTH_*` / `UI_*` (see docs/guides/authentication.md).
+
+**Pattern: Login Flow (testing the form itself)**
 ```gherkin
 Scenario: User login
   Given I navigate to "/login"
@@ -244,7 +254,7 @@ Feature: [Workflow Name]
 ```gherkin
 Scenario: [Workflow description]
   # --- API SETUP PHASE ---
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   [API steps to create test data]
   
   # --- UI VERIFICATION PHASE ---
@@ -256,7 +266,7 @@ Scenario: [Workflow description]
 ```gherkin
 Scenario: Create user via API, verify in admin panel
   # API: Create user
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   Given I generate a UUID and store as "testId"
   When I POST "/admin/users" with JSON body:
     """
@@ -306,7 +316,7 @@ Given I register cleanup DELETE "/users/{userId}"  # Important!
 
 ```gherkin
 Background:
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   Given I generate a UUID and store as "runId"
 
 Scenario: Test 1

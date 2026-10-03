@@ -40,8 +40,9 @@ When I GET "/users/{userId}"  # Becomes /users/123
 | `Then the response should be a JSON object` | Asserts response is an object |
 | `Then the value at {string} should equal {string}` | `Then the value at "name" should equal "John"` |
 | `And I store the value at {string} as {string}` | `And I store the value at "id" as "userId"` |
-| `Given I am authenticated as an admin via API` | Admin API authentication |
-| `Given I am authenticated as a user via API` | User API authentication |
+| `Given I am authenticated as {string} via API` | `Given I am authenticated as "pm" via API` (reads `AUTH_PM_*`) |
+| `Given I am authenticated as an admin via API` | Shorthand for role `"admin"` |
+| `Given I am authenticated as a user via API` | Shorthand for role `"user"` |
 | `Given I set header {string} to {string}` | `Given I set header "X-Custom" to "value"` |
 
 ### UI Steps
@@ -49,6 +50,8 @@ When I GET "/users/{userId}"  # Becomes /users/123
 | Step | Example |
 |------|---------|
 | `Given I navigate to {string}` | `Given I navigate to "/login"` |
+| `Given I am logged in as {string}` | `Given I am logged in as "pm"` (UI login, session reused) |
+| `When I log in as {string} in UI` | `When I log in as "pm" in UI` (always submits the form) |
 | `When I click the button {string}` | `When I click the button "Submit"` |
 | `When I click the link {string}` | `When I click the link "Sign Up"` |
 | `When I fill the field {string} with {string}` | `When I fill the field "Email" with "test@example.com"` |
@@ -106,7 +109,7 @@ For complete step definitions with all parameters and examples:
 
 ```gherkin
 Scenario: Create and fetch user
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   When I POST "/users" with JSON body:
     """
     { "email": "test@example.com", "name": "Test" }
@@ -132,7 +135,7 @@ Scenario: User login
 
 ```gherkin
 Scenario: Create via API, verify in UI
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   When I POST "/users" with JSON body:
     """
     { "email": "new@example.com" }

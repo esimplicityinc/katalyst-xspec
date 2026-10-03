@@ -18,8 +18,10 @@ All available steps at a glance. Steps are untagged: once registered, any step w
 | `Then the value at {string} should contain {string}` | Assert value contains |
 | `Then the value at {string} should match {string}` | Assert regex match |
 | `And I store the value at {string} as {string}` | Store response value |
-| `Given I am authenticated as an admin via API` | Admin auth |
-| `Given I am authenticated as a user via API` | User auth |
+| `Given I am authenticated as {string} via API` | Log in to the API as a role (`AUTH_<ROLE>_*`) |
+| `Given I am authenticated as an admin via API` | Shorthand for role `"admin"` |
+| `Given I am authenticated as a user via API` | Shorthand for role `"user"` |
+| `Given I set bearer token from variable {string}` | Use a stored token |
 | `Given I set header {string} to {string}` | Set request header |
 
 [Full API Steps Reference](./api-steps.md)
@@ -56,6 +58,17 @@ All available steps at a glance. Steps are untagged: once registered, any step w
 | `When I select {string} from dropdown {string}` | Select dropdown option |
 | `When I set the file input {string} to a file named {string} with content {string}` | Upload in-memory file |
 | `When I fill the form:` | Fill multiple fields |
+
+### Login
+
+| Step | Description |
+|------|-------------|
+| `Given I am logged in as {string}` | UI login as a role, session reused |
+| `When I log in as {string} in UI` | UI login as a role, always submits the form |
+| `When I log in as admin in UI` | Shorthand for role `"admin"` |
+| `When I log in as user in UI` | Shorthand for role `"user"` |
+
+See the [Authentication guide](../../guides/authentication.md).
 
 ### Assertions
 
@@ -137,7 +150,7 @@ Every registered step works in every scenario — no tags required. Playwright p
 
 ```gherkin
 Scenario: Create user
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   When I POST "/users" with JSON body:
     """
     { "email": "test@example.com", "name": "Test User" }
@@ -147,7 +160,16 @@ Scenario: Create user
   And the value at "email" should equal "test@example.com"
 ```
 
-### UI: Login flow
+### UI: Log in as a role
+
+```gherkin
+Scenario: Dashboard
+  Given I am logged in as "pm"
+  When I navigate to "/dashboard"
+  Then I should see text "Welcome"
+```
+
+### UI: Login form by hand
 
 ```gherkin
 Scenario: Login
@@ -163,7 +185,7 @@ Scenario: Login
 
 ```gherkin
 Scenario: Create via API, verify in UI
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   When I POST "/users" with JSON body:
     """
     { "email": "newuser@test.com" }

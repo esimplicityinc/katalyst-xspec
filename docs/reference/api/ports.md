@@ -168,6 +168,13 @@ interface UiPort {
   expectElementWithTextVisible(elementType: string, text: string, shouldBeVisible: boolean): Promise<void>;
   expectElementState(ordinal: string, text: string, method: UiLocatorMethod, state: UiElementState): Promise<void>;
   expectElementStateWithin(ordinal: string, text: string, method: UiLocatorMethod, state: UiElementState, seconds: number): Promise<void>;
+
+  // Optional: used by UniversalAuthAdapter for UI login
+  fillField?(name: string, value: string, options?: { timeoutMs?: number }): Promise<boolean>;
+  waitForUrl?(predicate: (url: string) => boolean, timeoutMs: number): Promise<boolean>;
+  waitForText?(text: string, timeoutMs: number): Promise<boolean>;
+  saveSession?(): Promise<UiSessionState>;
+  restoreSession?(state: UiSessionState): Promise<void>;
 }
 ```
 
@@ -179,6 +186,12 @@ type UiInputMode = 'type' | 'fill' | 'choose';
 type UiUrlAssertMode = 'contains' | 'doesntContain' | 'equals';
 type UiLocatorMethod = 'text' | 'label' | 'placeholder' | 'role' | 'test ID' | 'alternative text' | 'title' | 'locator';
 type UiElementState = 'visible' | 'hidden' | 'editable' | 'disabled' | 'enabled' | 'read-only';
+
+// Playwright storageState() shape
+type UiSessionState = {
+  cookies: Array<Record<string, unknown>>;
+  origins: Array<{ origin: string; localStorage: Array<{ name: string; value: string }> }>;
+};
 ```
 
 ### Key Methods
@@ -218,6 +231,18 @@ Asserts that text is visible on the page.
 await ui.expectText('Welcome');
 await ui.expectText('Login successful');
 ```
+
+### Optional login methods
+
+`UniversalAuthAdapter` uses these for UI login. `PlaywrightUiAdapter` implements all of them. A custom `UiPort` can leave them out: login then fills fields with `fillPlaceholder`, skips the "did login work" check, and doesn't reuse sessions.
+
+| Method | Description |
+|--------|-------------|
+| `fillField(name, value, { timeoutMs })` | Fill the field whose label, placeholder or `name` attribute matches. Resolves `false` if none appears in time. |
+| `waitForUrl(predicate, timeoutMs)` | Resolves `true` once the URL satisfies `predicate`, `false` on timeout |
+| `waitForText(text, timeoutMs)` | Resolves `true` once `text` is visible, `false` on timeout |
+| `saveSession()` | Snapshot cookies + localStorage |
+| `restoreSession(state)` | Apply a snapshot from `saveSession()` to the current browser context |
 
 ---
 
@@ -344,12 +369,12 @@ type TuiMouseEvent = {
 
 ## AuthPort
 
-Authentication operations interface.
+Authentication operations interface. See the [Authentication guide](../../guides/authentication.md).
 
 ### Import
 
 ```typescript
-import type { AuthPort } from '@esimplicitylabs/katalyst-xspec';
+import type { AuthPort, UiLoginOptions } from '@esimplicitylabs/katalyst-xspec';
 ```
 
 ### Interface
@@ -361,30 +386,41 @@ interface AuthPort {
   apiSetBearer(world: World, token: string): void;
   uiLoginAsAdmin(world: World): Promise<void>;
   uiLoginAsUser(world: World): Promise<void>;
+
+  // Optional (0.8+): log in as any named role
+  apiLoginAs?(world: World, role: string): Promise<void>;
+  uiLoginAs?(world: World, role: string, options?: UiLoginOptions): Promise<void>;
 }
+
+type UiLoginOptions = {
+  /** Submit the form once per role (per worker), then restore the saved session. */
+  reuseSession?: boolean;
+};
 ```
 
 ### Methods
 
-#### `apiLoginAsAdmin(world)`
+#### `apiLoginAs(world, role)`
 
-Authenticates as admin via API, setting bearer token in world.headers.
+Logs in to the API as `role`, setting the bearer token in `world.headers` (or keeping the session cookie). Used by `Given I am authenticated as "<role>" via API`.
 
-#### `apiLoginAsUser(world)`
+#### `uiLoginAs(world, role, options?)`
 
-Authenticates as standard user via API.
+Logs in through the UI as `role`. `Given I am logged in as "<role>"` passes `{ reuseSession: true }`; `When I log in as "<role>" in UI` passes nothing.
+
+The role methods are optional so adapters written before 0.8 keep compiling. If they're missing, the built-in steps fall back to the admin/user methods for the roles `"admin"` and `"user"`, and fail for any other role.
+
+#### `apiLoginAsAdmin(world)` / `apiLoginAsUser(world)`
+
+API login as the `admin` / `user` role.
 
 #### `apiSetBearer(world, token)`
 
 Manually sets a bearer token.
 
-#### `uiLoginAsAdmin(world)`
+#### `uiLoginAsAdmin(world)` / `uiLoginAsUser(world)`
 
-Performs admin login through the UI.
-
-#### `uiLoginAsUser(world)`
-
-Performs user login through the UI.
+UI login as the `admin` / `user` role.
 
 ---
 

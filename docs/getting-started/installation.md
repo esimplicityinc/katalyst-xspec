@@ -55,7 +55,7 @@ This creates a complete test package with:
 - Pre-configured Playwright setup (`api` and `ui` projects; `tui` commented out)
 - Two example features (`features/api/example.feature`, `features/ui/example.feature`) that pass with no `.env`
 - Step registration
-- Environment template
+- Environment template (`.env.example`: where to test, who logs in, login settings)
 - Utility scripts for upgrading and step generation
 
 The `package.json` name is taken from the target folder (npm-safe, e.g. `My Demo` becomes `my-demo`).
@@ -164,6 +164,8 @@ your-project/
 ```
 
 Each folder under `features/` is read by one Playwright project. Any step works in any scenario.
+
+To point it at your app, copy `.env.example` to `.env` and set `FRONTEND_URL` (plus `API_BASE_URL` only if the API is on another origin) and `AUTH_<ROLE>_USERNAME` / `AUTH_<ROLE>_PASSWORD` for each role you log in as. See [Quick Start](./quick-start.md#step-4-point-it-at-your-app) and the [Authentication guide](../guides/authentication.md).
 
 ## Included Scripts
 

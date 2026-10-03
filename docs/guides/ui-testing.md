@@ -266,15 +266,24 @@ Scenario: Test at different zoom levels
 
 ### UI Login
 
-```gherkin
-Scenario: Login via UI
-  When I log in as admin in UI
-  Then the URL should contain "/dashboard"
+Log in by role name. Credentials come from `AUTH_<ROLE>_USERNAME` / `AUTH_<ROLE>_PASSWORD`.
 
-Scenario: Login via UI as user
-  When I log in as user in UI
-  Then I should see text "Welcome"
+```gherkin
+Scenario: Dashboard for a project manager
+  Given I am logged in as "pm"
+  When I navigate to "/dashboard"
+  Then I should see text "Projects"
+
+Scenario: The login form works
+  When I log in as "admin" in UI
+  Then the URL should contain "/dashboard"
 ```
+
+- `Given I am logged in as "<role>"` submits the login form once per role per worker, then restores the saved cookies and localStorage in later scenarios. Set `UI_SESSION_REUSE=false` to log in every time.
+- `When I log in as "<role>" in UI` always submits the form. Use it when the login is what you're testing.
+- The step fails if credentials are missing (the message names the variables) or if the page is still on the login page afterwards.
+
+The older `When I log in as admin in UI` / `When I log in as user in UI` still work. See the [Authentication guide](./authentication.md) for all settings.
 
 ## Complete Examples
 
@@ -358,11 +367,17 @@ Scenario: Handle optional modal
 FRONTEND_URL=http://localhost:3000
 HEADLESS=true
 
+AUTH_ADMIN_USERNAME=admin@example.com
+AUTH_ADMIN_PASSWORD=changeme
+
 # UI login customization (optional -- these are the defaults)
 # UI_LOGIN_PATH=/login
-# UI_USERNAME_FIELD=Username
+# UI_USERNAME_FIELD=Username   # label, placeholder or name of the field
 # UI_PASSWORD_FIELD=Password
 # UI_LOGIN_BUTTON=Login
+# UI_LOGIN_SUCCESS_URL=/dashboard   # default: any page other than the login page
+# UI_LOGIN_SUCCESS_TEXT=Welcome     # if the URL doesn't change after login
+# UI_LOGIN_TIMEOUT=10000
 ```
 
 ## Best Practices

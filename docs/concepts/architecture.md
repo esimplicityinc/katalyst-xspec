@@ -176,10 +176,16 @@ Handles authentication across layers:
 interface AuthPort {
   apiLoginAsAdmin(world: World): Promise<void>;
   apiLoginAsUser(world: World): Promise<void>;
+  apiSetBearer(world: World, token: string): void;
   uiLoginAsAdmin(world: World): Promise<void>;
   uiLoginAsUser(world: World): Promise<void>;
+  // Optional: any named role
+  apiLoginAs?(world: World, role: string): Promise<void>;
+  uiLoginAs?(world: World, role: string, options?: { reuseSession?: boolean }): Promise<void>;
 }
 ```
+
+The default `UniversalAuthAdapter` logs in by role: credentials from `AUTH_<ROLE>_*` (or `roles` in code), API and UI login configured by `API_AUTH_*` / `UI_*` variables. It uses the `ApiPort` and `UiPort`, so API login never starts a browser. Extend it by subclassing and overriding `apiLogin` / `uiLogin`. See the [Authentication guide](../guides/authentication.md).
 
 ### CleanupPort
 

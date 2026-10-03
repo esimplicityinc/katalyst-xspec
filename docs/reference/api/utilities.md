@@ -447,6 +447,80 @@ resolveApiRequestTarget('https://app.localhost');   // unchanged (TLS needs the 
 
 Left alone: bare `localhost` (dev servers often listen on `::1` only), `https:` URLs, and every other host. Set `KATALYST_XSPEC_FORCE_IPV4=false` to turn it off.
 
+---
+
+## Targets
+
+Where tests point. See [Configuration](./configuration.md#where-tests-point).
+
+```typescript
+import { resolveTargets, logTargets, resolveApiBaseUrl } from '@esimplicitylabs/katalyst-xspec';
+```
+
+```typescript
+type Targets = {
+  frontendUrl: string;
+  frontendSource: 'FRONTEND_URL' | 'BASE_URL' | 'default';
+  apiBaseUrl: string;
+  apiSource: 'API_BASE_URL' | 'TARGET_BASE_URL' | 'TARGET_PORT' | 'FRONTEND_URL' | 'default';
+};
+
+function resolveTargets(env?: Record<string, string | undefined>): Targets;
+function logTargets(targets?: Targets): Targets;
+function resolveApiBaseUrl(options: { env?: Record<string, string | undefined>; projectName?: string; projectBaseURL?: string }): string;
+```
+
+- `resolveTargets` reads `FRONTEND_URL` (or `BASE_URL`) and `API_BASE_URL` (or `TARGET_BASE_URL`, `TARGET_PORT`). With no API URL set, the API URL is the frontend URL.
+- `logTargets` prints `katalyst-xspec targets: UI <url> (<source>) | API <url> (<source>)` once, in the main process only, and returns its argument. `KATALYST_XSPEC_QUIET=true` silences it.
+- `resolveApiBaseUrl` is what the `api` fixture uses for a Playwright project: `API_BASE_URL` > `TARGET_BASE_URL` > `baseURL` of a project named like `api` > `TARGET_PORT` > the project's `baseURL` > `http://localhost:3000`.
+
+```typescript
+// playwright.config.ts
+const targets = logTargets(resolveTargets());
+export default defineConfig({ use: { baseURL: targets.frontendUrl } });
+```
+
+---
+
+## Credentials
+
+Helpers behind `UniversalAuthAdapter`. See the [Authentication guide](../../guides/authentication.md).
+
+```typescript
+import {
+  resolveCredentials,
+  roleEnvKeys,
+  MissingCredentialsError,
+  buildApiLoginRequest,
+  extractToken,
+  type Credentials,
+  type RoleCredentials,
+} from '@esimplicitylabs/katalyst-xspec';
+```
+
+```typescript
+type Env = Record<string, string | undefined>;
+type Credentials = { username: string; password: string };
+type RoleCredentials = Record<string, Partial<Credentials>>;
+
+function roleEnvKeys(role: string): { username: string; password: string };
+function resolveCredentials(role: string, options?: { env?: Env; roles?: RoleCredentials }): Credentials;
+class MissingCredentialsError extends Error {}
+
+type ApiLoginRequest = { path: string; body: 'form' | 'json'; fields: Record<string, string> };
+function buildApiLoginRequest(creds: Credentials, env?: Env): ApiLoginRequest;
+function extractToken(json: unknown, env?: Env): string | undefined;
+```
+
+| Function | Description |
+|----------|-------------|
+| `roleEnvKeys('project manager')` | `{ username: 'AUTH_PROJECT_MANAGER_USERNAME', password: 'AUTH_PROJECT_MANAGER_PASSWORD' }` |
+| `resolveCredentials(role, { env, roles })` | `roles` in code, then `AUTH_<ROLE>_*`, then the older names for `admin`/`user`. Throws `MissingCredentialsError` naming the variables to set. |
+| `buildApiLoginRequest(creds, env)` | Login path, body type and fields from `API_AUTH_LOGIN_PATH`, `API_AUTH_BODY`, `API_AUTH_USERNAME_FIELD`, `API_AUTH_PASSWORD_FIELD` |
+| `extractToken(json, env)` | Token at `API_AUTH_TOKEN_PATH`, or the first of `access_token`, `token`, `accessToken`, `data.access_token`, `data.token`, `data.accessToken` |
+
+---
+
 ## Usage in Step Definitions
 
 ### Complete Example

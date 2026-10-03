@@ -40,6 +40,10 @@ const e2eBdd = defineBddProject({
 });
 ```
 
+### Where API steps go
+
+API steps with relative paths (`When I GET "/api/users"`) are sent to `API_BASE_URL`. If it isn't set, they go to `FRONTEND_URL` (the project's `baseURL`), in any project. So when your API is on the same origin as the app, a scenario in `features/ui/` that mixes API and UI steps needs only `FRONTEND_URL`. Set `API_BASE_URL` only when the API is on another origin. The `katalyst-xspec targets: UI … | API …` line printed at the start of each run shows where each side points.
+
 ## Common Patterns
 
 ### API Setup, UI Verify
@@ -51,7 +55,7 @@ Feature: User Management
 
   Scenario: Create user via API, verify in UI
     # Setup via API
-    Given I am authenticated as an admin via API
+    Given I am authenticated as "admin" via API
     When I POST "/admin/users" with JSON body:
       """
       {
@@ -89,7 +93,7 @@ Feature: Profile Update
     Then I should see text "Profile saved"
     
     # Verify via API
-    Given I am authenticated as a user via API
+    Given I am authenticated as "user" via API
     When I GET "/profile"
     Then the response status should be 200
     And the value at "displayName" should equal "Updated Name"
@@ -104,7 +108,7 @@ Feature: Fast UI Tests
 
   Background:
     # Get auth token via API
-    Given I am authenticated as an admin via API
+    Given I am authenticated as "admin" via API
     # Token is now available for UI requests
 
   Scenario: Access protected page
@@ -120,7 +124,7 @@ Create multiple entities via API, test UI listing:
 Feature: User List
 
   Scenario: Display multiple users
-    Given I am authenticated as an admin via API
+    Given I am authenticated as "admin" via API
     
     # Create multiple users via API
     When I POST "/admin/users" with JSON body:
@@ -158,7 +162,7 @@ Feature: User Deletion
 
   Scenario: Delete user via UI, verify via API
     # Create user via API
-    Given I am authenticated as an admin via API
+    Given I am authenticated as "admin" via API
     When I POST "/admin/users" with JSON body:
       """
       { "email": "todelete@test.com" }
@@ -183,7 +187,7 @@ Feature: Order Processing
 
   Scenario: Complete order workflow
     # 1. Setup: Create product via API
-    Given I am authenticated as an admin via API
+    Given I am authenticated as "admin" via API
     When I POST "/admin/products" with JSON body:
       """
       {
@@ -212,7 +216,7 @@ Feature: Order Processing
     When I get a part of the URL based on "/orders/(\d+)" regular expression and save it as "orderId"
     
     # 3. Verify: Check order via API
-    Given I am authenticated as an admin via API
+    Given I am authenticated as "admin" via API
     When I GET "/admin/orders/{orderId}"
     Then the response status should be 200
     And the value at "status" should equal "confirmed"
@@ -237,7 +241,7 @@ Variables set in API steps are available in UI steps and vice versa:
 ```gherkin
 Scenario: Share variables across layers
   # Set via API response
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   When I POST "/users" with JSON body: { "email": "test@example.com" }
   Then I store the value at "id" as "userId"
   
@@ -259,7 +263,7 @@ Scenario: Share variables across layers
 
 ```gherkin
 Scenario: Shared auth
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   # Bearer token set in world.headers
   
   Given I navigate to "/dashboard"
@@ -271,13 +275,13 @@ Scenario: Shared auth
 ```gherkin
 Scenario: Separate auth
   # API auth
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   When I GET "/admin/stats"
   Then the response status should be 200
   
-  # UI auth
-  Given I navigate to "/login"
-  When I log in as admin in UI
+  # UI auth (session reused across scenarios)
+  Given I am logged in as "admin"
+  When I navigate to "/dashboard"
   Then I should see text "Dashboard"
 ```
 
@@ -286,7 +290,7 @@ Scenario: Separate auth
 ```gherkin
 Scenario: Inject API token to UI
   # Get token via API
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   # Store token from auth step
   
   # Use token in UI (requires custom implementation)
@@ -302,7 +306,7 @@ Cleanup registered in API steps still works:
 ```gherkin
 Scenario: Cleanup works across layers
   # Create via API
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   When I POST "/users" with JSON body: { "email": "temp@test.com" }
   Then I store the value at "id" as "userId"
   Given I register cleanup DELETE "/users/{userId}"
@@ -321,7 +325,7 @@ Scenario: Cleanup works across layers
 ```gherkin
 # Good - fast setup
 Background:
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   When I POST "/reset-test-data" with JSON body: {}
 ```
 
@@ -331,7 +335,7 @@ Background:
 # Good - focused UI test
 Scenario: Test the delete confirmation dialog
   # Setup via API
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   When I POST "/users" with JSON body: { "email": "test@test.com" }
   Then I store the value at "id" as "userId"
   
@@ -354,7 +358,7 @@ Scenario: Verify form submission
   Then I should see text "Settings saved"
   
   # Verify via API
-  Given I am authenticated as a user via API
+  Given I am authenticated as "user" via API
   When I GET "/settings"
   Then the value at "timezone" should equal "UTC"
 ```
@@ -382,12 +386,15 @@ Given I navigate to "/users/{userId}"
 API and UI may use different auth mechanisms. Use appropriate auth for each:
 
 ```gherkin
-Given I am authenticated as an admin via API  # For API calls
-When I log in as admin in UI                   # For browser session
+Given I am authenticated as "admin" via API  # For API calls
+Given I am logged in as "admin"              # For browser session
 ```
+
+Both read the same `AUTH_ADMIN_USERNAME` / `AUTH_ADMIN_PASSWORD`. See the [Authentication guide](./authentication.md).
 
 ## Related Topics
 
 - [API Testing Guide](./api-testing.md) - API testing details
 - [UI Testing Guide](./ui-testing.md) - UI testing details
+- [Authentication](./authentication.md) - Roles and login settings
 - [World State](../concepts/world-state.md) - Variable sharing

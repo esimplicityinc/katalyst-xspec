@@ -212,18 +212,19 @@ When I create users:
 ### Optional Parameters
 
 ```typescript
-// Using regex for optional parts
+import { uiLoginAsRole } from '@esimplicitylabs/katalyst-xspec';
+
+// Using regex for optional parts.
+// Include `ui` in the fixtures when logging in through the UI, so the browser is available.
 Given(/^I am on the homepage( as (\w+))?$/, async ({ ui, auth, world }, _, role) => {
   if (role) {
-    if (role === 'admin') {
-      await auth.uiLoginAsAdmin(world);
-    } else {
-      await auth.uiLoginAsUser(world);
-    }
+    await uiLoginAsRole(auth, world, role, { reuseSession: true }); // reads AUTH_<ROLE>_*
   }
   await ui.goto('/');
 });
 ```
+
+UI login needs `ui` in the step's fixtures (here it's used anyway). Without it the step fails with `UI login needs the browser`. API logins (`apiLoginAsRole(auth, world, role)`) only need `auth` and `world`. See the [Authentication guide](./authentication.md).
 
 Usage:
 ```gherkin
@@ -408,7 +409,7 @@ Then('the order total should be {float}',
 Feature: Checkout
 
   Scenario: Purchase a product
-    Given I am authenticated as an admin via API
+    Given I am authenticated as "admin" via API
     And a product "Test Widget" exists with price 29.99
     
     When I add the product to cart

@@ -42,7 +42,7 @@ In any scenario you can combine:
 
 | Category | Examples |
 |----------|----------|
-| **API Auth** | `Given I am authenticated as an admin via API` |
+| **API Auth** | `Given I am authenticated as "admin" via API` |
 | **API HTTP** | `When I GET {string}`, `When I POST {string} with JSON body:` |
 | **API Assertions** | `Then the response status should be {int}` |
 | **UI Navigation** | `Given I navigate to {string}` |
@@ -59,7 +59,7 @@ In any scenario you can combine:
 ```gherkin
 Scenario: Create user via API, verify in UI
   # API Setup
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   When I POST "/users" with JSON body:
     """
     { "email": "test@example.com", "name": "Test User" }
@@ -83,7 +83,7 @@ Scenario: Update profile in UI, verify via API
   Then I should see text "Saved"
   
   # API Verification
-  Given I am authenticated as a user via API
+  Given I am authenticated as "user" via API
   When I GET "/profile"
   Then the response status should be 200
   And the value at "name" should equal "New Name"
@@ -93,7 +93,7 @@ Scenario: Update profile in UI, verify via API
 
 ```gherkin
 Scenario: Use API token for faster setup
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   Given I navigate to interpolated path "/admin/dashboard"
   Then I should see text "Admin Dashboard"
 ```
@@ -107,7 +107,7 @@ Variables set in API steps are available in UI steps:
 ```gherkin
 Scenario: Share data between layers
   # Set via API
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   When I POST "/products" with JSON body:
     """
     { "name": "Test Product", "price": 29.99 }
@@ -128,7 +128,7 @@ Feature: Order Management
 
   Scenario: Complete order workflow
     # 1. Create product via API
-    Given I am authenticated as an admin via API
+    Given I am authenticated as "admin" via API
     When I POST "/products" with JSON body:
       """
       { "name": "Widget", "price": 19.99, "stock": 100 }
@@ -177,7 +177,7 @@ Feature: Order Management
 ```gherkin
 Background:
   # Fast setup via API
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   When I POST "/test-data/reset" with JSON body:
     """
     {}
@@ -204,7 +204,7 @@ Scenario: Verify deletion
 ```gherkin
 Scenario: Clear documentation
   # === API Setup ===
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   When I POST "/users" with JSON body: ...
   
   # === UI Testing ===

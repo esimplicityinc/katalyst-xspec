@@ -10,9 +10,13 @@ Configure Playwright and BDD projects for your testing needs.
 // playwright.config.ts
 import { defineConfig } from '@playwright/test';
 import { defineBddProject, cucumberReporter } from 'playwright-bdd';
+import { resolveTargets, logTargets } from '@esimplicitylabs/katalyst-xspec';
 import dotenv from 'dotenv';
 
 dotenv.config();
+
+// Reads FRONTEND_URL / API_BASE_URL and prints "katalyst-xspec targets: UI … | API …"
+const targets = logTargets(resolveTargets());
 
 // Define BDD projects
 const apiBdd = defineBddProject({
@@ -34,7 +38,7 @@ export default defineConfig({
   ],
   projects: [apiBdd, uiBdd],
   use: {
-    baseURL: process.env.FRONTEND_URL || 'http://localhost:3000',
+    baseURL: targets.frontendUrl,
     headless: process.env.HEADLESS !== 'false',
   },
 });
@@ -46,7 +50,13 @@ export default defineConfig({
 // playwright.config.ts
 import { defineConfig, devices } from '@playwright/test';
 import { defineBddProject, cucumberReporter } from 'playwright-bdd';
-import { tagsForProject, resolveExtraTags, resolveWorkers } from '@esimplicitylabs/katalyst-xspec';
+import {
+  tagsForProject,
+  resolveExtraTags,
+  resolveWorkers,
+  resolveTargets,
+  logTargets,
+} from '@esimplicitylabs/katalyst-xspec';
 import dotenv from 'dotenv';
 import path from 'node:path';
 import fs from 'node:fs';
@@ -62,6 +72,8 @@ if (fs.existsSync(localEnv)) {
 } else if (fs.existsSync(rootEnv)) {
   dotenv.config({ path: rootEnv });
 }
+
+const targets = logTargets(resolveTargets());
 
 // Get extra tags from environment or CLI
 const extraTags = resolveExtraTags(process.env.TEST_TAGS);
@@ -113,7 +125,7 @@ export default defineConfig({
   
   // Global settings
   use: {
-    baseURL: process.env.FRONTEND_URL || 'http://localhost:3000',
+    baseURL: targets.frontendUrl,
     headless: process.env.HEADLESS !== 'false',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
@@ -284,19 +296,29 @@ export { test };
 ### .env File
 
 ```bash
-# API Configuration
-API_BASE_URL=http://localhost:3000
-API_AUTH_LOGIN_PATH=/auth/login
-
-# Authentication (required -- no hardcoded defaults)
-DEFAULT_ADMIN_USERNAME=admin@example.com
-DEFAULT_ADMIN_PASSWORD=changeme
-DEFAULT_USER_USERNAME=user@example.com
-DEFAULT_USER_PASSWORD=changeme
-
-# UI Configuration
+# Where to test
 FRONTEND_URL=http://localhost:3000
+# API_BASE_URL=http://localhost:4000   # optional: without it, API calls go to FRONTEND_URL
 HEADLESS=true
+
+# Who logs in: one pair per role (no hardcoded defaults)
+AUTH_ADMIN_USERNAME=admin@example.com
+AUTH_ADMIN_PASSWORD=changeme
+# AUTH_USER_USERNAME=user@example.com
+# AUTH_USER_PASSWORD=changeme
+
+# API login (defaults shown)
+# API_AUTH_LOGIN_PATH=/auth/login
+# API_AUTH_BODY=form
+# API_AUTH_USERNAME_FIELD=username
+# API_AUTH_PASSWORD_FIELD=password
+# API_AUTH_TOKEN_PATH=access_token
+
+# UI login (defaults shown)
+# UI_LOGIN_PATH=/login
+# UI_USERNAME_FIELD=Username
+# UI_PASSWORD_FIELD=Password
+# UI_LOGIN_BUTTON=Login
 
 # Cleanup Configuration
 CLEANUP_ALLOW_ALL=false
@@ -313,6 +335,8 @@ TEST_TAGS=
 # Debug
 DEBUG=false
 ```
+
+See the [Authentication guide](../guides/authentication.md) for the login settings and the [Configuration reference](../reference/api/configuration.md) for every variable.
 
 ## Multiple Browser Testing
 

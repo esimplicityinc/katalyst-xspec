@@ -131,88 +131,97 @@ export const test = createBddTest({
 
 ## Creating an Auth Adapter
 
-### Custom Auth Flow
+Most apps don't need one: `UniversalAuthAdapter` logs in by role using `.env` settings. See the [Authentication guide](./authentication.md) first.
+
+### Subclass UniversalAuthAdapter (recommended)
+
+When only the login request or the login page differs, subclass and override `apiLogin` or `uiLogin`. Role credentials (`AUTH_<ROLE>_*` or `roles` in code), all the login steps, and UI session reuse keep working. See [Extending the login](./authentication.md#extending-the-login).
 
 ```typescript
 // adapters/oauth-auth.adapter.ts
-import type { AuthPort, ApiPort, UiPort, World } from '@esimplicitylabs/katalyst-xspec';
+import { UniversalAuthAdapter, type Credentials, type World } from '@esimplicitylabs/katalyst-xspec';
 
-export class OAuthAuthAdapter implements AuthPort {
-  constructor(
-    private api: ApiPort,
-    private ui: UiPort,
-    private config: {
-      clientId: string;
-      clientSecret: string;
-      tokenUrl: string;
-    }
-  ) {}
-
-  async apiLoginAsAdmin(world: World): Promise<void> {
-    const result = await this.api.sendForm('POST', this.config.tokenUrl, {
-      grant_type: 'client_credentials',
-      client_id: this.config.clientId,
-      client_secret: this.config.clientSecret,
-      scope: 'admin',
+export class OAuthAuthAdapter extends UniversalAuthAdapter {
+  // OAuth password grant instead of the default form POST.
+  protected async apiLogin(world: World, role: string, creds: Credentials): Promise<void> {
+    const result = await this.api.sendForm('POST', '/oauth/token', {
+      grant_type: 'password',
+      client_id: process.env.OAUTH_CLIENT_ID!,
+      username: creds.username,
+      password: creds.password,
     });
-
     if (result.status !== 200) {
-      throw new Error(`OAuth login failed: ${result.status}`);
+      throw new Error(`OAuth login as ${role} failed: ${result.status} ${result.text}`);
     }
-
-    const token = (result.json as any).access_token;
-    world.headers['Authorization'] = `Bearer ${token}`;
+    this.apiSetBearer(world, (result.json as any).access_token);
   }
 
-  async apiLoginAsUser(world: World): Promise<void> {
-    const result = await this.api.sendForm('POST', this.config.tokenUrl, {
-      grant_type: 'password',
-      client_id: this.config.clientId,
-      username: process.env.DEFAULT_USER_USERNAME!,
-      password: process.env.DEFAULT_USER_PASSWORD!,
+  // A login page with "Email" and "Sign In".
+  protected async uiLogin(world: World, role: string, creds: Credentials): Promise<void> {
+    await this.ui.goto('/login');
+    await this.ui.fillLabel('Email', creds.username);
+    await this.ui.fillLabel('Password', creds.password);
+    await this.ui.clickButton('Sign In');
+    await this.ui.expectUrlContains('/dashboard');
+  }
+}
+```
+
+```typescript
+// features/steps/fixtures.ts
+export const test = createBddTest({
+  createAuth: ({ api, ui }) => new OAuthAuthAdapter({ api, ui }),
+});
+```
+
+### Implement AuthPort from scratch
+
+For full control, implement `AuthPort`. Implement `apiLoginAs` and `uiLoginAs` so the role steps (`Given I am authenticated as "pm" via API`, `Given I am logged in as "pm"`) work; without them only the `admin`/`user` steps work.
+
+```typescript
+// adapters/client-credentials-auth.adapter.ts
+import type { AuthPort, ApiPort, UiPort, UiLoginOptions, World } from '@esimplicitylabs/katalyst-xspec';
+
+export class ClientCredentialsAuth implements AuthPort {
+  constructor(private api: ApiPort, private ui: UiPort) {}
+
+  async apiLoginAs(world: World, role: string): Promise<void> {
+    const result = await this.api.sendForm('POST', '/oauth/token', {
+      grant_type: 'client_credentials',
+      client_id: process.env.OAUTH_CLIENT_ID!,
+      client_secret: process.env.OAUTH_CLIENT_SECRET!,
+      scope: role,
     });
+    if (result.status !== 200) throw new Error(`OAuth login failed: ${result.status}`);
+    this.apiSetBearer(world, (result.json as any).access_token);
+  }
 
-    if (result.status !== 200) {
-      throw new Error(`OAuth login failed: ${result.status}`);
-    }
-
-    const token = (result.json as any).access_token;
-    world.headers['Authorization'] = `Bearer ${token}`;
+  async uiLoginAs(world: World, role: string, _options?: UiLoginOptions): Promise<void> {
+    await this.ui.goto(`/test-login?role=${encodeURIComponent(role)}`);
   }
 
   apiSetBearer(world: World, token: string): void {
-    world.headers['Authorization'] = `Bearer ${token}`;
+    world.headers = { ...world.headers, Authorization: `Bearer ${token}` };
   }
 
-  async uiLoginAsAdmin(world: World): Promise<void> {
-    await this.ui.goto('/login');
-    await this.ui.fillLabel('Email', process.env.DEFAULT_ADMIN_USERNAME!);
-    await this.ui.fillLabel('Password', process.env.DEFAULT_ADMIN_PASSWORD!);
-    await this.ui.clickButton('Sign In');
-  }
-
-  async uiLoginAsUser(world: World): Promise<void> {
-    await this.ui.goto('/login');
-    await this.ui.fillLabel('Email', process.env.DEFAULT_USER_USERNAME!);
-    await this.ui.fillLabel('Password', process.env.DEFAULT_USER_PASSWORD!);
-    await this.ui.clickButton('Sign In');
-  }
+  apiLoginAsAdmin(world: World) { return this.apiLoginAs(world, 'admin'); }
+  apiLoginAsUser(world: World) { return this.apiLoginAs(world, 'user'); }
+  uiLoginAsAdmin(world: World) { return this.uiLoginAs(world, 'admin'); }
+  uiLoginAsUser(world: World) { return this.uiLoginAs(world, 'user'); }
 }
 ```
 
 ### Register Auth Adapter
 
 ```typescript
-import { OAuthAuthAdapter } from './adapters/oauth-auth.adapter';
+import { ClientCredentialsAuth } from './adapters/client-credentials-auth.adapter';
 
 export const test = createBddTest({
-  createAuth: ({ api, ui }) => new OAuthAuthAdapter(api, ui, {
-    clientId: process.env.OAUTH_CLIENT_ID!,
-    clientSecret: process.env.OAUTH_CLIENT_SECRET!,
-    tokenUrl: '/oauth/token',
-  }),
+  createAuth: ({ api, ui }) => new ClientCredentialsAuth(api, ui),
 });
 ```
+
+`createAuth` gets a `ui` that only works once a step has requested the `ui` fixture, so API-only scenarios never start a browser. Custom steps that log in through the UI must include `ui`: `async ({ auth, ui, world }) => …`.
 
 ## Creating a Cleanup Adapter
 

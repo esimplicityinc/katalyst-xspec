@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-10-02
+
+Simpler setup for pointing tests at an app and logging in, configured in `.env`. See the new [Authentication guide](docs/guides/authentication.md).
+
+### Breaking Changes
+
+- **Login steps fail when credentials are missing.** They used to print a warning and carry on logged out, so failures showed up later as confusing 401s or missing elements. The message now names the variables to set, e.g. `No username for role "admin". Set AUTH_ADMIN_USERNAME in .env (DEFAULT_ADMIN_USERNAME or DEFAULT_ADMIN_EMAIL also work)…`.
+- **A UI login that doesn't work now fails.** If the browser is still on the login page after submitting, the step fails, naming the credentials to check and the `UI_LOGIN_SUCCESS_*` settings.
+- **`API_BASE_URL` falls back to the frontend URL in every project.** Before, it fell back to `http://localhost:3000` outside `api` projects, so scenarios mixing API and UI steps silently called localhost. Set `API_BASE_URL=http://localhost:3000` if you relied on the old default.
+- **Custom steps that log in through the UI must request `ui`.** The `auth` fixture no longer depends on `page`, so API-only scenarios that log in never start a browser. Custom steps calling `auth.uiLoginAs*` need `ui` in their fixtures, or they fail with "UI login needs the browser". The built-in steps already do this.
+
+### Added
+
+- **Roles:** `Given I am authenticated as "pm" via API`, `Given I am logged in as "pm"` and `When I log in as "pm" in UI` work for any role. Credentials come from `AUTH_<ROLE>_USERNAME` / `AUTH_<ROLE>_PASSWORD`, or from `new UniversalAuthAdapter({ api, ui, roles: { pm: { username, password } } })`. The admin/user steps and the `DEFAULT_ADMIN_*` / `DEFAULT_USER_*` / `NON_ADMIN_*` variables keep working.
+- **Configurable API login without code:** `API_AUTH_BODY` (`form`|`json`), `API_AUTH_USERNAME_FIELD`, `API_AUTH_PASSWORD_FIELD` and `API_AUTH_TOKEN_PATH`. By default it finds `access_token`, `token`, `accessToken` or the same under `data.`. Cookie-session logins work with no token. Failures show the status, the response, and which settings to check.
+- **UI login improvements:**
+  - Fields are found by label, placeholder or `name`; before, only placeholder.
+  - New `UI_LOGIN_SUCCESS_URL`, `UI_LOGIN_SUCCESS_TEXT` and `UI_LOGIN_TIMEOUT` settings.
+  - **Session reuse:** `I am logged in as` submits the form once per role per worker, then restores the cookies and localStorage. Turn it off with `UI_SESSION_REUSE=false`.
+- **Targets:** `resolveTargets()` / `logTargets()`. The scaffolded config prints `katalyst-xspec targets: UI … | API …` once per run; silence it with `KATALYST_XSPEC_QUIET=true`.
+- **Extension points:** subclass `UniversalAuthAdapter` and override `apiLogin` / `uiLogin`, for example for SSO.
+  - `AuthPort` gained optional `apiLoginAs` / `uiLoginAs` methods.
+  - `UiPort` gained optional `fillField`, `waitForUrl`, `waitForText`, `saveSession` and `restoreSession` methods, which `PlaywrightUiAdapter` implements.
+  - New exports: `apiLoginAsRole` / `uiLoginAsRole` (for custom steps), `resolveCredentials`, `clearUiSessions`.
+- **Scaffolded `.env.example`** is organised into sections: where to test, who logs in, API login, UI login. The scaffolded `fixtures.ts` shows the `roles` option.
+
+### Changed
+
+- **Cleanup authentication** uses the `admin` role and the same `API_AUTH_*` settings. It's still best-effort: it runs unauthenticated if no credentials are set.
+- **`upgrade --migrate` keeps your `fixtures.ts`.** That file holds your adapter wiring. The current template is saved in the backup folder as `fixtures.ts.template` for comparison.
+
 ## [0.7.1] - 2026-10-02
 
 ### Fixed

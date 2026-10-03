@@ -553,7 +553,7 @@ function getTemplates() {
       clean: 'rm -rf .features-gen node_modules test-results storage cucumber-report playwright-report'
     },
     devDependencies: {
-      '@esimplicitylabs/katalyst-xspec': '^0.7.0',
+      '@esimplicitylabs/katalyst-xspec': '^0.8.0',
       '@playwright/test': '^1.49.0',
       'playwright-bdd': '^9.1.0',
       dotenv: '^16.1.4',
@@ -576,7 +576,12 @@ function getTemplates() {
 export const { test } = createBddTest({
   createApi: ({ apiRequest }) => new PlaywrightApiAdapter(apiRequest),
   createUi: ({ page }) => new PlaywrightUiAdapter(page),
-  createAuth: ({ api, ui }) => new UniversalAuthAdapter({ api, ui }),
+  // Logins read AUTH_<ROLE>_USERNAME / AUTH_<ROLE>_PASSWORD and the API_AUTH_* /
+  // UI_LOGIN_* settings in .env. You can also give credentials in code:
+  //   roles: { pm: { username: 'pm@example.com', password: process.env.PM_PASSWORD } },
+  // For SSO or unusual login flows, subclass UniversalAuthAdapter and override
+  // apiLogin() / uiLogin() (see the Authentication guide).
+  createAuth: ({ api, ui }) => new UniversalAuthAdapter({ api, ui, roles: {} }),
   createCleanup: () => new DefaultCleanupAdapter(),
   // TUI testing (optional - requires tui-tester and tmux installed)
   // Uncomment and configure for your CLI application:
@@ -634,6 +639,7 @@ async function migrate(cwd, options) {
   
   log('Starting migration...');
   log(`Backup directory: ${backupDir}`);
+  const templates = getTemplates();
   console.log('');
   
   // =========================================================================
@@ -714,6 +720,7 @@ async function migrate(cwd, options) {
     }
     if (existingFixturesTs) {
       fs.writeFileSync(path.join(backupDir, 'steps', 'fixtures.ts.original'), existingFixturesTs);
+      fs.writeFileSync(path.join(backupDir, 'steps', 'fixtures.ts.template'), templates['features/steps/fixtures.ts']);
     }
   }
   
@@ -728,7 +735,6 @@ async function migrate(cwd, options) {
   // =========================================================================
   log('Phase 3: Merging configurations...');
   
-  const templates = getTemplates();
   const filesToUpdate = {};
   
   // Merge package.json
@@ -745,13 +751,18 @@ async function migrate(cwd, options) {
   );
   console.log(`  steps.ts: merged (${customImports.length} custom imports preserved)`);
   
-  // Merge fixtures.ts
-  filesToUpdate['features/steps/fixtures.ts'] = mergeFixturesTs(
-    existingFixturesTs,
-    templates['features/steps/fixtures.ts'],
-    cleanupRules
-  );
-  console.log(`  fixtures.ts: merged (cleanup rules ${cleanupRules ? 'preserved' : 'using defaults'})`);
+  // fixtures.ts is your adapter wiring (custom auth, roles, cleanup rules): keep
+  // it, and leave the current template in the backup folder for comparison.
+  if (existingFixturesTs) {
+    console.log(`  fixtures.ts: kept (template saved as ${path.join(backupDir, 'steps', 'fixtures.ts.template')})`);
+  } else {
+    filesToUpdate['features/steps/fixtures.ts'] = mergeFixturesTs(
+      existingFixturesTs,
+      templates['features/steps/fixtures.ts'],
+      cleanupRules
+    );
+    console.log('  fixtures.ts: created');
+  }
   console.log('');
   
   // =========================================================================

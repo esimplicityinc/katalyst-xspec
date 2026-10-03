@@ -20,6 +20,7 @@ A comprehensive BDD testing framework built on Playwright, providing reusable fi
 - [UI Testing](./guides/ui-testing.md) - Browser automation
 - [TUI Testing](./guides/tui-testing.md) - Terminal UI testing
 - [Hybrid Testing](./guides/hybrid-testing.md) - Cross-layer tests
+- [Authentication](./guides/authentication.md) - Log in by role (API and UI)
 - [Custom Adapters](./guides/custom-adapters.md) - Extend the framework
 - [Custom Steps](./guides/custom-steps.md) - Domain-specific steps
 - [CI/CD Integration](./guides/ci-cd.md) - GitHub Actions, pipelines
@@ -109,7 +110,7 @@ graph TB
 Feature: User Management API
 
   Scenario: Create and verify user
-    Given I am authenticated as an admin via API
+    Given I am authenticated as "admin" via API
     When I POST "/admin/users" with JSON body:
       """
       { "email": "test@example.com", "name": "Test User" }

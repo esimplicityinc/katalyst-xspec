@@ -213,7 +213,8 @@ Given I register cleanup DELETE "/users/{userId}"      # Registered 2nd
 ### Admin Authentication
 
 Cleanup requests are authenticated with admin credentials:
-- Uses `DEFAULT_ADMIN_USERNAME` and `DEFAULT_ADMIN_PASSWORD`
+- Logs in as the `admin` role (`AUTH_ADMIN_USERNAME` / `AUTH_ADMIN_PASSWORD`, or the older `DEFAULT_ADMIN_*`) using the `API_AUTH_*` login settings
+- If no admin credentials are set, cleanup runs unauthenticated (best effort)
 - Token is cached across tests
 - Refreshes on 401/403
 
@@ -239,7 +240,7 @@ Feature: User Management with Cleanup
     Given I set header "X-Test-ID" to "{testId}"
     
     # Create resource
-    Given I am authenticated as an admin via API
+    Given I am authenticated as "admin" via API
     When I POST "/users" with JSON body:
       """
       {
@@ -261,7 +262,7 @@ Feature: User Management with Cleanup
 
   Scenario: Debug without cleanup
     Given I disable cleanup
-    Given I am authenticated as an admin via API
+    Given I am authenticated as "admin" via API
     
     When I POST "/users" with JSON body:
       """

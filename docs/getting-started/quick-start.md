@@ -52,14 +52,26 @@ Each Playwright project runs the feature files in its folder. Steps aren't tied 
 cp .env.example .env
 ```
 
-Set your URLs in `.env`:
+Set where to test and who logs in, in `.env`:
 
 ```bash
-API_BASE_URL=http://localhost:3000
 FRONTEND_URL=http://localhost:3000
+# API_BASE_URL=http://localhost:4000   # only if the API is on another origin
+
+AUTH_ADMIN_USERNAME=admin@example.com
+AUTH_ADMIN_PASSWORD=changeme
 ```
 
-Then use relative paths in your features, e.g. `Given I navigate to "/login"` or `When I GET "/health"`.
+Then use relative paths in your features, e.g. `Given I navigate to "/login"` or `When I GET "/health"`. Without `API_BASE_URL`, API steps go to `FRONTEND_URL`. Each run starts by printing `katalyst-xspec targets: UI … | API …` so you can see where tests point.
+
+Add one `AUTH_<ROLE>_USERNAME` / `AUTH_<ROLE>_PASSWORD` pair per role you log in as, then:
+
+```gherkin
+Given I am authenticated as "admin" via API   # API login
+Given I am logged in as "admin"               # UI login
+```
+
+If your login endpoint or form differs from the defaults (`/auth/login`, `/login`), see the [Authentication guide](../guides/authentication.md).
 
 ## Step 5: Write Your First Test
 

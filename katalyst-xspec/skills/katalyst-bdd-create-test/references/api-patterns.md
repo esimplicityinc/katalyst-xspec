@@ -8,7 +8,7 @@ Common patterns for API testing with the Katalyst BDD framework.
 
 ```gherkin
 Scenario: List all [resources]
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   When I GET "/[endpoint]"
   Then the response status should be 200
   And the response should be a JSON array
@@ -18,7 +18,7 @@ Scenario: List all [resources]
 
 ```gherkin
 Scenario: Get [resource] by ID
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   When I GET "/[endpoint]/1"
   Then the response status should be 200
   And the response should be a JSON object
@@ -29,7 +29,7 @@ Scenario: Get [resource] by ID
 
 ```gherkin
 Scenario: Create [resource]
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   Given I generate a UUID and store as "runId"
   When I POST "/[endpoint]" with JSON body:
     """
@@ -48,7 +48,7 @@ Scenario: Create [resource]
 
 ```gherkin
 Scenario: Update [resource] with PUT
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   # First create the resource
   When I POST "/[endpoint]" with JSON body:
     """
@@ -72,7 +72,7 @@ Scenario: Update [resource] with PUT
 
 ```gherkin
 Scenario: Partial update with PATCH
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   When I PATCH "/[endpoint]/{resourceId}" with JSON body:
     """
     { "status": "active" }
@@ -85,7 +85,7 @@ Scenario: Partial update with PATCH
 
 ```gherkin
 Scenario: Delete [resource]
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   # Create resource to delete
   When I POST "/[endpoint]" with JSON body:
     """
@@ -105,18 +105,27 @@ Scenario: Delete [resource]
 
 ## Authentication Patterns
 
+### Any Role
+
+```gherkin
+Background:
+  Given I am authenticated as "pm" via API
+```
+
+Reads `AUTH_PM_USERNAME` / `AUTH_PM_PASSWORD` from `.env`. Missing credentials fail the step with a message naming the variables.
+
 ### Admin Authentication
 
 ```gherkin
 Background:
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
 ```
 
 ### User Authentication
 
 ```gherkin
 Background:
-  Given I am authenticated as a user via API
+  Given I am authenticated as "user" via API
 ```
 
 ### Custom Token Authentication
@@ -150,7 +159,7 @@ Scenario: Login and use token
 
 ```gherkin
 Scenario: Resource not found
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   When I GET "/[endpoint]/99999"
   Then the response status should be 404
 ```
@@ -159,7 +168,7 @@ Scenario: Resource not found
 
 ```gherkin
 Scenario: Invalid data returns 400
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   When I POST "/[endpoint]" with JSON body:
     """
     { "email": "not-valid-email" }
@@ -181,7 +190,7 @@ Scenario: Unauthorized access
 
 ```gherkin
 Scenario: User cannot access admin endpoint
-  Given I am authenticated as a user via API
+  Given I am authenticated as "user" via API
   When I GET "/admin/settings"
   Then the response status should be 403
 ```
@@ -237,7 +246,7 @@ Then the value at "created_at" should match "^\d{4}-\d{2}-\d{2}"
 
 ```gherkin
 Scenario: Paginated list
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   When I GET "/[endpoint]?page=1&limit=10"
   Then the response status should be 200
   And the response should be a JSON object
@@ -250,7 +259,7 @@ Scenario: Paginated list
 
 ```gherkin
 Scenario: Filter by status
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   When I GET "/[endpoint]?status=active"
   Then the response status should be 200
   And the response should be a JSON array
@@ -260,7 +269,7 @@ Scenario: Filter by status
 
 ```gherkin
 Scenario: Bulk create
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   When I POST "/[endpoint]/bulk" with JSON body:
     """
     {
@@ -279,7 +288,7 @@ Scenario: Bulk create
 
 ```gherkin
 Scenario: Upload file
-  Given I am authenticated as an admin via API
+  Given I am authenticated as "admin" via API
   Given I set header "Content-Type" to "multipart/form-data"
   # Note: Actual file upload requires custom step implementation
 ```
@@ -293,7 +302,7 @@ Feature: User Management API
   So that I can control system access
 
   Background:
-    Given I am authenticated as an admin via API
+    Given I am authenticated as "admin" via API
     Given I generate a UUID and store as "runId"
 
   Scenario: Create new user

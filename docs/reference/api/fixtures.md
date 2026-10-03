@@ -41,6 +41,16 @@ type CreateContext = PlaywrightTestArgs & PlaywrightWorkerArgs & {
 };
 ```
 
+### createAuth context
+
+`createAuth` receives the Playwright context plus the `api` and `ui` adapters:
+
+```typescript
+createAuth: ({ api, ui }) => new UniversalAuthAdapter({ api, ui, roles: { pm: { username, password } } }),
+```
+
+The `auth` fixture doesn't depend on `page`, so API-only scenarios that log in never start a browser. The `ui` it receives is a stand-in that forwards to the scenario's real UI adapter once a step has requested the `ui` fixture. Calling a UI method before that throws ``UI login needs the browser: add `ui` to the step's fixtures``.
+
 ### Default Behavior
 
 When options are not provided, defaults are used:
@@ -51,7 +61,7 @@ When options are not provided, defaults are used:
 | `createUi` | `PlaywrightUiAdapter` |
 | `createAuth` | `UniversalAuthAdapter` |
 | `createCleanup` | `DefaultCleanupAdapter` |
-| `getCleanupAuth` | Form-based login using `DEFAULT_ADMIN_*` env vars |
+| `getCleanupAuth` | `CLEANUP_AUTH_TOKEN`, else API login as the `admin` role (`AUTH_ADMIN_*`, older `DEFAULT_ADMIN_*`) with the `API_AUTH_*` settings; unauthenticated if no credentials |
 | `createTui` | `undefined` (disabled) |
 | `worldFactory` | `initWorld()` |
 
@@ -184,13 +194,21 @@ test('example', async ({ ui }) => {
 
 ### auth
 
-The authentication adapter.
+The authentication adapter. API login needs only `auth` and `world`; UI login also needs `ui` in the fixtures so the browser is available.
 
 ```typescript
-test('example', async ({ auth, world }) => {
-  await auth.apiLoginAsAdmin(world);
+import { apiLoginAsRole, uiLoginAsRole } from '@esimplicitylabs/katalyst-xspec';
+
+When('I start as a PM', async ({ auth, world }) => {
+  await apiLoginAsRole(auth, world, 'pm');
+});
+
+When('I open the app as a PM', async ({ auth, ui, world }) => {
+  await uiLoginAsRole(auth, world, 'pm', { reuseSession: true });
 });
 ```
+
+`apiLoginAsRole` / `uiLoginAsRole` are what the built-in steps use. They call `auth.apiLoginAs` / `auth.uiLoginAs`, and fall back to the admin/user methods for older custom adapters. See the [Authentication guide](../../guides/authentication.md).
 
 ### cleanup
 

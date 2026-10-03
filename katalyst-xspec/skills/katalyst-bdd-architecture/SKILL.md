@@ -304,51 +304,36 @@ class AxiosApiAdapter implements ApiPort {
 
 ### Custom Auth Adapter
 
-```typescript
-import { AuthPort, World, ApiPort, UiPort } from '@esimplicitylabs/katalyst-xspec';
+Usually not needed: the default `UniversalAuthAdapter` logs in by role using `AUTH_<ROLE>_*` credentials and `API_AUTH_*` / `UI_*` settings (see docs/guides/authentication.md). Constructor: `new UniversalAuthAdapter({ api, ui, roles?, env? })`, where `roles` is `{ pm: { username, password } }` and overrides env vars.
 
-class CustomAuthAdapter implements AuthPort {
-  constructor(private deps: { api: ApiPort; ui: UiPort }) {}
-  
-  async apiLoginAsAdmin(world: World): Promise<void> {
-    const result = await this.deps.api.sendJson('POST', '/auth/admin', {
-      apiKey: process.env.ADMIN_API_KEY,
+When only the login request or page differs, **subclass** and override `apiLogin` / `uiLogin`. Credentials, the role steps, and UI session reuse keep working:
+
+```typescript
+import { UniversalAuthAdapter, type Credentials, type World } from '@esimplicitylabs/katalyst-xspec';
+
+class CustomAuthAdapter extends UniversalAuthAdapter {
+  protected async apiLogin(world: World, role: string, creds: Credentials): Promise<void> {
+    const result = await this.api.sendJson('POST', '/auth/login', {
+      email: creds.username,
+      password: creds.password,
     });
-    
-    if (result.json?.token) {
-      world.headers['Authorization'] = `Bearer ${result.json.token}`;
-    }
+    if (result.status !== 200) throw new Error(`login as ${role} failed: ${result.status}`);
+    this.apiSetBearer(world, (result.json as any).token);
   }
-  
-  async apiLoginAsUser(world: World): Promise<void> {
-    const result = await this.deps.api.sendJson('POST', '/auth/login', {
-      email: process.env.DEFAULT_USER_USERNAME,
-      password: process.env.DEFAULT_USER_PASSWORD,
-    });
-    
-    if (result.json?.token) {
-      world.headers['Authorization'] = `Bearer ${result.json.token}`;
-    }
-  }
-  
-  async uiLoginAsAdmin(world: World): Promise<void> {
-    await this.deps.ui.goto('/admin/login');
-    await this.deps.ui.fillLabel('Admin Key', process.env.ADMIN_KEY!);
-    await this.deps.ui.clickButton('Login');
-  }
-  
-  async uiLoginAsUser(world: World): Promise<void> {
-    await this.deps.ui.goto('/login');
-    await this.deps.ui.fillLabel('Email', process.env.DEFAULT_USER_USERNAME!);
-    await this.deps.ui.fillLabel('Password', process.env.DEFAULT_USER_PASSWORD!);
-    await this.deps.ui.clickButton('Sign In');
-  }
-  
-  apiSetBearer(world: World, token: string): void {
-    world.headers['Authorization'] = `Bearer ${token}`;
+
+  protected async uiLogin(world: World, role: string, creds: Credentials): Promise<void> {
+    await this.ui.goto('/login');
+    await this.ui.fillLabel('Email', creds.username);
+    await this.ui.fillLabel('Password', creds.password);
+    await this.ui.clickButton('Sign In');
+    await this.ui.expectUrlContains('/dashboard');
   }
 }
 ```
+
+Writing an `AuthPort` from scratch: implement `apiLoginAsAdmin`, `apiLoginAsUser`, `uiLoginAsAdmin`, `uiLoginAsUser`, `apiSetBearer`, plus the optional `apiLoginAs(world, role)` and `uiLoginAs(world, role, { reuseSession })` so the role steps work for any role.
+
+The `ui` passed to `createAuth` only works after a step requests the `ui` fixture (API login never starts a browser). Custom steps calling `auth.uiLoginAs` must include `ui`: `async ({ auth, ui, world }) => ...`.
 
 ### Using Custom Adapters
 

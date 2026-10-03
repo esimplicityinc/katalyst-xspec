@@ -118,6 +118,14 @@ interface UiPort {
   
   // Utilities
   zoomTo(scale: number): Promise<void>;
+
+  // Optional: used by UniversalAuthAdapter for UI login. Custom UiPorts may omit
+  // them; login then uses fillPlaceholder and skips the success check and session reuse.
+  fillField?(name: string, value: string, options?: { timeoutMs?: number }): Promise<boolean>;
+  waitForUrl?(predicate: (url: string) => boolean, timeoutMs: number): Promise<boolean>;
+  waitForText?(text: string, timeoutMs: number): Promise<boolean>;
+  saveSession?(): Promise<UiSessionState>;            // cookies + localStorage
+  restoreSession?(state: UiSessionState): Promise<void>;
 }
 
 type UiClickMode = 'click' | 'dispatch click' | 'force click' | 'force dispatch click';
@@ -216,14 +224,20 @@ interface AuthPort {
   
   uiLoginAsAdmin(world: World): Promise<void>;
   uiLoginAsUser(world: World): Promise<void>;
+
+  // Optional (0.8+): any named role. Steps fall back to the admin/user methods if absent.
+  apiLoginAs?(world: World, role: string): Promise<void>;
+  uiLoginAs?(world: World, role: string, options?: { reuseSession?: boolean }): Promise<void>;
 }
 ```
 
 ### Implementation Notes
 
 The default `UniversalAuthAdapter`:
-- API login: POSTs to `API_AUTH_LOGIN_PATH` with username/password from env
-- UI login: Fills form at `/login` with username/password
+- Credentials: `roles` option, then `AUTH_<ROLE>_USERNAME` / `AUTH_<ROLE>_PASSWORD` (older `DEFAULT_ADMIN_*` / `DEFAULT_USER_*` for admin/user). Missing ones throw, naming the variables.
+- API login: POSTs to `API_AUTH_LOGIN_PATH` (form or JSON per `API_AUTH_BODY`), reads the token (`API_AUTH_TOKEN_PATH`) or keeps the session cookie
+- UI login: fills the form at `UI_LOGIN_PATH` (fields by label, placeholder or `name`), checks the page left the login page, optionally reuses the session
+- Extend by subclassing and overriding `protected apiLogin` / `uiLogin`
 
 ## CleanupPort
 

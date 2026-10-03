@@ -301,7 +301,7 @@ function templates(packageName) {
       clean: 'rm -rf .features-gen node_modules test-results storage cucumber-report playwright-report'
     },
     devDependencies: {
-      '@esimplicitylabs/katalyst-xspec': '^0.7.0',
+      '@esimplicitylabs/katalyst-xspec': '^0.8.0',
       '@playwright/test': '^1.49.0',
       'playwright-bdd': '^9.1.0',
       dotenv: '^16.1.4',
@@ -335,7 +335,12 @@ function templates(packageName) {
 export const { test } = createBddTest({
   createApi: ({ apiRequest }) => new PlaywrightApiAdapter(apiRequest),
   createUi: ({ page }) => new PlaywrightUiAdapter(page),
-  createAuth: ({ api, ui }) => new UniversalAuthAdapter({ api, ui }),
+  // Logins read AUTH_<ROLE>_USERNAME / AUTH_<ROLE>_PASSWORD and the API_AUTH_* /
+  // UI_LOGIN_* settings in .env. You can also give credentials in code:
+  //   roles: { pm: { username: 'pm@example.com', password: process.env.PM_PASSWORD } },
+  // For SSO or unusual login flows, subclass UniversalAuthAdapter and override
+  // apiLogin() / uiLogin() (see the Authentication guide).
+  createAuth: ({ api, ui }) => new UniversalAuthAdapter({ api, ui, roles: {} }),
   createCleanup: () => new DefaultCleanupAdapter(),
   // TUI testing (optional - requires tui-tester and tmux installed)
   // Uncomment and configure for your CLI application:
@@ -370,7 +375,7 @@ export { test };
 
   const playwrightConfig = `import { defineConfig } from '@playwright/test';
 import { defineBddProject, cucumberReporter } from 'playwright-bdd';
-import { resolveWorkers, tagsForProject, resolveExtraTags } from '@esimplicitylabs/katalyst-xspec';
+import { resolveWorkers, tagsForProject, resolveExtraTags, resolveTargets, logTargets } from '@esimplicitylabs/katalyst-xspec';
 import dotenv from 'dotenv';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -387,6 +392,10 @@ if (fs.existsSync(localEnvPath)) {
 } else {
   dotenv.config();
 }
+
+// UI and API base URLs from FRONTEND_URL / API_BASE_URL (API falls back to the
+// frontend URL). Printed once per run; silence with KATALYST_XSPEC_QUIET=true.
+const targets = logTargets(resolveTargets());
 
 // Each project runs the feature files in its folder. Any scenario can use any
 // step (API, UI, shared). Tags are optional: use your own (e.g. @smoke) and
@@ -425,7 +434,7 @@ export default defineConfig({
   // Add tuiBdd to this array when TUI testing is enabled
   projects: [apiBdd, uiBdd /* , tuiBdd */],
   use: {
-    baseURL: process.env.BASE_URL || process.env.FRONTEND_URL || 'http://localhost:3000',
+    baseURL: targets.frontendUrl,
     headless: process.env.HEADLESS === 'false' ? false : true,
   },
 });
@@ -480,27 +489,45 @@ storage
 .env
 `; 
 
-  const envExample = `# API defaults used by the auth and cleanup helpers
-DEFAULT_ADMIN_USERNAME=admin@example.com
-DEFAULT_ADMIN_PASSWORD=changeme
-API_AUTH_LOGIN_PATH=/auth/login
-API_BASE_URL=http://localhost:3000
-
-# UI defaults
+  const envExample = `# ── Where to test ──────────────────────────────────────────────
+# Relative paths in steps ("/login", "/api/users") use these.
+# API_BASE_URL is optional: without it, API calls go to FRONTEND_URL.
 FRONTEND_URL=http://localhost:3000
+# API_BASE_URL=http://localhost:4000
 HEADLESS=true
 
-# Cleanup rules (JSON array)
+# ── Who logs in ────────────────────────────────────────────────
+# One pair per role. Use any role name: "pm" reads AUTH_PM_USERNAME/PASSWORD.
+#   Given I am authenticated as "admin" via API
+#   Given I am logged in as "admin"
+AUTH_ADMIN_USERNAME=admin@example.com
+AUTH_ADMIN_PASSWORD=changeme
+# AUTH_USER_USERNAME=user@example.com
+# AUTH_USER_PASSWORD=changeme
+
+# ── API login (defaults shown) ─────────────────────────────────
+# API_AUTH_LOGIN_PATH=/auth/login
+# API_AUTH_BODY=form                 # or json
+# API_AUTH_USERNAME_FIELD=username   # e.g. email
+# API_AUTH_PASSWORD_FIELD=password
+# API_AUTH_TOKEN_PATH=access_token   # e.g. data.token; default tries common names.
+#                                    # No token but a session cookie also works.
+
+# ── UI login (defaults shown) ──────────────────────────────────
+# UI_LOGIN_PATH=/login
+# UI_USERNAME_FIELD=Username         # label, placeholder or name of the field
+# UI_PASSWORD_FIELD=Password
+# UI_LOGIN_BUTTON=Login
+# UI_LOGIN_SUCCESS_URL=/dashboard    # default: any page other than the login page
+# UI_LOGIN_SUCCESS_TEXT=Welcome      # use if the URL doesn't change after login
+# UI_SESSION_REUSE=true              # "I am logged in as" reuses the session
+
+# ── Other ──────────────────────────────────────────────────────
 # CLEANUP_RULES=[{"varMatch":"user","path":"/api/users/{id}"}]
-
-# TUI testing (optional)
-# Set DEBUG=true to see TUI tester output
-DEBUG=false
-
-# Worker configuration
-# Set to a number for explicit worker count, or "auto" to let Playwright decide
-# In CI, defaults to 1 for stability unless explicitly overridden
-# WORKERS=auto
+# TEST_TAGS=@smoke                   # run only scenarios with these tags
+# WORKERS=auto                       # defaults to 1 in CI
+# KATALYST_XSPEC_QUIET=true          # don't print the targets line
+# DEBUG=false                        # TUI tester output
 `;
 
   const readme = `# ${packageName}

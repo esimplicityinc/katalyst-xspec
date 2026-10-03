@@ -188,13 +188,15 @@ Check test output for cleanup warnings. Enable verbose logging:
 DEBUG=cleanup npm test
 ```
 
-Ensure cleanup auth is configured. Set the admin credentials in `.env`:
+Ensure cleanup auth is configured. Cleanup logs in as the `admin` role with the same `API_AUTH_*` settings as the login steps. Set the admin credentials in `.env`:
 
 ```bash
-DEFAULT_ADMIN_USERNAME=admin@example.com
-DEFAULT_ADMIN_PASSWORD=changeme
-API_AUTH_LOGIN_PATH=/auth/login
+AUTH_ADMIN_USERNAME=admin@example.com
+AUTH_ADMIN_PASSWORD=changeme
+# API_AUTH_LOGIN_PATH=/auth/login   # default
 ```
+
+Without admin credentials, cleanup still runs, but unauthenticated.
 
 Or use a static token:
 
@@ -318,24 +320,47 @@ const count = parseInt(world.vars['count'], 10);
 
 ---
 
+## Login Issues
+
+Login steps (`Given I am authenticated as "pm" via API`, `Given I am logged in as "pm"`, …) fail right away with a message naming what to fix. Missing credentials are an error, not a warning.
+
+| Message | Fix |
+|---------|-----|
+| `No username for role "x"` | Set `AUTH_X_USERNAME` / `AUTH_X_PASSWORD` (check the role spelling) |
+| `API login as "x" failed: POST /auth/login returned 401` | Wrong credentials, or wrong `API_AUTH_BODY` / field names; the message includes the response body |
+| `returned 404` | Wrong `API_AUTH_LOGIN_PATH`, or the API base URL is wrong; check the `katalyst-xspec targets:` line |
+| `returned 200 but no token found` | Set `API_AUTH_TOKEN_PATH` to where the token is |
+| `No username field "Username" on /login` | Set `UI_USERNAME_FIELD` to the field's label, placeholder or `name`, or fix `UI_LOGIN_PATH` |
+| `UI login as "x" stayed on /login` | Wrong credentials, or the app doesn't change URL after login: set `UI_LOGIN_SUCCESS_TEXT` |
+| Logged out in a later scenario | A previous scenario ended the shared session: use `When I log in as "x" in UI` there, or `UI_SESSION_REUSE=false` |
+| `UI login needs the browser` | A custom step called `auth.uiLoginAs` without the `ui` fixture: add `ui` to its parameters |
+
+See the [Authentication guide](./guides/authentication.md#troubleshooting).
+
+---
+
 ## Configuration Issues
 
 ### Tests hitting wrong environment
 
-Multiple environment variables control base URLs.
+Each run starts by printing where tests point, and which variable each URL came from:
 
-**Priority order:**
-1. `API_BASE_URL` - Explicit API URL
-2. `FRONTEND_URL` - UI testing URL
-3. Playwright config `baseURL`
+```
+katalyst-xspec targets: UI http://localhost:3000 (FRONTEND_URL) | API http://localhost:3000 (FRONTEND_URL)
+```
+
+- UI steps use `FRONTEND_URL` (older alias `BASE_URL`), default `http://localhost:3000`.
+- API steps use `API_BASE_URL` (older aliases `TARGET_BASE_URL`, `TARGET_PORT`). If none is set, they go to `FRONTEND_URL`, in any project.
+- Absolute URLs in steps always go where they say.
+
+See [Configuration](./reference/api/configuration.md#where-tests-point) for the full order. `KATALYST_XSPEC_QUIET=true` hides the line.
 
 **Solution:**
 
 Create environment-specific `.env` files:
 
 ```bash
-# .env.development
-API_BASE_URL=http://localhost:3000
+# .env.development (API on the same origin)
 FRONTEND_URL=http://localhost:3000
 
 # .env.staging
@@ -482,6 +507,7 @@ If your issue isn't covered here:
 
 ## Related Topics
 
+- [Authentication](./guides/authentication.md) - Roles and login settings
 - [Installation](./getting-started/installation.md)
 - [Quick Start](./getting-started/quick-start.md)
 - [Upgrading](./guides/upgrading.md)

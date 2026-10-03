@@ -97,20 +97,22 @@ cp .env.example .env
 Edit `.env` with your settings:
 
 ```bash
-# API Configuration
-API_BASE_URL=http://localhost:3000
-
-# Authentication (required -- no hardcoded defaults)
-DEFAULT_ADMIN_USERNAME=admin@example.com
-DEFAULT_ADMIN_PASSWORD=changeme
-DEFAULT_USER_USERNAME=user@example.com
-DEFAULT_USER_PASSWORD=changeme
-API_AUTH_LOGIN_PATH=/auth/login
-
-# UI Configuration
+# Where to test
 FRONTEND_URL=http://localhost:3000
-BASE_URL=http://localhost:3000
+# API_BASE_URL=http://localhost:4000   # only if the API is on another origin
 HEADLESS=true
+
+# Who logs in: AUTH_<ROLE>_USERNAME / AUTH_<ROLE>_PASSWORD, any role name
+AUTH_ADMIN_USERNAME=admin@example.com
+AUTH_ADMIN_PASSWORD=changeme
+# AUTH_PM_USERNAME=pm@example.com      # for Given I am logged in as "pm"
+# AUTH_PM_PASSWORD=changeme
+
+# Login settings (defaults shown; change only if your app differs)
+# API_AUTH_LOGIN_PATH=/auth/login
+# API_AUTH_BODY=form                    # or json
+# UI_LOGIN_PATH=/login
+# UI_USERNAME_FIELD=Username            # label, placeholder or name
 
 # Cleanup Rules (required -- no built-in rules)
 # CLEANUP_RULES='[{"varMatch":"user","path":"/api/users/{id}"}]'
@@ -122,10 +124,12 @@ Then use relative paths in features, e.g. `Given I navigate to "/login"`, `When 
 
 | Steps used | Required Variables |
 |-----------|-------------------|
-| API steps with relative paths | `API_BASE_URL` |
-| UI steps with relative paths | `FRONTEND_URL` or `BASE_URL` |
-| Both in one scenario | Both API and UI variables |
-| Auth steps | `DEFAULT_*_USERNAME`, `DEFAULT_*_PASSWORD` |
+| UI steps with relative paths | `FRONTEND_URL` (older alias `BASE_URL`) |
+| API steps with relative paths | `API_BASE_URL`, or nothing extra if the API is on the `FRONTEND_URL` origin |
+| Both in one scenario | `FRONTEND_URL` (+ `API_BASE_URL` if the API is elsewhere) |
+| Login steps (`Given I am authenticated as "pm" via API`, `Given I am logged in as "pm"`) | `AUTH_PM_USERNAME`, `AUTH_PM_PASSWORD` (one pair per role) |
+
+Missing credentials fail the login step with a message naming the variables. Each run prints `katalyst-xspec targets: UI … | API …` showing where tests point. Login settings: docs/guides/authentication.md.
 
 ## Step 4: Write Your First Test
 
@@ -161,7 +165,7 @@ Any scenario can mix API and UI steps — no tag or separate project needed. Put
 Feature: User Workflow
 
   Scenario: Create via API, verify in UI
-    Given I am authenticated as an admin via API
+    Given I am authenticated as "admin" via API
     When I POST "/users" with JSON body:
       """
       { "name": "Test User" }
