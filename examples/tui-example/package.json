@@ -3,18 +3,19 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Example project demonstrating @esimplicitylabs/katalyst-xspec TUI testing",
+  "description": "Terminal UI testing with @esimplicitylabs/katalyst-xspec",
   "scripts": {
-    "test": "playwright test",
-    "test:debug": "DEBUG=tui-tester playwright test"
-  },
-  "dependencies": {
-    "@esimplicitylabs/katalyst-xspec": "^0.7.0",
-    "@playwright/test": "^1.49.0",
-    "playwright-bdd": "^9.1.0",
-    "tui-tester": "^1.0.0"
+    "test": "bddgen && playwright test",
+    "test:debug": "DEBUG=true bddgen && DEBUG=true playwright test"
   },
   "devDependencies": {
+    "@esimplicitylabs/katalyst-xspec": "^0.7.1",
+    "@playwright/test": "^1.49.0",
+    "playwright-bdd": "^9.1.0",
+    "tui-tester": "^0.3.0",
     "typescript": "^5.6.0"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

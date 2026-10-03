@@ -4,24 +4,18 @@ import { resolveWorkers } from '@esimplicitylabs/katalyst-xspec';
 
 const testDir = defineBddConfig({
   features: 'features/**/*.feature',
-  steps: 'fixtures.ts',
+  steps: 'features/steps/**/*.ts',
 });
 
 export default defineConfig({
   testDir,
-  timeout: 30000,
-  retries: 0,
   workers: resolveWorkers(),
-  reporter: [['html', { open: 'never' }]],
+  reporter: [['list'], ['html', { open: 'never' }]],
   use: {
-    baseURL: process.env.UI_BASE_URL || 'https://the-internet.herokuapp.com',
-    trace: 'on-first-retry',
+    // Sauce Demo: a public shop built for test automation. Override with FRONTEND_URL.
+    baseURL: process.env.FRONTEND_URL || 'https://www.saucedemo.com',
     screenshot: 'only-on-failure',
+    trace: 'retain-on-failure',
   },
-  projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
-  ],
+  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
 });

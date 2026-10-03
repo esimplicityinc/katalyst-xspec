@@ -1,110 +1,33 @@
-# TUI Testing Example
+# TUI Example
 
-Demonstrates terminal UI testing with @esimplicitylabs/katalyst-xspec using common Unix commands.
+Terminal UI tests with `@esimplicitylabs/katalyst-xspec`. The app under test is `app.mjs`, a tiny interactive todo CLI; each scenario starts it in a fresh tmux session, types commands and checks the screen.
 
-## What This Example Shows
-
-- Spawning terminal processes
-- Sending input to terminal
-- Waiting for specific output
-- Testing interactive prompts
-- Terminal state assertions
-
-## Prerequisites
+## Requirements
 
 - Node.js >= 20
-- npm >= 9.0.0
-- Unix-like environment (macOS, Linux, WSL)
+- [tmux](https://github.com/tmux/tmux) (`brew install tmux` or `apt-get install tmux`)
+- macOS, Linux or WSL
 
-## Setup
+## Run it
 
 ```bash
-# Install dependencies
 npm install
-
-# Copy environment file (optional)
-cp .env.example .env
-```
-
-## Running Tests
-
-```bash
-# Run all tests
 npm test
-
-# Run with debug output
-npm run test:debug
+DEBUG=true npm test   # with tui-tester debug output
 ```
 
-## Feature Files
-
-### shell.feature
-Tests basic shell interactions:
-- Running commands
-- Checking output
-- Environment variables
-
-### interactive.feature
-Tests interactive terminal applications:
-- Text input
-- Navigation
-- Menu selection
-
-## Project Structure
+## Files
 
 ```
-tui-example/
-├── features/
-│   ├── shell.feature       # Basic shell tests
-│   └── interactive.feature # Interactive app tests
-├── fixtures.ts             # Test configuration
-├── playwright.config.ts    # Playwright setup
-├── package.json
-└── .env.example
+app.mjs                   # the CLI under test
+features/
+├── todo.feature          # start, add/list, complete, unknown command
+└── steps/
+    ├── fixtures.ts       # TuiTesterAdapter({ command: ['node', 'app.mjs'] })
+    └── steps.ts          # registers TUI + shared steps
+playwright.config.ts      # one worker (tmux sessions run one at a time)
 ```
 
-## Testing Your Own CLI
+To test your own CLI, change `command` in `features/steps/fixtures.ts`.
 
-1. Update `fixtures.ts` with your CLI path:
-
-```typescript
-export const { test, expect } = createBddTest({
-  createTui: () => new TuiTesterAdapter({
-    defaultCommand: './my-cli',
-  }),
-});
-```
-
-2. Write feature files for your CLI:
-
-```gherkin
-Feature: My CLI
-  Scenario: Run help command
-    When I spawn the terminal with "my-cli --help"
-    Then I should see "Usage: my-cli [options]" in terminal
-```
-
-## Customizing
-
-### Set Terminal Size
-
-Edit `.env`:
-
-```bash
-TUI_COLS=120
-TUI_ROWS=40
-```
-
-### Add Timeout for Slow Commands
-
-In feature file:
-
-```gherkin
-When I spawn the terminal with "slow-command"
-And I wait up to 30 seconds for "Done" in terminal
-```
-
-## Related Documentation
-
-- [TUI Testing Guide](../../docs/guides/tui-testing.md)
-- [TUI Steps Reference](../../docs/reference/steps/tui-steps.md)
+See the [TUI Testing guide](../../docs/guides/tui-testing.md) and [TUI steps](../../docs/reference/steps/tui-steps.md).

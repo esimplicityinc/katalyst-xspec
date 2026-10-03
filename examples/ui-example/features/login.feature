@@ -1,31 +1,27 @@
-Feature: Login Page
-  As a user
-  I want to test the login functionality
-  So that I can verify authentication works correctly
-
+Feature: Login
   Background:
-    Given I navigate to "/login"
+    Given I navigate to "/"
 
-  Scenario: Successful login with valid credentials
-    When I fill in "username" with "tomsmith"
-    And I fill in "password" with "SuperSecretPassword!"
-    And I click the "Login" button
-    Then I should see text "You logged into a secure area!"
-    And I should be on page "/secure"
+  Scenario: Standard user can log in
+    When I fill the placeholder "Username" with "standard_user"
+    And I fill the placeholder "Password" with "secret_sauce"
+    And I click the button "Login"
+    Then the URL should contain "/inventory.html"
+    And I should see text "Products"
 
-  Scenario: Failed login with invalid username
-    When I fill in "username" with "invaliduser"
-    And I fill in "password" with "SuperSecretPassword!"
-    And I click the "Login" button
-    Then I should see text "Your username is invalid!"
+  Scenario: Locked-out user sees an error
+    When I fill the placeholder "Username" with "locked_out_user"
+    And I fill the placeholder "Password" with "secret_sauce"
+    And I click the button "Login"
+    Then I should see text "Sorry, this user has been locked out."
 
-  Scenario: Failed login with invalid password
-    When I fill in "username" with "tomsmith"
-    And I fill in "password" with "wrongpassword"
-    And I click the "Login" button
-    Then I should see text "Your password is invalid!"
+  Scenario: Wrong password is rejected
+    When I fill the placeholder "Username" with "standard_user"
+    And I fill the placeholder "Password" with "nope"
+    And I click the button "Login"
+    Then I should see text "Username and password do not match any user in this service"
 
-  Scenario: Login form displays required elements
-    Then the element "#username" should be visible
-    And the element "#password" should be visible
-    And the element "button[type='submit']" should be visible
+  Scenario: Login form shows its fields
+    Then the element "[data-test='username']" should be visible
+    And the element "[data-test='password']" should be visible
+    And the element "[data-test='login-button']" should have attribute "value" equal to "Login"

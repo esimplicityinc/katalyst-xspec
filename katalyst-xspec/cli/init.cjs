@@ -576,8 +576,33 @@ To enable terminal user interface testing:
   };
 }
 
+const HELP = `
+Usage: npx @esimplicitylabs/katalyst-xspec init [dir] [options]
+
+Scaffold a new katalyst-xspec test project in [dir] (default: ./katalyst-xspec).
+Use "." for the current folder. The package name is taken from the folder name.
+
+Options:
+  --dir <dir>              Target directory (same as the positional [dir])
+  --force                  Overwrite existing files (.env is never touched; .env.example is merged)
+  --with-skills            Install Agent Skills without prompting
+  --no-skills              Skip Agent Skills without prompting
+  --skills-agents <list>   Comma-separated: opencode, claude-code, cursor, generic
+  -h, --help               Show this help message
+
+Examples:
+  npx @esimplicitylabs/katalyst-xspec init my-tests
+  npx @esimplicitylabs/katalyst-xspec init . --no-skills
+  npx @esimplicitylabs/katalyst-xspec init my-tests --with-skills --skills-agents opencode,claude-code
+`;
+
 async function main() {
-  const args = parseArgs(process.argv.slice(2));
+  const argv = process.argv.slice(2);
+  if (argv.includes('--help') || argv.includes('-h')) {
+    console.log(HELP);
+    return;
+  }
+  const args = parseArgs(argv);
   const targetDir = path.resolve(process.cwd(), args.dir);
   const detectedPm = await detectPackageManager(process.cwd());
   const pm = commandsFor(detectedPm);

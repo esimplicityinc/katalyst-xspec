@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.1] - 2026-10-02
+
+### Fixed
+
+- **`tui-tester` can be installed again.** The optional peer dependency asked for `tui-tester@^1.0.0`, a version that has never existed (the latest is 0.3.0), so following the TUI setup docs failed with `No matching version found`. The range is now `^0.3.0`, and the TUI adapter is verified against it by the new runnable TUI example.
+- **`katalyst-xspec init --help` prints help.** It used to ignore the flag and scaffold a `katalyst-xspec/` folder.
+
+### Docs
+
+- **The docs site root now redirects to `/docs/`.** It used to return 404.
+- **New CLI reference page** for `init`, `upgrade` and `stubs` and their options.
+- **`resolveApiRequestTarget()` and `KATALYST_XSPEC_FORCE_IPV4` are now documented** (Utilities and Configuration).
+- **The examples have been rewritten and actually run.** Before, they never registered their steps, passed options the adapters don't accept, imported a non-existent `DefaultAuthAdapter`, and used TUI steps that don't exist. Now:
+  - `api-example`: 12 scenarios against JSONPlaceholder.
+  - `ui-example`: 7 scenarios against Sauce Demo.
+  - `full-stack-example`: API and UI projects, a scenario that mixes both, and a `@smoke` filter.
+  - `tui-example`: drives an included todo CLI through tmux.
+
 ## [0.7.0] - 2026-10-02
 
 ### Breaking Changes

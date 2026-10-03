@@ -1,6 +1,6 @@
 {
   "name": "@esimplicitylabs/katalyst-xspec",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -58,7 +58,7 @@
   "peerDependencies": {
     "@playwright/test": "^1.49.0",
     "playwright-bdd": "^9.1.0",
-    "tui-tester": "^1.0.0",
+    "tui-tester": "^0.3.0",
     "typescript": "^5.6.0"
   },
   "peerDependenciesMeta": {

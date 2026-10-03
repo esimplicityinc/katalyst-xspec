@@ -5,22 +5,19 @@
   "type": "module",
   "description": "Example project demonstrating full-stack testing with @esimplicitylabs/katalyst-xspec",
   "scripts": {
-    "gen": "bddgen",
     "test": "bddgen && playwright test",
     "test:api": "bddgen && playwright test --project=api",
     "test:ui": "bddgen && playwright test --project=ui",
-    "test:tui": "bddgen && playwright test --project=tui",
-    "test:hybrid": "bddgen && playwright test --project=hybrid",
-    "test:headed": "bddgen && playwright test --headed",
-    "test:debug": "bddgen && PWDEBUG=1 playwright test"
-  },
-  "dependencies": {
-    "@esimplicitylabs/katalyst-xspec": "^0.7.0",
-    "@playwright/test": "^1.49.0",
-    "playwright-bdd": "^9.1.0",
-    "tui-tester": "^1.0.0"
+    "test:smoke": "TEST_TAGS=@smoke npm test",
+    "test:headed": "bddgen && playwright test --headed"
   },
   "devDependencies": {
+    "@esimplicitylabs/katalyst-xspec": "^0.7.1",
+    "@playwright/test": "^1.49.0",
+    "playwright-bdd": "^9.1.0",
     "typescript": "^5.6.0"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

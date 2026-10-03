@@ -1,111 +1,35 @@
-# API Testing Example
+# API Example
 
-Demonstrates REST API testing with @esimplicitylabs/katalyst-xspec using JSONPlaceholder as a mock API.
+API tests with `@esimplicitylabs/katalyst-xspec` against [JSONPlaceholder](https://jsonplaceholder.typicode.com), a free public fake REST API.
 
-## What This Example Shows
+## What it shows
 
-- GET requests and response validation
-- POST requests with JSON bodies
-- Response value assertions
-- Variable storage and interpolation
-- Using variables in subsequent requests
+- `GET`/`POST` requests and status assertions
+- JSON assertions (`the value at "address.city" should equal ...`)
+- Storing values and reusing them (`{userId}`)
+- Generated data (`I generate a UUID and store as ...`) and a Scenario Outline
 
-## Prerequisites
+## Run it
 
-- Node.js >= 20
-- npm >= 9.0.0
-
-## Setup
+Requires Node.js >= 20.
 
 ```bash
-# Install dependencies
 npm install
-
-# Copy environment file (optional)
-cp .env.example .env
-```
-
-## Running Tests
-
-```bash
-# Run all tests
 npm test
-
-# Run with visible browser (for debugging)
-npm run test:headed
-
-# Run with Playwright inspector
-npm run test:debug
 ```
 
-## Feature Files
-
-### users.feature
-Tests basic CRUD operations on the `/users` endpoint:
-- Fetch single user
-- List all users
-- Create new user (simulated - JSONPlaceholder returns mock response)
-
-### posts.feature
-Tests the `/posts` endpoint with:
-- Fetch posts for a user
-- Create a new post
-- Variable interpolation in requests
-
-## Project Structure
+## Files
 
 ```
-api-example/
-├── features/
-│   ├── users.feature     # User API tests
-│   └── posts.feature     # Posts API tests
-├── fixtures.ts           # Test configuration
-├── playwright.config.ts  # Playwright setup
-├── package.json
-└── .env.example
+features/
+├── users.feature         # users endpoints
+├── posts.feature         # posts endpoints, variables, outline
+└── steps/
+    ├── fixtures.ts       # createBddTest() with default adapters
+    └── steps.ts          # registers API + shared steps
+playwright.config.ts      # sets API_BASE_URL (default JSONPlaceholder)
 ```
 
-## Customizing
+To test your own API, run with `API_BASE_URL=https://api.example.com npm test`.
 
-### Use Different API
-
-Edit `.env`:
-
-```bash
-API_BASE_URL=https://your-api.example.com
-```
-
-### Add Authentication
-
-Update `fixtures.ts`:
-
-```typescript
-import { DefaultAuthAdapter } from '@esimplicitylabs/katalyst-xspec';
-
-export const { test, expect } = createBddTest({
-  createApi: (request) => new PlaywrightApiAdapter(request, {
-    baseUrl: process.env.API_BASE_URL,
-  }),
-  createAuth: () => new DefaultAuthAdapter({
-    loginPath: '/auth/login',
-    adminCredentials: {
-      username: process.env.DEFAULT_ADMIN_USERNAME,
-      password: process.env.DEFAULT_ADMIN_PASSWORD,
-    },
-  }),
-});
-```
-
-Then use in features:
-
-```gherkin
-Scenario: Authenticated request
-  Given I am authenticated as an admin via API
-  When I GET "/admin/users"
-  Then the response status should be 200
-```
-
-## Related Documentation
-
-- [API Testing Guide](../../docs/guides/api-testing.md)
-- [API Steps Reference](../../docs/reference/steps/api-steps.md)
+See the [API Testing guide](../../docs/guides/api-testing.md) and [API steps](../../docs/reference/steps/api-steps.md).

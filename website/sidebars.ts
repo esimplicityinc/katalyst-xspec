@@ -66,6 +66,7 @@ const sidebars: SidebarsConfig = {
             "reference/api/configuration",
           ],
         },
+        "reference/cli",
         {
           type: "category",
           label: "Step Reference",

@@ -11,8 +11,9 @@ Environment variables and configuration helpers.
 | `API_BASE_URL` | `'http://localhost:3000'` | Base URL for API requests |
 | `TARGET_BASE_URL` | - | Alternative API base URL |
 | `TARGET_PORT` | - | Port for localhost URL construction |
+| `KATALYST_XSPEC_FORCE_IPV4` | `true` | Set to `false` (or `0`) to stop rewriting `http://*.localhost` API targets to `127.0.0.1`. See [`resolveApiRequestTarget`](./utilities.md#resolveapirequesttarget). The pre-0.4 name `STACK_TESTS_FORCE_IPV4` also works. |
 
-**Priority:** `API_BASE_URL` > `TARGET_BASE_URL` > project baseURL > `TARGET_PORT` > default
+**Priority:** `API_BASE_URL` > `TARGET_BASE_URL` > the project's `baseURL` (only for projects whose name contains `api`) > `TARGET_PORT` > default
 
 ### Authentication
 

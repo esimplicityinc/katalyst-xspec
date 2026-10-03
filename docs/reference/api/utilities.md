@@ -422,6 +422,31 @@ console.log(`Available CPU cores: ${getCpuCount()}`);
 
 ---
 
+## Network
+
+### resolveApiRequestTarget
+
+Works out the `baseURL` and headers used by the `apiRequest` fixture. You only need it if you build your own request context.
+
+```typescript
+function resolveApiRequestTarget(
+  baseURL: string,
+  env?: Record<string, string | undefined>, // defaults to process.env
+): { baseURL: string; extraHTTPHeaders?: Record<string, string> };
+```
+
+macOS resolves `*.localhost` to `::1` (IPv6) first, but local kind/k3d ingresses usually listen on IPv4 only, so requests fail with `ECONNRESET`. For plain `http://*.localhost` URLs this connects to `127.0.0.1` instead and sends the original host as the `Host` header, so host-based ingress routing still matches.
+
+```typescript
+resolveApiRequestTarget('http://api.app.localhost:8080');
+// { baseURL: 'http://127.0.0.1:8080', extraHTTPHeaders: { Host: 'api.app.localhost:8080' } }
+
+resolveApiRequestTarget('http://localhost:3000');   // unchanged: { baseURL: 'http://localhost:3000' }
+resolveApiRequestTarget('https://app.localhost');   // unchanged (TLS needs the real hostname)
+```
+
+Left alone: bare `localhost` (dev servers often listen on `::1` only), `https:` URLs, and every other host. Set `KATALYST_XSPEC_FORCE_IPV4=false` to turn it off.
+
 ## Usage in Step Definitions
 
 ### Complete Example

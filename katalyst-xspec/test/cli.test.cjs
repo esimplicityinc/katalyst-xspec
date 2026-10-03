@@ -128,3 +128,20 @@ describe('katalyst-xspec upgrade --migrate', () => {
     }
   });
 });
+
+describe('katalyst-xspec init --help', () => {
+  const fs = require('node:fs');
+  const os = require('node:os');
+  it('prints usage and does not scaffold anything', () => {
+    const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'kx-help-'));
+    try {
+      const r = spawnSync(process.execPath, [BIN, 'init', '--help'], { cwd, encoding: 'utf8' });
+      assert.equal(r.status, 0, r.stderr);
+      assert.match(r.stdout, /katalyst-xspec init \[dir\]/);
+      assert.match(r.stdout, /--with-skills/);
+      assert.deepEqual(fs.readdirSync(cwd), []);
+    } finally {
+      fs.rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+});

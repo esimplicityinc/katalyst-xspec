@@ -1,120 +1,36 @@
-# UI Testing Example
+# UI Example
 
-Demonstrates browser UI testing with @esimplicitylabs/katalyst-xspec using The Internet (Heroku) as a test application.
+Browser tests with `@esimplicitylabs/katalyst-xspec` against [Sauce Demo](https://www.saucedemo.com), a public shop built for test automation.
 
-## What This Example Shows
+## What it shows
 
-- Page navigation
-- Form interactions (input, click, select)
-- Element visibility assertions
-- Text content verification
-- Screenshot capture
-- Handling alerts and prompts
+- Filling fields by placeholder and clicking buttons by name
+- Text, URL, visibility, attribute and input-value assertions
+- Selecting from a dropdown
+- Clicking by CSS selector (`[data-test='...']`)
 
-## Prerequisites
+## Run it
 
-- Node.js >= 20
-- npm >= 9.0.0
-- Playwright browsers
-
-## Setup
+Requires Node.js >= 20.
 
 ```bash
-# Install dependencies
 npm install
-
-# Install Playwright browsers
-npx playwright install chromium
-
-# Copy environment file (optional)
-cp .env.example .env
-```
-
-## Running Tests
-
-```bash
-# Run all tests
+npx playwright install chromium   # one-time browser download
 npm test
-
-# Run with visible browser
-npm run test:headed
-
-# Run with Playwright inspector
-npm run test:debug
 ```
 
-## Feature Files
-
-### login.feature
-Tests the login page:
-- Successful login
-- Failed login with invalid credentials
-- Form validation
-
-### checkboxes.feature
-Tests checkbox interactions:
-- Checking/unchecking boxes
-- Verifying checkbox state
-
-### dropdown.feature
-Tests dropdown selection:
-- Selecting options
-- Verifying selected values
-
-## Project Structure
+## Files
 
 ```
-ui-example/
-├── features/
-│   ├── login.feature       # Login form tests
-│   ├── checkboxes.feature  # Checkbox tests
-│   └── dropdown.feature    # Dropdown tests
-├── fixtures.ts             # Test configuration
-├── playwright.config.ts    # Playwright setup
-├── package.json
-└── .env.example
+features/
+├── login.feature         # valid, locked-out and wrong-password logins
+├── inventory.feature     # sorting, cart, product page
+└── steps/
+    ├── fixtures.ts       # createBddTest() with default adapters
+    └── steps.ts          # registers UI + shared steps
+playwright.config.ts      # baseURL (default Sauce Demo), Chromium project
 ```
 
-## Customizing
+To test your own app, run with `FRONTEND_URL=https://app.example.com npm test` and change the paths in the features.
 
-### Use Different Base URL
-
-Edit `.env`:
-
-```bash
-UI_BASE_URL=https://your-app.example.com
-```
-
-### Add More Browsers
-
-Edit `playwright.config.ts`:
-
-```typescript
-projects: [
-  {
-    name: 'chromium',
-    use: { ...devices['Desktop Chrome'] },
-  },
-  {
-    name: 'firefox',
-    use: { ...devices['Desktop Firefox'] },
-  },
-  {
-    name: 'webkit',
-    use: { ...devices['Desktop Safari'] },
-  },
-],
-```
-
-### Enable Visual Comparison
-
-```typescript
-use: {
-  screenshot: 'on',
-},
-```
-
-## Related Documentation
-
-- [UI Testing Guide](../../docs/guides/ui-testing.md)
-- [UI Steps Reference](../../docs/reference/steps/ui-steps.md)
+See the [UI Testing guide](../../docs/guides/ui-testing.md) and [UI steps](../../docs/reference/steps/ui-steps.md).

@@ -4,13 +4,13 @@ import { resolveWorkers } from '@esimplicitylabs/katalyst-xspec';
 
 const testDir = defineBddConfig({
   features: 'features/**/*.feature',
-  steps: 'fixtures.ts',
+  steps: 'features/steps/**/*.ts',
 });
 
 export default defineConfig({
   testDir,
-  timeout: 60000, // TUI tests may need longer timeout
-  retries: 0,
-  reporter: [['html', { open: 'never' }]],
-  workers: resolveWorkers({ testType: 'tui' }), // TUI tests always run sequentially
+  timeout: 60_000,
+  // TUI tests share tmux; run them one at a time.
+  workers: resolveWorkers({ testType: 'tui' }),
+  reporter: [['list'], ['html', { open: 'never' }]],
 });

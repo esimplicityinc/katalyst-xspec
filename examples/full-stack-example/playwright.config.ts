@@ -1,50 +1,25 @@
 import { defineConfig, devices } from '@playwright/test';
 import { defineBddProject, cucumberReporter } from 'playwright-bdd';
-import { resolveWorkers } from '@esimplicitylabs/katalyst-xspec';
+import { resolveWorkers, resolveExtraTags, tagsForProject } from '@esimplicitylabs/katalyst-xspec';
 
-// Define separate BDD projects for each test type
-const apiBdd = defineBddProject({
-  name: 'api',
-  features: 'features/api/**/*.feature',
-  steps: 'fixtures.ts',
-});
+// Public demo targets; override with API_BASE_URL / FRONTEND_URL.
+process.env.API_BASE_URL ??= 'https://jsonplaceholder.typicode.com';
+const frontendUrl = process.env.FRONTEND_URL || 'https://www.saucedemo.com';
 
-const uiBdd = defineBddProject({
-  name: 'ui',
-  features: 'features/ui/**/*.feature',
-  steps: 'fixtures.ts',
-});
+// Skips @Skip/@ignore and applies TEST_TAGS (e.g. TEST_TAGS=@smoke).
+const tags = tagsForProject({ extraTags: resolveExtraTags(process.env.TEST_TAGS) });
 
-const tuiBdd = defineBddProject({
-  name: 'tui',
-  features: 'features/tui/**/*.feature',
-  steps: 'fixtures.ts',
-});
-
-const hybridBdd = defineBddProject({
-  name: 'hybrid',
-  features: 'features/hybrid/**/*.feature',
-  steps: 'fixtures.ts',
-});
+// Each project runs the feature files in its folder.
+const api = defineBddProject({ name: 'api', features: 'features/api/**/*.feature', steps: 'features/steps/**/*.ts', tags });
+const ui = defineBddProject({ name: 'ui', features: 'features/ui/**/*.feature', steps: 'features/steps/**/*.ts', tags });
 
 export default defineConfig({
-  timeout: 60000,
-  retries: 0,
   workers: resolveWorkers(),
   reporter: [
-    ['html', { open: 'never' }],
+    ['list'],
     cucumberReporter('html', { outputFile: 'cucumber-report/index.html' }),
     cucumberReporter('json', { outputFile: 'cucumber-report/report.json' }),
   ],
-  use: {
-    baseURL: process.env.UI_BASE_URL || 'https://the-internet.herokuapp.com',
-    trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
-  },
-  projects: [
-    { ...apiBdd, use: { ...devices['Desktop Chrome'] } },
-    { ...uiBdd, use: { ...devices['Desktop Chrome'] } },
-    { ...tuiBdd, workers: resolveWorkers({ testType: 'tui' }) },
-    { ...hybridBdd, use: { ...devices['Desktop Chrome'] } },
-  ],
+  use: { baseURL: frontendUrl, screenshot: 'only-on-failure', trace: 'retain-on-failure' },
+  projects: [api, { ...ui, use: { ...devices['Desktop Chrome'], baseURL: frontendUrl } }],
 });

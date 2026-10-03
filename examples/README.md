@@ -1,156 +1,61 @@
 # @esimplicitylabs/katalyst-xspec Examples
 
-Runnable example projects demonstrating @esimplicitylabs/katalyst-xspec usage.
+Runnable example projects. The API and UI examples call public demo sites, so they pass with no setup.
 
-## Available Examples
+| Example | What it tests | Target |
+|---------|---------------|--------|
+| [api-example](./api-example/) | REST API requests and JSON assertions | [JSONPlaceholder](https://jsonplaceholder.typicode.com) |
+| [ui-example](./ui-example/) | Browser login, forms, dropdowns, cart | [Sauce Demo](https://www.saucedemo.com) |
+| [full-stack-example](./full-stack-example/) | API and UI projects, plus a scenario mixing both; `@smoke` grouping | both of the above |
+| [tui-example](./tui-example/) | An interactive command-line app driven through tmux | `app.mjs` (included) |
 
-| Example | Description | Steps Used |
-|---------|-------------|------------|
-| [api-example](./api-example/) | REST API testing | API, shared |
-| [ui-example](./ui-example/) | Browser UI testing | UI, shared |
-| [tui-example](./tui-example/) | Terminal UI testing | TUI, shared |
-| [full-stack-example](./full-stack-example/) | Combined API + UI + TUI | API, UI, TUI, shared |
+## Run one
 
-Steps are untagged, so any step works in any scenario; each project picks feature files by folder.
-
-## Quick Start
-
-### Running an Example
+Requires Node.js >= 20.
 
 ```bash
-# Navigate to example
-cd examples/api-example
-
-# Install dependencies
+cd examples/ui-example
 npm install
-
-# Run tests
+npx playwright install chromium   # UI examples only; one-time browser download
 npm test
 ```
 
-### Running with Real Services
+The TUI example also needs [tmux](https://github.com/tmux/tmux).
 
-Most examples use mock servers by default. To run against real services:
+## Layout
 
-```bash
-# Copy environment template
-cp .env.example .env
-
-# Edit with your values
-vim .env
-
-# Run tests
-npm test
-```
-
-## Prerequisites
-
-- Node.js >= 20
-- npm >= 9.0.0
-- Playwright browser for UI examples: `npx playwright install chromium`
-
-## Example Structure
-
-Each example follows this structure:
+Every example uses the same layout as a project created with `katalyst-xspec init`:
 
 ```
 example-name/
-├── features/              # Gherkin feature files
-│   └── *.feature
-├── steps/                 # Custom step definitions (if any)
-│   └── custom.steps.ts
-├── fixtures.ts            # Test fixture configuration
-├── playwright.config.ts   # Playwright configuration
-├── package.json
-├── tsconfig.json
-├── .env.example           # Environment template
-└── README.md              # Example-specific docs
+├── features/
+│   ├── *.feature           # scenarios
+│   └── steps/
+│       ├── fixtures.ts     # createBddTest(...) adapter wiring
+│       └── steps.ts        # registers the built-in steps
+├── playwright.config.ts
+├── package.json            # "test": "bddgen && playwright test"
+└── README.md
 ```
 
-## What Each Example Demonstrates
+Steps are untagged, so any registered step works in any scenario.
 
-### API Example
-- HTTP request methods (GET, POST, PUT, PATCH, DELETE)
-- Response assertions
-- Variable storage and interpolation
-- Authentication flow
-- Cleanup registration
+## Pointing an example at your own app
 
-### UI Example
-- Page navigation
-- Form interactions
-- Element assertions
-- Screenshot capture
-- Visual regression (optional)
+Set `API_BASE_URL` and/or `FRONTEND_URL` when running, e.g. `FRONTEND_URL=https://app.example.com npm test`, and change the paths in the feature files.
 
-### TUI Example
-- Terminal application spawning
-- Text input and navigation
-- Screen content assertions
-- Wizard/multi-step flows
-
-### Full-Stack Example
-- Cross-layer testing (API to seed, UI to verify)
-- Hybrid scenarios
-- Shared authentication
-- Complete user workflows
-
-## Creating Your Own Project
-
-Use the CLI to scaffold a new project:
+## Start your own project
 
 ```bash
-npx @esimplicitylabs/katalyst-xspec init my-project
-cd my-project
+npx @esimplicitylabs/katalyst-xspec init my-tests
+cd my-tests
 npm install
 npx playwright install chromium
 npm test
 ```
 
-## Troubleshooting
+## Related docs
 
-### Browser Not Found
-
-```bash
-npx playwright install chromium
-```
-
-### Port Already in Use
-
-```bash
-# Find process using port
-lsof -i :3000
-
-# Kill it
-kill -9 <PID>
-```
-
-### Tests Timeout
-
-Increase timeout in `playwright.config.ts`:
-
-```typescript
-export default defineConfig({
-  timeout: 60000, // 60 seconds
-});
-```
-
-## Contributing Examples
-
-To add a new example:
-
-1. Create directory in `examples/`
-2. Follow the standard structure
-3. Include `README.md` with:
-   - What the example demonstrates
-   - Prerequisites
-   - How to run
-4. Test that it runs standalone
-5. Submit PR
-
-## Related Documentation
-
-- [Getting Started Guide](../docs/getting-started/quick-start.md)
-- [API Testing Guide](../docs/guides/api-testing.md)
-- [UI Testing Guide](../docs/guides/ui-testing.md)
-- [TUI Testing Guide](../docs/guides/tui-testing.md)
+- [Quick Start](../docs/getting-started/quick-start.md)
+- [API Testing](../docs/guides/api-testing.md) · [UI Testing](../docs/guides/ui-testing.md) · [Hybrid Testing](../docs/guides/hybrid-testing.md) · [TUI Testing](../docs/guides/tui-testing.md)
+- [CLI reference](../docs/reference/cli.md)

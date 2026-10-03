@@ -1,153 +1,39 @@
-# Full-Stack Testing Example
+# Full-Stack Example
 
-Demonstrates comprehensive full-stack testing with @esimplicitylabs/katalyst-xspec, combining API, UI, and TUI testing in a single project.
+API and UI tests in one project, including a scenario that mixes both. Uses [JSONPlaceholder](https://jsonplaceholder.typicode.com) for the API and [Sauce Demo](https://www.saucedemo.com) for the UI.
 
-## What This Example Shows
+## What it shows
 
-- Multi-layer test organization by folder (one Playwright project per folder)
-- Hybrid testing (API + UI in same scenario)
-- Shared variable state across layers
-- Authentication across different layers
-- Cleanup and test isolation
-- Optional tag-based filtering (`TEST_TAGS`)
+- Two Playwright projects, `api` and `ui`, each running the feature files in its folder
+- A scenario that calls the API, stores a value, and types it into the UI (`features/ui/api-then-ui.feature`), with no special tags or setup
+- Your own tags for grouping: scenarios tagged `@smoke` can be run on their own
 
-## Prerequisites
+## Run it
 
-- Node.js >= 20
-- npm >= 9.0.0
-- Playwright browsers
-- Unix-like environment for TUI tests
-
-## Setup
+Requires Node.js >= 20.
 
 ```bash
-# Install dependencies
 npm install
-
-# Install Playwright browsers
-npx playwright install chromium
-
-# Copy environment file
-cp .env.example .env
+npx playwright install chromium   # one-time browser download
+npm test             # everything
+npm run test:api     # just features/api
+npm run test:ui      # just features/ui
+npm run test:smoke   # just @smoke scenarios (TEST_TAGS=@smoke)
 ```
 
-## Running Tests
-
-```bash
-# Run all tests
-npm test
-
-# Run only API tests
-npm run test:api
-
-# Run only UI tests
-npm run test:ui
-
-# Run only TUI tests
-npm run test:tui
-
-# Run hybrid tests
-npm run test:hybrid
-
-# Run with visible browser
-npm run test:headed
-
-# Run with debugger
-npm run test:debug
-```
-
-## Feature Files
-
-### api/users.feature
-API-only tests for user endpoints.
-
-### ui/login.feature
-UI-only tests for the login page.
-
-### tui/commands.feature
-TUI-only tests for terminal commands.
-
-### hybrid/user-journey.feature
-Cross-layer tests combining API and UI:
-- Create user via API
-- Verify user appears in UI
-- Clean up via API
-
-## Project Structure
+## Files
 
 ```
-full-stack-example/
-├── features/
-│   ├── api/
-│   │   └── users.feature     # API tests
-│   ├── ui/
-│   │   └── login.feature     # UI tests
-│   ├── tui/
-│   │   └── commands.feature  # TUI tests
-│   └── hybrid/
-│       └── user-journey.feature  # Cross-layer tests
-├── fixtures.ts               # All adapters configured
-├── playwright.config.ts      # Playwright setup
-├── package.json
-└── .env.example
+features/
+├── api/users.feature         # API scenarios
+├── ui/checkout.feature       # full checkout in the browser
+├── ui/api-then-ui.feature    # API + UI steps in one scenario
+└── steps/
+    ├── fixtures.ts           # createBddTest() with default adapters
+    └── steps.ts              # registers API, UI and shared steps
+playwright.config.ts          # api + ui projects, TEST_TAGS, cucumber reports
 ```
 
-## Folder Organization
+Reports are written to `cucumber-report/index.html`. Override targets with `API_BASE_URL` and `FRONTEND_URL`.
 
-Each folder is a Playwright project. Steps are untagged, so any step works in any folder; the folders just group scenarios.
-
-| Folder | Description | Adapters Used |
-|--------|-------------|---------------|
-| `features/api/` | API-only tests | ApiPort |
-| `features/ui/` | UI-only tests | UiPort |
-| `features/tui/` | TUI-only tests | TuiPort |
-| `features/hybrid/` | Scenarios mixing API and UI steps | Multiple ports |
-
-## Hybrid Testing Pattern
-
-```gherkin
-Scenario: Create user via API and verify in UI
-  # API layer - create test data
-  Given I am authenticated as an admin via API
-  When I POST "/users" with JSON body:
-    """
-    { "email": "test@example.com" }
-    """
-  And I store the value at "id" as "userId"
-  
-  # UI layer - verify the data
-  Given I navigate to "/admin/users"
-  Then I should see text "test@example.com"
-  
-  # Cleanup happens automatically via CleanupAdapter
-```
-
-## Configuration
-
-### adapters Configured
-
-This example configures all available adapters:
-
-1. **PlaywrightApiAdapter** - HTTP API testing
-2. **PlaywrightUiAdapter** - Browser automation
-3. **TuiTesterAdapter** - Terminal UI testing
-4. **DefaultAuthAdapter** - Authentication handling
-5. **DefaultCleanupAdapter** - Test data cleanup
-
-### Environment Variables
-
-See `.env.example` for all available configuration options.
-
-## Best Practices Demonstrated
-
-1. **Test Isolation**: Each scenario is independent
-2. **Automatic Cleanup**: Resources cleaned up after tests
-3. **Shared Variables**: Pass data between layers using variables
-4. **Project Selection**: Run one folder with `--project` (tags optional)
-5. **Configuration**: Environment-based settings
-
-## Related Documentation
-
-- [Hybrid Testing Guide](../../docs/guides/hybrid-testing.md)
-- [Architecture Concepts](../../docs/concepts/architecture.md)
-- [Tags](../../docs/concepts/tag-system.md)
+For terminal apps see the [TUI example](../tui-example/). More: [Hybrid Testing guide](../../docs/guides/hybrid-testing.md), [Tags](../../docs/concepts/tag-system.md).

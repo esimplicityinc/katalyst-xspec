@@ -2,18 +2,16 @@ import { defineConfig } from '@playwright/test';
 import { defineBddConfig } from 'playwright-bdd';
 import { resolveWorkers } from '@esimplicitylabs/katalyst-xspec';
 
+// JSONPlaceholder: a free public fake REST API. Override with API_BASE_URL.
+process.env.API_BASE_URL ??= 'https://jsonplaceholder.typicode.com';
+
 const testDir = defineBddConfig({
   features: 'features/**/*.feature',
-  steps: 'fixtures.ts',
+  steps: 'features/steps/**/*.ts',
 });
 
 export default defineConfig({
   testDir,
-  timeout: 30000,
-  retries: 0,
   workers: resolveWorkers(),
-  reporter: [['html', { open: 'never' }]],
-  use: {
-    trace: 'on-first-retry',
-  },
+  reporter: [['list'], ['html', { open: 'never' }]],
 });

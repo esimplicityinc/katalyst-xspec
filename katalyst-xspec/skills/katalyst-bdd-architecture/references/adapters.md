@@ -166,7 +166,7 @@ const test = createBddTest({
 ```bash
 # Admin credentials
 DEFAULT_ADMIN_USERNAME=admin@example.com
-DEFAULT_ADMIN_PASSWORD=admin123
+DEFAULT_ADMIN_PASSWORD=changeme
 
 # User credentials
 DEFAULT_USER_USERNAME=user@example.com
