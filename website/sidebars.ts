@@ -42,6 +42,7 @@ const sidebars: SidebarsConfig = {
       type: "category",
       label: "Guides",
       items: [
+        "guides/best-practices",
         "guides/api-testing",
         "guides/ui-testing",
         "guides/tui-testing",

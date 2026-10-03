@@ -1,5 +1,7 @@
 # Tags
 
+> For a recommended tag set and how to organize feature files, see [Best Practices](../guides/best-practices.md#tags).
+
 Tags are optional. Use them for your own grouping (`@smoke`, `@wip`, `@regression`, ...) and filtering. They don't decide which steps are available.
 
 ## How Scenarios Are Selected

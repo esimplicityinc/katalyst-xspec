@@ -36,6 +36,7 @@ npm test
 - [Tags](./concepts/tag-system.md) - Optional tags, filtering, folders
 
 ### Guides
+- [Best Practices](./guides/best-practices.md) - Organizing features, tags, data, CI
 - [API Testing](./guides/api-testing.md) - HTTP API testing
 - [UI Testing](./guides/ui-testing.md) - Browser automation
 - [TUI Testing](./guides/tui-testing.md) - Terminal UI testing
