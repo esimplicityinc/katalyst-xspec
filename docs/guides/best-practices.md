@@ -131,6 +131,8 @@ More detail: [Tags](../concepts/tag-system.md).
 
 ## Writing good scenarios
 
+> For why UI suites go flaky, the biggest anti-patterns, and what to ask developers for, see [Good UI Tests Don't Have to Suck](./testable-ui.md).
+
 **Describe what the user does and sees, not how the page is built.** Prefer labels, button text and placeholders over CSS selectors:
 
 ```gherkin

@@ -30,6 +30,7 @@ npm test
 
 ### Core Concepts
 - [Ports and Adapters, Explained](./concepts/ports-and-adapters.md) - The core idea in plain language, start here
+- [Why a Built-in Step Library](./concepts/step-library.md) - The thinking behind the steps you import
 - [Architecture](./concepts/architecture.md) - Ports & adapters in technical detail
 - [World State](./concepts/world-state.md) - Variables, headers, cleanup
 - [Test Lifecycle](./concepts/test-lifecycle.md) - Fixtures, hooks, teardown
@@ -37,6 +38,7 @@ npm test
 
 ### Guides
 - [Best Practices](./guides/best-practices.md) - Organizing features, tags, data, CI
+- [Good UI Tests Don't Have to Suck](./guides/testable-ui.md) - Making the UI testable, and the biggest anti-patterns
 - [API Testing](./guides/api-testing.md) - HTTP API testing
 - [UI Testing](./guides/ui-testing.md) - Browser automation
 - [TUI Testing](./guides/tui-testing.md) - Terminal UI testing

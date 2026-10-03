@@ -32,6 +32,7 @@ const sidebars: SidebarsConfig = {
       label: "Core Concepts",
       items: [
         "concepts/ports-and-adapters",
+        "concepts/step-library",
         "concepts/architecture",
         "concepts/world-state",
         "concepts/test-lifecycle",
@@ -43,6 +44,7 @@ const sidebars: SidebarsConfig = {
       label: "Guides",
       items: [
         "guides/best-practices",
+        "guides/testable-ui",
         "guides/api-testing",
         "guides/ui-testing",
         "guides/tui-testing",

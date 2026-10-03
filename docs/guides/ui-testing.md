@@ -1,5 +1,7 @@
 # UI Testing Guide
 
+> Before writing lots of UI tests, read [Good UI Tests Don't Have to Suck](./testable-ui.md): it covers making the app testable and the anti-patterns that make suites flaky.
+
 Comprehensive guide to browser-based UI testing with @esimplicitylabs/katalyst-xspec.
 
 ## Overview
