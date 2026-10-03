@@ -2,6 +2,8 @@
 
 @esimplicitylabs/katalyst-xspec is built on the **Ports and Adapters** (Hexagonal) architecture pattern, enabling clean separation of concerns and easy extensibility.
 
+> **New to this?** Read [Ports and Adapters, Explained](./ports-and-adapters.md) first. It covers the same idea in plain language, with an analogy, one step traced end to end, and two worked examples.
+
 ## Overview
 
 ```mermaid

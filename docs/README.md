@@ -29,7 +29,8 @@ npm test
 - [Project Setup](./getting-started/project-setup.md) - Playwright configuration
 
 ### Core Concepts
-- [Architecture](./concepts/architecture.md) - Ports & adapters pattern
+- [Ports and Adapters, Explained](./concepts/ports-and-adapters.md) - The core idea in plain language, start here
+- [Architecture](./concepts/architecture.md) - Ports & adapters in technical detail
 - [World State](./concepts/world-state.md) - Variables, headers, cleanup
 - [Test Lifecycle](./concepts/test-lifecycle.md) - Fixtures, hooks, teardown
 - [Tags](./concepts/tag-system.md) - Optional tags, filtering, folders

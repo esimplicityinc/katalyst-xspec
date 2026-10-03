@@ -31,6 +31,7 @@ const sidebars: SidebarsConfig = {
       type: "category",
       label: "Core Concepts",
       items: [
+        "concepts/ports-and-adapters",
         "concepts/architecture",
         "concepts/world-state",
         "concepts/test-lifecycle",

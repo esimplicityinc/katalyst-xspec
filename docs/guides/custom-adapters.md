@@ -2,6 +2,8 @@
 
 Create custom adapters to extend or replace default implementations.
 
+> If ports and adapters are new to you, start with [Ports and Adapters, Explained](../concepts/ports-and-adapters.md).
+
 ## Overview
 
 Adapters implement port interfaces, allowing you to:

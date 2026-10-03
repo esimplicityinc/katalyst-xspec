@@ -2,6 +2,8 @@
 
 Complete reference for all adapter implementations in @esimplicitylabs/katalyst-xspec.
 
+> If ports and adapters are new to you, start with [Ports and Adapters, Explained](../../concepts/ports-and-adapters.md).
+
 ## Overview
 
 Adapters implement port interfaces using specific technologies.

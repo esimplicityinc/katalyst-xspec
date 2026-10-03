@@ -2,6 +2,8 @@
 
 Complete reference for all port interfaces in @esimplicitylabs/katalyst-xspec.
 
+> If ports and adapters are new to you, start with [Ports and Adapters, Explained](../../concepts/ports-and-adapters.md).
+
 ## Overview
 
 Ports define the contracts that adapters must implement. They enable the Ports and Adapters (Hexagonal) architecture pattern.
