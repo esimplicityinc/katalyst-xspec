@@ -46,6 +46,7 @@ See the [Authentication guide](../../guides/authentication.md) for how these fit
 | `API_AUTH_USERNAME_FIELD` | `username` | Body field for the username |
 | `API_AUTH_PASSWORD_FIELD` | `password` | Body field for the password |
 | `API_AUTH_TOKEN_PATH` | common names | Where the token is in the response, e.g. `data.jwt` |
+| `API_AUTH_MODE` | `login` | `oidc`: API login gets a token from an OIDC provider (see [OIDC login](#oidc-login)) |
 | `UI_LOGIN_PATH` | `/login` | Login page |
 | `UI_USERNAME_FIELD` | `Username` | Label, placeholder or `name` of the username field |
 | `UI_PASSWORD_FIELD` | `Password` | Label, placeholder or `name` of the password field |
@@ -74,9 +75,38 @@ See the [Authentication guide](../../guides/authentication.md) for how these fit
 ]
 ```
 
+### OIDC Login
+
+With `API_AUTH_MODE=oidc`, the API login steps and the default cleanup auth log in to an OIDC / OAuth2 provider with openid-client. The [Authentication guide](../../guides/authentication.md#oidc-login) explains each option.
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OIDC_ISSUER` | - | Issuer URL: endpoints are discovered and ID tokens validated (recommended) |
+| `OIDC_TOKEN_URL` | - | Token endpoint; alone it skips discovery (ID tokens are then dropped), with `OIDC_ISSUER` it overrides the discovered one |
+| `OIDC_CLIENT_ID` | - | Client ID (required). Per role: `AUTH_<ROLE>_CLIENT_ID` |
+| `OIDC_CLIENT_SECRET` | - | Client secret. Per role: `AUTH_<ROLE>_CLIENT_SECRET` |
+| `OIDC_CLIENT_PRIVATE_KEY` | - | PEM or JWK (or a path to one) for `private_key_jwt`. Per role: `AUTH_<ROLE>_CLIENT_PRIVATE_KEY` |
+| `OIDC_CLIENT_KEY_ID` / `OIDC_CLIENT_SIGNING_ALG` | - / from the key | `kid` and JWS algorithm for `private_key_jwt` |
+| `OIDC_CLIENT_AUTH` | `post` with a secret, `private_key_jwt` with a key, else `none` | `post`, `basic`, `client_secret_jwt`, `private_key_jwt`, `tls_client_auth`, `none` |
+| `OIDC_GRANT_TYPE` | `password` | `password`, `client_credentials` or `authorization_code` (PKCE) |
+| `OIDC_SCOPE` | - (`openid` for the code flow) | Requested scopes |
+| `OIDC_AUDIENCE` | - | Sent as `audience` (Auth0 and others) |
+| `OIDC_REDIRECT_URI` | - | Registered redirect URI, required for `authorization_code` (nothing needs to listen on it) |
+| `OIDC_CODE_FLOW_DRIVER` | `http` | `http` (form submit, no browser) or `browser` (headless Chromium) |
+| `OIDC_LOGIN_USERNAME_FIELD` / `OIDC_LOGIN_PASSWORD_FIELD` / `OIDC_LOGIN_BUTTON` | auto | Login page fields for the code flow |
+| `OIDC_LOGIN_TIMEOUT` | `15000` | Browser driver timeout (ms) |
+| `OIDC_TLS_CERT` + `OIDC_TLS_KEY`, or `OIDC_TLS_PFX` | - | Client certificate (mTLS), sent to the provider and the API |
+| `OIDC_TLS_PASSPHRASE` | - | Passphrase for the key or PFX |
+| `OIDC_TLS_INSECURE` | `false` | Don't verify the provider's server certificate |
+| `OIDC_MTLS_ENDPOINT_ALIASES` | `false` | Use the provider's `mtls_endpoint_aliases` |
+| `OIDC_DPOP` / `OIDC_DPOP_ALG` | `false` / `ES256` | DPoP-bound tokens with a proof on every API request |
+| `OIDC_TOKEN_CACHE` | `true` | Reuse sessions per worker until they expire |
+| `OIDC_REFRESH` | `true` | Renew expiring tokens with the refresh token |
+| `OIDC_VERIFY_ID_TOKEN` | `true` | Check ID token signatures against the provider's keys |
+
 ### OIDC Cleanup Auth (Optional)
 
-For consumers using `createOidcCleanupAuth()` in their fixture setup:
+For consumers using `createOidcCleanupAuth()` in their fixture setup. You don't need it with `API_AUTH_MODE=oidc`, which already covers cleanup. Note that this helper's `OIDC_GRANT_TYPE` default is `client_credentials`:
 
 | Variable | Default | Description |
 |----------|---------|-------------|

@@ -37,9 +37,12 @@ See the [Authentication guide](../../guides/authentication.md) for all settings.
 
 If credentials are missing, the step fails with a message naming the variables to set. A failed login fails with the status, the response, and the settings to check.
 
+With `API_AUTH_MODE=oidc`, the role logs in to an OIDC provider instead (password, client credentials or authorization code + PKCE). Later API steps send the token, refreshed when it expires, with a DPoP proof per request when `OIDC_DPOP=true`. See [OIDC login](../../guides/authentication.md#oidc-login).
+
 **Environment Variables:**
 - `AUTH_<ROLE>_USERNAME` / `AUTH_<ROLE>_PASSWORD`
 - `API_AUTH_LOGIN_PATH`, `API_AUTH_BODY`, `API_AUTH_USERNAME_FIELD`, `API_AUTH_PASSWORD_FIELD`, `API_AUTH_TOKEN_PATH`
+- `API_AUTH_MODE=oidc` and the `OIDC_*` settings
 
 **Example:**
 ```gherkin
@@ -100,6 +103,40 @@ Scenario: Use stored token
   Given I set variable "token" to "eyJhbG..."
   Given I set bearer token from variable "token"
   When I GET "/protected"
+  Then the response status should be 200
+```
+
+---
+
+### Then the ID token claim {string} should equal {string}
+
+Checks a claim of the ID token from the last OIDC login (`API_AUTH_MODE=oidc`). Claims are validated before use (issuer, audience, expiry, nonce, signature). This needs `OIDC_ISSUER` and `openid` in `OIDC_SCOPE`.
+
+**Parameters:**
+| Name | Type | Description |
+|------|------|-------------|
+| path | string | Claim name or path, e.g. `email`, `realm_access.roles[0]` |
+| expected | string | Expected value; `true`/`false`/`null`/numbers are parsed, `{var}` is interpolated |
+
+**Example:**
+```gherkin
+Scenario: Logged in as the right user
+  Given I am authenticated as "pm" via API
+  Then the ID token claim "email" should equal "pm@example.com"
+```
+
+---
+
+### Then I store the ID token claim {string} as {string}
+
+Stores an ID token claim in a variable (objects and arrays as JSON).
+
+**Example:**
+```gherkin
+Scenario: Fetch my own profile
+  Given I am authenticated as "pm" via API
+  And I store the ID token claim "sub" as "userId"
+  When I GET "/users/{userId}"
   Then the response status should be 200
 ```
 

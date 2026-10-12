@@ -18,9 +18,13 @@ export class MissingCredentialsError extends Error {
   }
 }
 
+export function roleEnvPrefix(role: string): string {
+  return `AUTH_${role.trim().toUpperCase().replace(/[^A-Z0-9]+/g, '_').replace(/^_|_$/g, '')}`;
+}
+
 export function roleEnvKeys(role: string): { username: string; password: string } {
-  const key = role.trim().toUpperCase().replace(/[^A-Z0-9]+/g, '_').replace(/^_|_$/g, '');
-  return { username: `AUTH_${key}_USERNAME`, password: `AUTH_${key}_PASSWORD` };
+  const prefix = roleEnvPrefix(role);
+  return { username: `${prefix}_USERNAME`, password: `${prefix}_PASSWORD` };
 }
 
 const LEGACY_KEYS: Record<string, { username: string[]; password: string[] }> = {

@@ -251,6 +251,11 @@ const targets = logTargets(resolveTargets());
 
 ## Version History
 
+### 0.9.0
+
+- OIDC login for the API steps with `API_AUTH_MODE=oidc`: password, client credentials, and authorization code + PKCE grants; client secret, signed JWT, `private_key_jwt` and mTLS client authentication; DPoP; refresh tokens; validated ID token claims. See [OIDC login](./authentication.md#oidc-login).
+- No breaking changes. `openid-client` is a new dependency, loaded only in OIDC mode.
+
 ### 0.8.0
 
 - Role-based login: `AUTH_<ROLE>_*` credentials, new role steps, configurable API and UI login, UI session reuse.

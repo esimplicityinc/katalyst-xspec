@@ -5,6 +5,11 @@ import { initWorld, type World } from './world';
 import { resolveApiRequestTarget } from './network';
 import { resolveApiBaseUrl } from './targets';
 import { buildApiLoginRequest, extractToken } from './auth/api-login';
+import { isOidcMode, oidcNeedsUserCredentials, readOidcTls } from './auth/oidc/settings';
+import { OidcClient } from './auth/oidc/client';
+import { clientCertificateFor } from './auth/oidc/transport';
+import { resolveCredentials } from './auth/credentials';
+import { withApiRequestAuth } from './auth/request-auth';
 import type { ApiPort } from './ports/api.port';
 import type { UiPort } from './ports/ui.port';
 import type { AuthPort } from './ports/auth.port';
@@ -22,7 +27,13 @@ let cachedAdminToken: string | undefined;
  * Consumers can provide their own implementation (e.g., Keycloak, Auth0, Okta)
  * via the `getCleanupAuth` option in createBddTest().
  */
-export type CleanupAuthProvider = (request: APIRequestContext) => Promise<Record<string, string>>;
+export type CleanupAuthProvider = (
+  request: APIRequestContext,
+  /** The cleanup request about to be sent (absolute URL), for providers that sign each request (DPoP). */
+  target?: { method: string; url: string },
+) => Promise<Record<string, string>>;
+
+let cleanupOidc: OidcClient | undefined;
 
 /**
  * Default cleanup auth: attempts a form-based login to the API.
@@ -31,9 +42,10 @@ export type CleanupAuthProvider = (request: APIRequestContext) => Promise<Record
  * or DEFAULT_ADMIN_*) and the same API_AUTH_* settings as the API login steps.
  *
  * If a static CLEANUP_AUTH_TOKEN is set, uses that directly (no login needed).
+ * With API_AUTH_MODE=oidc, gets the admin token from the OIDC provider.
  * If credentials are not configured, returns empty headers (cleanup runs unauthenticated).
  */
-async function defaultGetAdminHeaders(request: APIRequestContext): Promise<Record<string, string>> {
+async function defaultGetAdminHeaders(request: APIRequestContext, target?: { method: string; url: string }): Promise<Record<string, string>> {
   // Fast path: reuse cached token
   if (cachedAdminToken) {
     return { Authorization: `Bearer ${cachedAdminToken}` };
@@ -44,6 +56,26 @@ async function defaultGetAdminHeaders(request: APIRequestContext): Promise<Recor
   if (staticToken) {
     cachedAdminToken = staticToken;
     return { Authorization: `Bearer ${staticToken}` };
+  }
+
+  // OIDC mode: same provider settings as the API login steps; sessions are cached and refreshed.
+  if (isOidcMode()) {
+    let creds: { username: string; password: string } | undefined;
+    if (oidcNeedsUserCredentials()) {
+      try {
+        creds = resolveCredentials('admin');
+      } catch {
+        return {}; // No admin credentials -- cleanup runs unauthenticated.
+      }
+    }
+    try {
+      cleanupOidc ??= new OidcClient();
+      const session = await cleanupOidc.login('admin', creds);
+      return target ? session.requestHeaders(target.method, target.url) : { Authorization: `${session.scheme} ${session.token}` };
+    } catch (err) {
+      console.warn(`cleanup auth failed: ${(err as Error).message}`);
+      return {};
+    }
   }
 
   const username =
@@ -98,7 +130,7 @@ export type CreateBddTestOptions = {
    * Build the auth adapter. `ui` is available to UI login methods once a step
    * requests the `ui` fixture; API login never starts a browser.
    */
-  createAuth?: (ctx: CreateContext & { api: ApiPort; ui: UiPort }) => AuthPort;
+  createAuth?: (ctx: CreateContext & { api: ApiPort; ui: UiPort; apiBaseUrl: string }) => AuthPort;
   createCleanup?: (ctx: CreateContext) => CleanupPort;
   /**
    * Custom auth provider for cleanup operations.
@@ -159,7 +191,7 @@ export function createBddTest(options: CreateBddTestOptions = {}) {
   const {
     createApi = ({ apiRequest }) => new PlaywrightApiAdapter(apiRequest),
     createUi = ({ page }) => new PlaywrightUiAdapter(page),
-    createAuth = ({ api, ui }) => new UniversalAuthAdapter({ api, ui }),
+    createAuth = ({ api, ui, apiBaseUrl }) => new UniversalAuthAdapter({ api, ui, apiBaseUrl }),
     createCleanup = () => new DefaultCleanupAdapter(),
     getCleanupAuth = defaultGetAdminHeaders,
     createTui,
@@ -174,6 +206,7 @@ export function createBddTest(options: CreateBddTestOptions = {}) {
     cleanup: CleanupPort;
     tui: TuiPort | undefined;
     apiRequest: APIRequestContext;
+    apiBaseUrl: string;
     uiBinding: { current?: UiPort };
   }>({
     // Lets `auth` reach the UI adapter without depending on `page`, so API-only
@@ -182,7 +215,7 @@ export function createBddTest(options: CreateBddTestOptions = {}) {
       await use({});
     },
 
-    world: async ({ apiRequest }, use) => {
+    world: async ({ apiRequest, apiBaseUrl }, use) => {
       const w = worldFactory();
       await use(w);
 
@@ -190,7 +223,7 @@ export function createBddTest(options: CreateBddTestOptions = {}) {
       if (!w.cleanup.length) return;
 
       for (const item of [...w.cleanup].reverse()) {
-        const adminHeaders = await getCleanupAuth(apiRequest);
+        const adminHeaders = await getCleanupAuth(apiRequest, { method: item.method, url: new URL(item.path, apiBaseUrl).href });
         const headers = { ...adminHeaders, ...(item.headers || {}) };
         // Add Content-Type for JSON body
         if (item.body !== undefined) {
@@ -217,14 +250,23 @@ export function createBddTest(options: CreateBddTestOptions = {}) {
       }
     },
 
-    apiRequest: async ({ playwright }, use, testInfo) => {
-      const baseURL = resolveApiBaseUrl({
-        projectName: String(testInfo.project.name || ''),
-        projectBaseURL: testInfo.project.use?.baseURL as string | undefined,
-      });
+    apiBaseUrl: async ({}, use, testInfo) => {
+      await use(
+        resolveApiBaseUrl({
+          projectName: String(testInfo.project.name || ''),
+          projectBaseURL: testInfo.project.use?.baseURL as string | undefined,
+        }),
+      );
+    },
 
+    apiRequest: async ({ playwright, apiBaseUrl }, use) => {
+      // OIDC with a client certificate: present it to the API too (certificate-bound tokens).
+      const cert = isOidcMode() ? clientCertificateFor(new URL(apiBaseUrl).origin, readOidcTls()) : undefined;
       // Forces IPv4 for http *.localhost targets (kind ingress); see network.ts.
-      const ctx = await playwright.request.newContext(resolveApiRequestTarget(baseURL));
+      const ctx = await playwright.request.newContext({
+        ...resolveApiRequestTarget(apiBaseUrl),
+        ...(cert ? { clientCertificates: [cert] } : {}),
+      });
       try {
         await use(ctx);
       } finally {
@@ -232,8 +274,9 @@ export function createBddTest(options: CreateBddTestOptions = {}) {
       }
     },
 
-    api: async ({ apiRequest }, use) => {
-      await use(createApi({ apiRequest } as CreateContext));
+    // Requests carrying the scenario's OIDC token get refreshed tokens and DPoP proofs, also from custom steps.
+    api: async ({ apiRequest, world }, use) => {
+      await use(withApiRequestAuth(createApi({ apiRequest } as CreateContext), () => world));
     },
 
     cleanup: async ({ apiRequest }, use) => {
@@ -246,8 +289,10 @@ export function createBddTest(options: CreateBddTestOptions = {}) {
       await use(ui);
     },
 
-    auth: async ({ api, apiRequest, uiBinding }, use) => {
-      await use(createAuth({ api, apiRequest, ui: lazyUi(uiBinding) } as CreateContext & { api: ApiPort; ui: UiPort }));
+    auth: async ({ api, apiRequest, apiBaseUrl, uiBinding }, use) => {
+      await use(
+        createAuth({ api, apiRequest, apiBaseUrl, ui: lazyUi(uiBinding) } as CreateContext & { api: ApiPort; ui: UiPort; apiBaseUrl: string }),
+      );
     },
 
     /**

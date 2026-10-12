@@ -1,6 +1,6 @@
 {
   "name": "@esimplicitylabs/katalyst-xspec",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -68,6 +68,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
+    "jose": "^6.2.12",
     "tsup": "^8.3.0",
     "tsx": "^4.19.2"
   },
@@ -76,5 +77,8 @@
   },
   "bin": {
     "katalyst-xspec": "bin/katalyst-xspec.cjs"
+  },
+  "dependencies": {
+    "openid-client": "^6.8.8"
   }
 }

@@ -2,6 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import type { ApiMethod, ApiPort } from '../ports/api.port';
 import type { World } from '../world';
 import { interpolate, tryParseJson } from '../utils';
+import { sendAuthenticated } from '../auth/request-auth';
 
 export function registerApiHttpSteps(test: any): void {
   const { When } = createBdd(test as any) as any;
@@ -14,7 +15,7 @@ export function registerApiHttpSteps(test: any): void {
   ): Promise<void> {
     const { api, world } = args;
     const path = interpolate(pathTemplate, world.vars);
-    const result = await api.sendJson(method, path, body, world.headers);
+    const result = await sendAuthenticated(api, world, method, path, body);
     world.lastStatus = result.status;
     world.lastText = result.text;
     world.lastJson = result.json;

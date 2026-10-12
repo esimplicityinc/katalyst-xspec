@@ -4,6 +4,10 @@ import type { UiPort, UiSessionState } from '../../ports/ui.port';
 import type { World } from '../../world';
 import { resolveCredentials, roleEnvKeys, type Credentials, type RoleCredentials } from '../../auth/credentials';
 import { apiLoginErrorMessage, buildApiLoginRequest, extractToken } from '../../auth/api-login';
+import { isOidcMode, oidcNeedsUserCredentials } from '../../auth/oidc/settings';
+import { OidcClient, type OidcSession } from '../../auth/oidc/client';
+import { createBrowserAuthorize, createHttpAuthorize, type AuthorizeRequest } from '../../auth/oidc/code-flow';
+import { resolveApiBaseUrl } from '../../targets';
 
 type Env = Record<string, string | undefined>;
 
@@ -14,6 +18,8 @@ export type UniversalAuthOptions = {
   roles?: RoleCredentials;
   /** Settings source; defaults to process.env. */
   env?: Env;
+  /** API base URL, used to sign DPoP proofs for relative paths. Defaults to API_BASE_URL resolution. */
+  apiBaseUrl?: string;
 };
 
 // Saved UI sessions, per worker process: role + username + login path -> state.
@@ -26,22 +32,28 @@ export function clearUiSessions(): void {
 
 /**
  * Logs in by role through the API or the UI, configured by environment
- * variables (see docs/guides/authentication.md).
+ * variables (see docs/guides/authentication.md). With API_AUTH_MODE=oidc, API
+ * logins get their token from an OIDC provider instead (see auth/oidc/).
  *
  * Extend it by subclassing and overriding `apiLogin` / `uiLogin` (e.g. for SSO
- * or a multi-step form); credentials, steps and session reuse keep working.
+ * or a multi-step form), or `oidcAuthorize` for an authorization code login
+ * page the built-in drivers can't handle (MFA, consent); credentials, steps
+ * and session reuse keep working.
  */
 export class UniversalAuthAdapter implements AuthPort {
   protected readonly api: ApiPort;
   protected readonly ui: UiPort;
   protected readonly roles?: RoleCredentials;
   protected readonly env: Env;
+  protected readonly apiBaseUrl: string;
+  private oidcClient?: OidcClient;
 
   constructor(options: UniversalAuthOptions) {
     this.api = options.api;
     this.ui = options.ui;
     this.roles = options.roles;
     this.env = options.env ?? process.env;
+    this.apiBaseUrl = options.apiBaseUrl ?? resolveApiBaseUrl({ env: this.env });
   }
 
   /** Credentials for a role; throws MissingCredentialsError with the variables to set. */
@@ -51,9 +63,15 @@ export class UniversalAuthAdapter implements AuthPort {
 
   apiSetBearer(world: World, token: string): void {
     world.headers = { ...(world.headers || {}), Authorization: `Bearer ${token}` };
+    delete world.apiAuth;
+    delete world.idTokenClaims;
   }
 
   async apiLoginAs(world: World, role: string): Promise<void> {
+    if (isOidcMode(this.env)) {
+      await this.oidcLogin(world, role);
+      return;
+    }
     await this.apiLogin(world, role, this.credentialsFor(role));
   }
 
@@ -111,6 +129,44 @@ export class UniversalAuthAdapter implements AuthPort {
     if (!setsCookie) {
       throw new Error(apiLoginErrorMessage({ role, path: req.path, status: result.status, text: result.text, noToken: true }));
     }
+  }
+
+  /** The OIDC client (one per adapter; sessions and provider configuration are cached per worker). */
+  protected get oidc(): OidcClient {
+    this.oidcClient ??= new OidcClient({ env: this.env, authorize: (request) => this.oidcAuthorize(request) });
+    return this.oidcClient;
+  }
+
+  /** API_AUTH_MODE=oidc: log in with the configured grant and use the session for later API steps. */
+  protected async oidcLogin(world: World, role: string): Promise<void> {
+    const creds = oidcNeedsUserCredentials(this.env) ? this.credentialsFor(role) : undefined;
+    this.useOidcSession(world, await this.oidc.login(role, creds));
+  }
+
+  /**
+   * Authorization code flow: get from the provider's authorization URL to the
+   * redirect back (returns that URL). Defaults to OIDC_CODE_FLOW_DRIVER.
+   * Override for login pages that need more than a username and password.
+   */
+  protected oidcAuthorize(request: AuthorizeRequest): Promise<URL> {
+    const driver = request.settings.codeFlowDriver === 'browser' ? createBrowserAuthorize() : createHttpAuthorize();
+    return driver(request);
+  }
+
+  /** Point the scenario's API requests at an OIDC session (token refresh and DPoP proofs per request). */
+  protected useOidcSession(world: World, session: OidcSession): void {
+    const absolute = (url: string) => new URL(url, this.apiBaseUrl).href;
+    world.headers = { ...(world.headers || {}), Authorization: `${session.scheme} ${session.token}` };
+    world.idTokenClaims = session.idTokenClaims;
+    world.apiAuth = {
+      headers: async (method, url) => {
+        const headers = await session.requestHeaders(method, absolute(url));
+        world.headers = { ...world.headers, Authorization: headers.Authorization };
+        return headers;
+      },
+      afterResponse: (url, status, headers) => session.afterResponse(absolute(url), status, headers),
+      matches: (authorization) => session.owns(authorization),
+    };
   }
 
   /** Fill and submit the login form, then confirm the login worked. */

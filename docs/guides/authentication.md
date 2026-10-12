@@ -32,6 +32,7 @@ No username for role "reviewer". Set AUTH_REVIEWER_USERNAME in .env, or pass rol
 |----------|-----|-----------|
 | API with a login endpoint that returns a token | `Given I am authenticated as "pm" via API` | `API_AUTH_*` if not the defaults |
 | API with a cookie session | same step | `API_AUTH_LOGIN_PATH` (the cookie is kept automatically) |
+| API protected by an OIDC provider (Keycloak, Auth0, Okta, Entra ID): password, client credentials or authorization code + PKCE; secret, JWT or mTLS client auth; DPoP | same step | `API_AUTH_MODE=oidc` + `OIDC_*`, see [OIDC login](#oidc-login) |
 | A token you already have (CI secret, previous step) | `Given I set bearer token from variable "token"` | nothing |
 | Web app with a login form | `Given I am logged in as "pm"` | `UI_*` if not the defaults |
 | Testing the login page itself | `When I log in as "pm" in UI` (always submits the form) | same as above |
@@ -62,6 +63,123 @@ API_AUTH_TOKEN_PATH=data.jwt
 ```
 
 The login is sent to the API base URL (`API_BASE_URL`, or `FRONTEND_URL` when that isn't set). See [Configuration](../reference/api/configuration.md#where-tests-point).
+
+## OIDC login
+
+If your API accepts tokens from an OIDC / OAuth2 provider (Keycloak, Auth0, Okta, Entra ID…), set `API_AUTH_MODE=oidc`. `Given I am authenticated as "<role>" via API` then logs in to the provider with [openid-client](https://github.com/panva/openid-client) and later API steps send the token. Feature files don't change.
+
+```bash
+API_AUTH_MODE=oidc
+OIDC_ISSUER=https://sso.example.com/realms/myapp
+OIDC_CLIENT_ID=e2e-tests
+OIDC_CLIENT_SECRET=…          # confidential clients only
+OIDC_SCOPE=openid
+AUTH_PM_USERNAME=pm@example.com
+AUTH_PM_PASSWORD=secret
+```
+
+`OIDC_ISSUER` is recommended: the endpoints are discovered and ID tokens are validated, including their signature. With only `OIDC_TOKEN_URL`, logins work but ID tokens are dropped, because there's nothing to validate them against.
+
+Provider requests go through Playwright's request API, so they get Playwright's proxy and TLS handling. `http://` URLs (a local Keycloak) are allowed.
+
+### Grants
+
+| `OIDC_GRANT_TYPE` | Logs in as | Needs |
+|-------------------|------------|-------|
+| `password` (default) | the role's user (`AUTH_<ROLE>_USERNAME` / `_PASSWORD`) | the client to allow it (Keycloak: **Direct access grants**) |
+| `client_credentials` | a service account; no user | Keycloak: **Service accounts** |
+| `authorization_code` | the role's user, through the provider's login page, with PKCE (S256), `state` and `nonce` | `OIDC_ISSUER`, `OIDC_REDIRECT_URI` |
+
+**Authorization code + PKCE** is the flow most production clients use, and the one to choose when the password grant is disabled. The API step fills in the provider's login page and catches the redirect back to `OIDC_REDIRECT_URI`. That URI must be registered for the client, but nothing needs to listen on it.
+
+```bash
+OIDC_GRANT_TYPE=authorization_code
+OIDC_REDIRECT_URI=http://localhost:9/callback
+OIDC_CODE_FLOW_DRIVER=http        # or browser
+```
+
+- `http` (default): no browser. Fetches the login page, submits its form with the provider's cookies, and follows redirects. Works with server-rendered login pages (Keycloak, Okta, Auth0 Universal Login), including identifier-first pages that ask for the username and the password on separate screens.
+- `browser`: drives the page in headless Chromium, for login pages built by JavaScript. It needs `npx playwright install chromium`.
+
+Both drivers find the username and password fields themselves. Set `OIDC_LOGIN_USERNAME_FIELD` / `OIDC_LOGIN_PASSWORD_FIELD` if they pick the wrong ones: the field `name` for `http`, or the label, placeholder or `name` for `browser`. For `browser` you can also set `OIDC_LOGIN_BUTTON`, the submit button's text (otherwise it presses Enter). A wrong password fails with the error the page shows. For MFA or consent pages, override `oidcAuthorize` (see [Extending](#extending-the-login)).
+
+### Client authentication
+
+`OIDC_CLIENT_AUTH` defaults to `post` when there's a client secret, `private_key_jwt` when there's a private key, and `none` (public client) otherwise.
+
+| `OIDC_CLIENT_AUTH` | Settings |
+|--------------------|----------|
+| `post` / `basic` | `OIDC_CLIENT_SECRET`, sent in the body or an HTTP Basic header |
+| `client_secret_jwt` | `OIDC_CLIENT_SECRET`, used to sign an HS256 client assertion |
+| `private_key_jwt` | `OIDC_CLIENT_PRIVATE_KEY`: a PEM or JWK, or a path to one. Optional: `OIDC_CLIENT_KEY_ID` (`kid`), `OIDC_CLIENT_SIGNING_ALG` (default from the key: RS256, ES256, …) |
+| `tls_client_auth` | a client certificate (see [mTLS](#mtls)); `self_signed_tls_client_auth` is accepted too |
+| `none` | public client; use with `authorization_code` |
+
+Every client setting can be set per role: `AUTH_<ROLE>_CLIENT_ID`, `AUTH_<ROLE>_CLIENT_SECRET`, `AUTH_<ROLE>_CLIENT_PRIVATE_KEY`, `AUTH_<ROLE>_CLIENT_KEY_ID` and `AUTH_<ROLE>_CLIENT_SIGNING_ALG` override the `OIDC_` value for that role.
+
+### mTLS
+
+```bash
+OIDC_TLS_CERT=certs/client.pem    # or OIDC_TLS_PFX=certs/client.p12
+OIDC_TLS_KEY=certs/client.key
+OIDC_TLS_PASSPHRASE=…             # if the key is encrypted
+OIDC_CLIENT_AUTH=tls_client_auth  # or keep another method and use mTLS only for certificate-bound tokens
+OIDC_MTLS_ENDPOINT_ALIASES=true   # if the provider publishes mtls_endpoint_aliases
+```
+
+The certificate is sent to the provider (as a Playwright `clientCertificates` entry) and to the API under test, which certificate-bound tokens (RFC 8705) need. It's only sent to `https` origins. `OIDC_TLS_INSECURE=true` skips verification of the provider's server certificate (self-signed test servers). To trust a private CA instead, set `NODE_EXTRA_CA_CERTS`.
+
+### DPoP
+
+`OIDC_DPOP=true` sender-constrains tokens with DPoP (RFC 9449). Each login gets its own key pair (`OIDC_DPOP_ALG`, default ES256). Token requests carry a DPoP proof, the API steps send `Authorization: DPoP …` with a fresh proof on every request, and when the API asks for a nonce (`use_dpop_nonce`) the request is retried once with it. In Keycloak, turn on **DPoP bound access tokens** for the client (a preview feature before 26.4: start Keycloak with `--features=dpop`).
+
+Custom steps need nothing special: any request through the `api` fixture that carries the login's token (e.g. `api.sendJson('GET', path, undefined, world.headers)`) gets a fresh proof, and a refreshed token when it's expiring. Requests with no token or a different one are sent as given.
+
+### Token reuse and refresh
+
+Sessions are kept per worker and per role. The next `I am authenticated as "pm" via API` reuses the token while it's valid. An expiring token (30s before `expires_in`, or halfway through a short lifetime) is renewed with the refresh token, both between scenarios and in the middle of a long one. `world.headers` always carries the current token. If refreshing fails, the next login starts from scratch.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| `OIDC_TOKEN_CACHE` | `true` | `false`: log in again for every scenario |
+| `OIDC_REFRESH` | `true` | `false`: never use refresh tokens |
+
+### ID token claims
+
+When the provider returns an ID token, it's validated (issuer, audience, expiry, `nonce`, and the signature against the provider's keys) and its claims are available to steps:
+
+```gherkin
+Given I am authenticated as "pm" via API
+Then the ID token claim "email" should equal "pm@example.com"
+And I store the ID token claim "sub" as "userId"
+When I GET "/users/{userId}"
+```
+
+`OIDC_VERIFY_ID_TOKEN=false` skips the signature check. The claims are also on `world.idTokenClaims` for custom steps.
+
+### All OIDC settings
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| `OIDC_ISSUER` / `OIDC_TOKEN_URL` | — | one is required; with both, the token URL overrides the discovered one |
+| `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, `OIDC_CLIENT_PRIVATE_KEY`, `OIDC_CLIENT_KEY_ID`, `OIDC_CLIENT_SIGNING_ALG` | — | per role: `AUTH_<ROLE>_CLIENT_*` |
+| `OIDC_CLIENT_AUTH` | see above | `post`, `basic`, `client_secret_jwt`, `private_key_jwt`, `tls_client_auth`, `none` |
+| `OIDC_GRANT_TYPE` | `password` | `client_credentials`, `authorization_code` |
+| `OIDC_SCOPE`, `OIDC_AUDIENCE` | — | `scope` (code flow default `openid`) / `audience` (Auth0 and others) |
+| `OIDC_REDIRECT_URI` | — | required for `authorization_code` |
+| `OIDC_CODE_FLOW_DRIVER` | `http` | `browser` |
+| `OIDC_LOGIN_USERNAME_FIELD`, `OIDC_LOGIN_PASSWORD_FIELD`, `OIDC_LOGIN_BUTTON` | auto | code flow login page fields |
+| `OIDC_LOGIN_TIMEOUT` | `15000` | ms, browser driver |
+| `OIDC_TLS_CERT` + `OIDC_TLS_KEY`, or `OIDC_TLS_PFX`; `OIDC_TLS_PASSPHRASE` | — | client certificate |
+| `OIDC_TLS_INSECURE` | `false` | skip the provider's server certificate check |
+| `OIDC_MTLS_ENDPOINT_ALIASES` | `false` | use the provider's mTLS endpoints |
+| `OIDC_DPOP`, `OIDC_DPOP_ALG` | `false`, `ES256` | DPoP |
+| `OIDC_TOKEN_CACHE`, `OIDC_REFRESH`, `OIDC_VERIFY_ID_TOKEN` | `true` | see above |
+| `API_AUTH_TOKEN_PATH` | `access_token` | send another field of the token response, e.g. `id_token` |
+
+Cleanup uses the same settings and logs in as the `admin` role, with DPoP proofs when they're needed.
+
+This covers API logins. For browser logins that redirect to the provider's page, point the `UI_*` settings at that page's fields (e.g. `UI_LOGIN_BUTTON=Sign In`), or subclass the adapter for multi-step and MFA flows (see [Extending](#extending-the-login)).
 
 ## UI login
 
@@ -122,10 +240,10 @@ See [UI steps](../reference/steps/ui-steps.md).
 
 ## Cleanup authentication
 
-Data registered for cleanup is deleted after each scenario as the `admin` role, using the same `API_AUTH_*` settings. Alternatives:
+Data registered for cleanup is deleted after each scenario as the `admin` role, using the same `API_AUTH_*` settings (including `API_AUTH_MODE=oidc`, with DPoP proofs per request). Alternatives:
 
 - `CLEANUP_AUTH_TOKEN`: a static bearer token, so no login is needed
-- OIDC client credentials: `OIDC_TOKEN_URL`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` (see `createOidcCleanupAuth` in [Utilities](../reference/api/utilities.md))
+- `createOidcCleanupAuth` (see [Utilities](../reference/api/utilities.md)): OIDC for cleanup only
 - `getCleanupAuth` in `createBddTest({...})` for anything else
 
 Cleanup is best-effort: if no admin credentials are set, it runs unauthenticated instead of failing the scenario.
@@ -164,6 +282,33 @@ export class MyAuth extends UniversalAuthAdapter {
 createAuth: ({ api, ui }) => new MyAuth({ api, ui }),
 ```
 
+**OIDC login pages with MFA or consent:** override `oidcAuthorize`. It gets the authorization URL (PKCE, `state` and `nonce` already in it) and returns the URL the provider redirected back to. The token exchange, ID token validation, DPoP and refresh keep working:
+
+```typescript
+import { UniversalAuthAdapter, createBrowserAuthorize, type AuthorizeRequest } from '@esimplicitylabs/katalyst-xspec';
+import { chromium } from '@playwright/test';
+
+export class MfaAuth extends UniversalAuthAdapter {
+  protected async oidcAuthorize({ url, redirectUri, credentials }: AuthorizeRequest): Promise<URL> {
+    const browser = await chromium.launch();
+    const page = await browser.newPage();
+    let callback: URL | undefined;
+    page.on('request', (r) => { if (r.url().startsWith(redirectUri)) callback = new URL(r.url()); });
+    await page.goto(url.href);
+    await page.getByLabel('Username').fill(credentials.username);
+    await page.getByLabel('Password').fill(credentials.password);
+    await page.getByRole('button', { name: 'Sign in' }).click();
+    await page.getByLabel('One-time code').fill(totp(process.env.PM_TOTP_SECRET!));
+    await page.getByRole('button', { name: 'Verify' }).click();
+    await page.waitForEvent('request', (r) => r.url().startsWith(redirectUri));
+    await browser.close();
+    return callback!;
+  }
+}
+```
+
+**Custom steps that call the API** keep working with OIDC: the `api` fixture applies `world.apiAuth` to any request carrying the login's token, so tokens are refreshed and DPoP proofs added. If you build your own `ApiPort` outside the fixtures, wrap it with `withApiRequestAuth(api, () => world)`, or send with `sendAuthenticated(api, world, method, path, body)`.
+
 You can also write an `AuthPort` from scratch: implement `apiLoginAs(world, role)` and `uiLoginAs(world, role, { reuseSession })`, plus the admin/user methods. See [Custom Adapters](./custom-adapters.md).
 
 If you write your own steps that log in through the UI, include `ui` in the step's fixtures so the browser is available: `async ({ auth, ui, world }) => …`. API logins never start a browser.
@@ -176,6 +321,13 @@ If you write your own steps that log in through the UI, include `ui` in the step
 | `API login as "x" failed: POST /auth/login returned 401` | Wrong credentials, or wrong `API_AUTH_BODY` / field names; the message includes the response body |
 | `returned 404` | Wrong `API_AUTH_LOGIN_PATH`, or the API base URL is wrong; check the `katalyst-xspec targets:` line printed at the start of the run |
 | `returned 200 but no token found` | Set `API_AUTH_TOKEN_PATH` to where the token is |
+| `OIDC login as "x" failed … invalid_client` | Wrong client id, secret, key or certificate; the message names the settings for your `OIDC_CLIENT_AUTH` |
+| `OIDC login as "x" failed … unauthorized_client` | Enable the grant on the client (Keycloak: Direct access grants / Service accounts / Standard flow) |
+| `… invalid_dpop_proof … DPoP proof is missing` | The client requires DPoP: set `OIDC_DPOP=true` |
+| `the provider showed the login form again` | Wrong `AUTH_X_USERNAME` / `AUTH_X_PASSWORD` (code flow); the page's error is quoted |
+| `no login form on …` | The login page is built by JavaScript: set `OIDC_CODE_FLOW_DRIVER=browser` |
+| `the ID token didn't validate` | Wrong `OIDC_ISSUER`, or the provider's signing keys aren't reachable; `OIDC_VERIFY_ID_TOKEN=false` skips the signature check |
+| `OIDC discovery failed` | Check `OIDC_ISSUER` (it's the URL before `/.well-known/openid-configuration`) |
 | `No username field "Username" on /login` | Set `UI_USERNAME_FIELD` to the field's label, placeholder or `name`, or fix `UI_LOGIN_PATH` |
 | `UI login as "x" stayed on /login` | Wrong credentials, or the app doesn't change URL after login: set `UI_LOGIN_SUCCESS_TEXT` |
 | Logged out in a later scenario | A previous scenario ended the shared session: use `When I log in as "x" in UI` there, or `UI_SESSION_REUSE=false` |

@@ -21,4 +21,6 @@ export * from './network';
 export * from './targets';
 export * from './auth/credentials';
 export { buildApiLoginRequest, extractToken, type ApiLoginRequest } from './auth/api-login';
+export * from './auth/oidc';
 export { apiLoginAsRole, uiLoginAsRole } from './auth/login-steps';
+export { sendAuthenticated, withApiRequestAuth } from './auth/request-auth';

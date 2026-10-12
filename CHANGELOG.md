@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2026-10-12
+
+OIDC login for the API steps. No breaking changes; projects that don't set `API_AUTH_MODE=oidc` behave as before.
+
+### Added
+
+- **OIDC login for the API steps** (`API_AUTH_MODE=oidc`), built on [openid-client](https://github.com/panva/openid-client), with provider traffic going through Playwright's request API. See [OIDC login](docs/guides/authentication.md#oidc-login).
+  - Grants: password, client credentials, and authorization code + PKCE. The code flow fills in the provider's login page without a browser (`OIDC_CODE_FLOW_DRIVER=http`, the default) or in headless Chromium (`browser`). Override `oidcAuthorize` for MFA or consent pages.
+  - Client authentication: `client_secret_post`/`basic`, `client_secret_jwt`, `private_key_jwt` (PEM or JWK), `tls_client_auth` (mTLS, including certificate-bound tokens and `mtls_endpoint_aliases`), and public clients.
+  - DPoP (`OIDC_DPOP=true`): tokens bound to a per-login key, a fresh proof on every API request, and server nonces handled.
+  - Sessions are reused per worker and renewed with refresh tokens, also in the middle of a scenario.
+  - ID tokens are validated, including the signature. New steps: `Then the ID token claim {string} should equal {string}` and `Then I store the ID token claim {string} as {string}`.
+  - Client settings can be set per role (`AUTH_<ROLE>_CLIENT_ID`, `_CLIENT_SECRET`, `_CLIENT_PRIVATE_KEY`, …). Default cleanup auth uses the same login.
+- Custom steps that send `world.headers` through the `api` fixture get the same per-request auth (`world.apiAuth`: refreshed tokens, DPoP proofs) as the built-in steps. Outside the fixtures, use `withApiRequestAuth(api, () => world)` or `sendAuthenticated(api, world, method, path, body)`.
+- `CleanupAuthProvider` gets an optional second argument `{ method, url }` for per-request signing.
+- New runtime dependency: `openid-client`, loaded only when OIDC mode is used.
+
 ## [0.8.0] - 2026-10-02
 
 Simpler setup for pointing tests at an app and logging in, configured in `.env`. See the new [Authentication guide](docs/guides/authentication.md).
