@@ -302,7 +302,7 @@ function templates(packageName) {
       clean: 'rm -rf .features-gen node_modules test-results storage cucumber-report playwright-report'
     },
     devDependencies: {
-      '@esimplicitylabs/katalyst-xspec': '^0.8.0',
+      '@esimplicitylabs/katalyst-xspec': `^${require('../package.json').version}`,
       '@playwright/test': '^1.49.0',
       'playwright-bdd': '^9.1.0',
       dotenv: '^16.1.4',

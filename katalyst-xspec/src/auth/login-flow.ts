@@ -145,6 +145,13 @@ export async function runLoginFlow({ page, role, creds, env = process.env, oneTi
       // Give a slow page a moment before concluding the password was refused.
       await page.wait(pollMs);
       if (!(await page.hasField('password', fieldName.password))) continue;
+      if (otpTries > 0) {
+        throw new Error(
+          `UI login as "${role}": after the one-time code, ${where} asked for the password again${await says()}. ` +
+            `The provider restarted the sign-in: check that UI_OTP_BUTTON / UI_LOGIN_BUTTON name the button that submits ` +
+            `the code (unset, Enter is pressed), and that the code was accepted.`,
+        );
+      }
       throw new Error(`UI login as "${role}" stayed on ${where}: the password was asked for again${await says()}. Check ${keys.username} / ${keys.password}.`);
     }
     if (password && !username && !usernameSubmitted) {

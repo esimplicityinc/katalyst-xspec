@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.19.1] - 2026-10-13
+
+Fixes found by running the page-by-page login against a real Keycloak 26.
+
+### Fixed
+
+- The UI login no longer clicks unrelated buttons whose label merely contains `UI_LOGIN_BUTTON`. With the default `Login`, it clicked Keycloak's "Restart login" icon button on the one-time code page, which started the sign-in over. Loose (substring) matches now only apply to submit buttons; anything else must match exactly. Without a match, Enter is pressed as before.
+- If the provider asks for the password again after a one-time code, the error says so and points at `UI_OTP_BUTTON` / `UI_LOGIN_BUTTON` instead of blaming the password.
+- `katalyst-xspec init` scaffolds projects with the current version (`^0.19.1`) instead of `^0.8.0`.
+
 ## [0.19.0] - 2026-10-13
 
 Log roles in before the run with a Playwright setup project. See [Session reuse](docs/guides/authentication.md#session-reuse).

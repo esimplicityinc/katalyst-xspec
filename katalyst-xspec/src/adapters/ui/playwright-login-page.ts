@@ -81,11 +81,19 @@ export class PlaywrightLoginPage implements LoginPage {
     await this.lastFilled.fill(value);
   }
 
+  /**
+   * A button with exactly this text, or a submit button containing it. Plain
+   * `type="button"` controls only match exactly: login pages put icon buttons
+   * like Keycloak's "Restart login" next to the form, and a loose "Login" must
+   * not click them.
+   */
   private button(name: string): Locator {
+    const submit = this.page.locator(
+      'button:not([type="button" i]):not([type="reset" i]), input[type="submit" i], input[type="image" i]',
+    );
     return this.page
       .getByRole('button', { name, exact: true })
-      .or(this.page.getByRole('button', { name }))
-      .or(this.page.locator(`input[type="submit" i][value="${name.replace(/"/g, '\\"')}" i]`))
+      .or(this.page.getByRole('button', { name }).and(submit))
       .locator('visible=true')
       .first();
   }
