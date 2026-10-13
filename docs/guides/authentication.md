@@ -37,6 +37,7 @@ No username for role "reviewer". Set AUTH_REVIEWER_USERNAME in .env, or pass rol
 | Web app with a login form | `Given I am logged in as "pm"` | `UI_*` if not the defaults |
 | Testing the login page itself | `When I log in as "pm" in UI` (always submits the form) | same as above |
 | SPA whose API accepts test headers (no real login) | `Given I am authenticated in UI as "pm"` | see [Header-based UI auth](#header-based-ui-auth) |
+| A one-time code from an authenticator app (TOTP) | `When I fill the one-time code for "pm" in "One-time code"` | `AUTH_<ROLE>_OTP_SECRET`, see [One-time passcodes](#one-time-passcodes-totp) |
 | SSO, MFA, multi-step login | subclass the adapter | see [Extending](#extending-the-login) |
 
 ## API login
@@ -226,6 +227,59 @@ createAuth: ({ api, ui }) =>
 
 Keep real passwords out of git: `.env` is in the scaffolded `.gitignore`, and in CI set the `AUTH_*` variables from your secret store.
 
+## One-time passcodes (TOTP)
+
+For logins that ask for a code from an authenticator app (Google Authenticator, Authy, Keycloak OTP, login.gov's authentication app option), give the role its TOTP secret. The secret is what's behind the QR code shown when the authenticator was set up.
+
+```bash
+AUTH_PM_OTP_SECRET=JBSWY3DPEHPK3PXP      # base32, as authenticator apps show it
+```
+
+Then fill the current code in a step:
+
+```gherkin
+When I fill the one-time code for "pm" in "One-time code"
+And I click the button "Verify"
+```
+
+or store it for later steps (it's valid for the rest of its 30-second window):
+
+```gherkin
+Given I generate a one-time code for "pm" as "otp"
+When I fill the field "otp" with "{otp}"
+```
+
+The field is found by label, placeholder or `name`, like `I fill the field`.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| `AUTH_<ROLE>_OTP_SECRET` | — | The shared secret, or a full `otpauth://totp/...` URI (its `digits`, `period` and `algorithm` are used) |
+| `AUTH_<ROLE>_OTP_ENCODING` | `base32` | `latin1` (or `ascii`) for a plain-text secret, `hex` for hex |
+| `AUTH_<ROLE>_OTP_DIGITS` | `6` | 6 to 10 |
+| `AUTH_<ROLE>_OTP_PERIOD` | `30` | seconds |
+| `AUTH_<ROLE>_OTP_ALGORITHM` | `SHA1` | `SHA256`, `SHA512` |
+| `AUTH_OTP_*` | — | The same settings for every role, e.g. `AUTH_OTP_ENCODING=latin1`. A role's own setting wins |
+
+Example: a local Keycloak whose test users share the plain-text secret `logingov-local-otp-secret`:
+
+```bash
+AUTH_OTP_SECRET=logingov-local-otp-secret
+AUTH_OTP_ENCODING=latin1
+```
+
+In code, pass `otp` with the role, either the secret or the full settings:
+
+```typescript
+roles: {
+  pm: { username: 'pm@example.com', password: process.env.PM_PASSWORD, otp: process.env.PM_TOTP_SECRET },
+  auditor: { username: 'audit@example.com', password: process.env.AUDIT_PASSWORD, otp: { secret: 'logingov-local-otp-secret', encoding: 'latin1' } },
+},
+```
+
+`generateTotp({ secret, encoding, digits, period, algorithm })` is exported for your own steps and adapters, and the auth adapter's `oneTimeCodeFor(role)` returns the role's current code using the settings above.
+
+**Codes can only be used once.** Most providers reject a code that was already accepted in the same 30-second window. If several logins as the same user happen within one window (parallel workers, or a scenario that logs in twice), wait for the next window between them, or log in once and reuse the session.
+
 ## Header-based UI auth
 
 For single-page apps whose backend accepts identity headers in test environments, there's no login form to drive. These steps make the page's `fetch` calls to `/api/` carry `x-user-id`, `x-tenant-id` and `x-user-roles`, or a bearer token:
@@ -264,13 +318,15 @@ export class MyAuth extends UniversalAuthAdapter {
     this.apiSetBearer(world, res.headers['x-auth-token']);
   }
 
-  // Example: SSO that redirects to an identity provider.
+  // Example: SSO that redirects to an identity provider and asks for a one-time code.
   protected async uiLogin(world: World, role: string, creds: Credentials) {
     await this.ui.goto('/');
     await this.ui.clickButton('Sign in with SSO');
     await this.ui.fillLabel('Email address', creds.username);
     await this.ui.clickButton('Next');
     await this.ui.fillLabel('Password', creds.password);
+    await this.ui.clickButton('Sign in');
+    await this.ui.fillLabel('One-time code', await this.oneTimeCodeFor(role)); // AUTH_<ROLE>_OTP_SECRET
     await this.ui.clickButton('Verify');
     await this.ui.expectUrlContains('/home');
   }
@@ -289,7 +345,7 @@ import { UniversalAuthAdapter, createBrowserAuthorize, type AuthorizeRequest } f
 import { chromium } from '@playwright/test';
 
 export class MfaAuth extends UniversalAuthAdapter {
-  protected async oidcAuthorize({ url, redirectUri, credentials }: AuthorizeRequest): Promise<URL> {
+  protected async oidcAuthorize({ url, redirectUri, credentials, settings }: AuthorizeRequest): Promise<URL> {
     const browser = await chromium.launch();
     const page = await browser.newPage();
     let callback: URL | undefined;
@@ -298,7 +354,7 @@ export class MfaAuth extends UniversalAuthAdapter {
     await page.getByLabel('Username').fill(credentials.username);
     await page.getByLabel('Password').fill(credentials.password);
     await page.getByRole('button', { name: 'Sign in' }).click();
-    await page.getByLabel('One-time code').fill(totp(process.env.PM_TOTP_SECRET!));
+    await page.getByLabel('One-time code').fill(await this.oneTimeCodeFor(settings.role));
     await page.getByRole('button', { name: 'Verify' }).click();
     await page.waitForEvent('request', (r) => r.url().startsWith(redirectUri));
     await browser.close();
@@ -318,6 +374,9 @@ If you write your own steps that log in through the UI, include `ui` in the step
 | Message | Fix |
 |---------|-----|
 | `No username for role "x"` | Set `AUTH_X_USERNAME` / `AUTH_X_PASSWORD` (check the role spelling) |
+| `No one-time code secret for role "x"` | Set `AUTH_X_OTP_SECRET`, or `AUTH_OTP_SECRET` for every role |
+| `The TOTP secret is not valid base32` | The secret is plain text or hex: set `AUTH_OTP_ENCODING=latin1` or `hex` |
+| The provider says the code is invalid | Check the secret, and `AUTH_OTP_DIGITS` / `_PERIOD` / `_ALGORITHM` against the provider's OTP policy; check the machine's clock; a code can't be used twice in one window |
 | `API login as "x" failed: POST /auth/login returned 401` | Wrong credentials, or wrong `API_AUTH_BODY` / field names; the message includes the response body |
 | `returned 404` | Wrong `API_AUTH_LOGIN_PATH`, or the API base URL is wrong; check the `katalyst-xspec targets:` line printed at the start of the run |
 | `returned 200 but no token found` | Set `API_AUTH_TOKEN_PATH` to where the token is |

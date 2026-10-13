@@ -52,6 +52,7 @@ When I GET "/users/{userId}"  # Becomes /users/123
 | `Given I navigate to {string}` | `Given I navigate to "/login"` |
 | `Given I am logged in as {string}` | `Given I am logged in as "pm"` (UI login, session reused) |
 | `When I log in as {string} in UI` | `When I log in as "pm" in UI` (always submits the form) |
+| `When I fill the one-time code for {string} in {string}` | `When I fill the one-time code for "pm" in "One-time code"` (TOTP from `AUTH_PM_OTP_SECRET`) |
 | `When I click the button {string}` | `When I click the button "Submit"` |
 | `When I click the link {string}` | `When I click the link "Sign Up"` |
 | `When I fill the field {string} with {string}` | `When I fill the field "Email" with "test@example.com"` |

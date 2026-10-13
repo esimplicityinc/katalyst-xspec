@@ -55,6 +55,24 @@ Given I generate a UUID and store as "uniqueId"
 
 ---
 
+### Given I generate a one-time code for {string} as {string}
+
+Stores the role's current one-time code from its TOTP secret in a variable. The code is valid for the rest of its window (30 seconds by default).
+
+**Parameters:**
+| Name | Type | Description |
+|------|------|-------------|
+| role | string | Any role name. Reads `AUTH_<ROLE>_OTP_SECRET` (see [One-time passcodes](../../guides/authentication.md#one-time-passcodes-totp)). |
+| name | string | Variable name |
+
+**Example:**
+```gherkin
+Given I generate a one-time code for "pm" as "otp"
+When I fill the field "Code" with "{otp}"
+```
+
+---
+
 ### Given I set header {string} to {string}
 
 Sets a request header.

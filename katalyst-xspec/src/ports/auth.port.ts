@@ -20,4 +20,6 @@ export interface AuthPort {
   apiLoginAs?(world: World, role: string): Promise<void>;
   /** Log in through the UI as any named role. */
   uiLoginAs?(world: World, role: string, options?: UiLoginOptions): Promise<void>;
+  /** The role's current one-time code (e.g. from its TOTP secret). */
+  oneTimeCodeFor?(role: string): Promise<string>;
 }

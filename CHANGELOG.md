@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 2026-10-13
+
+One-time passcodes (TOTP) for logins that ask for a code from an authenticator app. No breaking changes and no new dependencies. See [One-time passcodes](docs/guides/authentication.md#one-time-passcodes-totp).
+
+### Added
+
+- `generateTotp({ secret, encoding, digits, period, algorithm })`: RFC 6238 codes built on `node:crypto`. Secrets in base32 (the default), plain text (`latin1`/`ascii`) or hex, or a full `otpauth://totp/...` URI; SHA1, SHA256 and SHA512. Also exported: `totpTimeStep`, `parseOtpauthUri`, `decodeTotpSecret`.
+- One-time code settings per role: `AUTH_<ROLE>_OTP_SECRET`, plus optional `AUTH_<ROLE>_OTP_ENCODING` / `_DIGITS` / `_PERIOD` / `_ALGORITHM`. `AUTH_OTP_*` sets them for every role, and `roles: { pm: { otp } }` in code takes precedence. Missing or malformed settings fail with a message naming the variable.
+- Steps: `When I fill the one-time code for {string} in {string}` and `Given I generate a one-time code for {string} as {string}`.
+- `AuthPort.oneTimeCodeFor(role)` (optional), implemented by `UniversalAuthAdapter`, for custom `uiLogin` / `oidcAuthorize` overrides. Helpers `oneTimeCode`, `resolveOtpSettings`, `otpEnvKeys` and `oneTimeCodeForRole` are exported.
+
 ## [0.9.0] - 2026-10-12
 
 OIDC login for the API steps. No breaking changes; projects that don't set `API_AUTH_MODE=oidc` behave as before.

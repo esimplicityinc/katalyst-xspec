@@ -392,6 +392,9 @@ interface AuthPort {
   // Optional (0.8+): log in as any named role
   apiLoginAs?(world: World, role: string): Promise<void>;
   uiLoginAs?(world: World, role: string, options?: UiLoginOptions): Promise<void>;
+
+  // Optional (0.10+): the role's current one-time code
+  oneTimeCodeFor?(role: string): Promise<string>;
 }
 
 type UiLoginOptions = {
@@ -411,6 +414,10 @@ Logs in to the API as `role`, setting the bearer token in `world.headers` (or ke
 Logs in through the UI as `role`. `Given I am logged in as "<role>"` passes `{ reuseSession: true }`; `When I log in as "<role>" in UI` passes nothing.
 
 The role methods are optional so adapters written before 0.8 keep compiling. If they're missing, the built-in steps fall back to the admin/user methods for the roles `"admin"` and `"user"`, and fail for any other role.
+
+#### `oneTimeCodeFor(role)`
+
+The role's current one-time code. `UniversalAuthAdapter` generates it from the role's TOTP secret (`AUTH_<ROLE>_OTP_SECRET` or `roles: { x: { otp } }`). Used by the one-time code steps; adapters without it fall back to the `AUTH_<ROLE>_OTP_*` variables.
 
 #### `apiLoginAsAdmin(world)` / `apiLoginAsUser(world)`
 

@@ -251,6 +251,11 @@ const targets = logTargets(resolveTargets());
 
 ## Version History
 
+### 0.10.0
+
+- One-time passcodes (TOTP): `AUTH_<ROLE>_OTP_SECRET` (or `AUTH_OTP_*` for every role), the steps `When I fill the one-time code for {string} in {string}` and `Given I generate a one-time code for {string} as {string}`, and `generateTotp()` for custom steps. See [One-time passcodes](./authentication.md#one-time-passcodes-totp).
+- No breaking changes and no new dependencies.
+
 ### 0.9.0
 
 - OIDC login for the API steps with `API_AUTH_MODE=oidc`: password, client credentials, and authorization code + PKCE grants; client secret, signed JWT, `private_key_jwt` and mTLS client authentication; DPoP; refresh tokens; validated ID token claims. See [OIDC login](./authentication.md#oidc-login).

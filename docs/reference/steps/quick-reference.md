@@ -65,6 +65,7 @@ All available steps at a glance. Steps are untagged: once registered, any step w
 |------|-------------|
 | `Given I am logged in as {string}` | UI login as a role, session reused |
 | `When I log in as {string} in UI` | UI login as a role, always submits the form |
+| `When I fill the one-time code for {string} in {string}` | Fill the role's current TOTP code |
 | `When I log in as admin in UI` | Shorthand for role `"admin"` |
 | `When I log in as user in UI` | Shorthand for role `"user"` |
 
@@ -130,6 +131,7 @@ See the [Authentication guide](../../guides/authentication.md).
 | Step | Description |
 |------|-------------|
 | `Given I generate a UUID and store as {string}` | Create unique ID |
+| `Given I generate a one-time code for {string} as {string}` | Store the role's current TOTP code |
 | `Given I set variable {string} to {string}` | Set variable |
 | `Then the variable {string} should equal {string}` | Assert variable |
 | `Given I register cleanup for {string} {string}` | Register cleanup |

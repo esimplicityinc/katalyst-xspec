@@ -34,6 +34,20 @@ Given I set variable "email" to "test-{runId}@example.com"
 # email becomes something like "test-a1b2c3d4-e5f6-7890-abcd-ef1234567890@example.com"
 ```
 
+### Generate a One-Time Code
+
+```gherkin
+Given I generate a one-time code for {string} as {string}
+```
+
+Stores the role's current TOTP code (from `AUTH_<ROLE>_OTP_SECRET`) in a variable.
+
+**Example:**
+```gherkin
+Given I generate a one-time code for "pm" as "otp"
+When I fill the field "Code" with "{otp}"
+```
+
 ### Assert Variable Value
 
 ```gherkin

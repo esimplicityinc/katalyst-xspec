@@ -6,10 +6,13 @@
  * Roles passed in code (UniversalAuthAdapter `roles` option) take precedence.
  * "admin" and "user" also accept the pre-0.8 DEFAULT_* / NON_ADMIN_* names.
  */
+import type { TotpOptions } from './totp';
+
 type Env = Record<string, string | undefined>;
 
 export type Credentials = { username: string; password: string };
-export type RoleCredentials = Record<string, Partial<Credentials>>;
+/** Per-role settings passed in code. `otp` is the role's TOTP secret, or its full settings (see auth/otp.ts). */
+export type RoleCredentials = Record<string, Partial<Credentials> & { otp?: string | TotpOptions }>;
 
 export class MissingCredentialsError extends Error {
   constructor(message: string) {

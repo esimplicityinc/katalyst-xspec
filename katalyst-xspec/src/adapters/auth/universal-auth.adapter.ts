@@ -3,6 +3,7 @@ import type { AuthPort, UiLoginOptions } from '../../ports/auth.port';
 import type { UiPort, UiSessionState } from '../../ports/ui.port';
 import type { World } from '../../world';
 import { resolveCredentials, roleEnvKeys, type Credentials, type RoleCredentials } from '../../auth/credentials';
+import { oneTimeCode } from '../../auth/otp';
 import { apiLoginErrorMessage, buildApiLoginRequest, extractToken } from '../../auth/api-login';
 import { isOidcMode, oidcNeedsUserCredentials } from '../../auth/oidc/settings';
 import { OidcClient, type OidcSession } from '../../auth/oidc/client';
@@ -14,7 +15,7 @@ type Env = Record<string, string | undefined>;
 export type UniversalAuthOptions = {
   api: ApiPort;
   ui: UiPort;
-  /** Credentials per role, e.g. { pm: { username, password } }. Overrides AUTH_<ROLE>_* env vars. */
+  /** Credentials per role, e.g. { pm: { username, password, otp } }. Overrides AUTH_<ROLE>_* env vars. */
   roles?: RoleCredentials;
   /** Settings source; defaults to process.env. */
   env?: Env;
@@ -59,6 +60,11 @@ export class UniversalAuthAdapter implements AuthPort {
   /** Credentials for a role; throws MissingCredentialsError with the variables to set. */
   credentialsFor(role: string): Credentials {
     return resolveCredentials(role, { env: this.env, roles: this.roles });
+  }
+
+  /** The role's current one-time code from its TOTP secret (AUTH_<ROLE>_OTP_SECRET or `roles: { x: { otp } }`). */
+  async oneTimeCodeFor(role: string): Promise<string> {
+    return oneTimeCode(role, { env: this.env, roles: this.roles });
   }
 
   apiSetBearer(world: World, token: string): void {
