@@ -387,6 +387,34 @@ roles: {
 
 `generateTotp({ secret, encoding, digits, period, algorithm })` is exported for your own steps and adapters, and the auth adapter's `oneTimeCodeFor(role)` returns the role's current code using the settings above.
 
+### Codes from email or elsewhere
+
+Not every login uses an authenticator app. For codes **sent by email**, point the role at a test inbox (see [Email Testing](./email-testing.md)):
+
+```bash
+MAIL_API_URL=http://localhost:8025
+AUTH_PM_OTP_SOURCE=email          # or AUTH_OTP_SOURCE=email for every role
+# AUTH_PM_OTP_EMAIL=pm+codes@test.local   # default: the role's username
+# AUTH_PM_OTP_EMAIL_SUBJECT=sign-in code  # or AUTH_OTP_EMAIL_SUBJECT
+# MAIL_CODE_PATTERN=code: ([A-Z0-9]+)     # default: the first 4 to 8 digit number
+```
+
+The page-by-page login and the one-time code steps then use the code in the newest email to the role that arrived during the login (or the scenario). A retry waits for a newer email.
+
+For **anything else** (an SMS test service, a backdoor endpoint in a test environment), pass a function that returns the current code:
+
+```typescript
+roles: {
+  pm: { username: 'pm@example.com', password: process.env.PM_PASSWORD, otp: () => smsInbox.latestCode('+15550100') },
+},
+```
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| `AUTH_<ROLE>_OTP_SOURCE` | `totp` | `email`: read the code from the test inbox. `AUTH_OTP_SOURCE` for every role |
+| `AUTH_<ROLE>_OTP_EMAIL` | the role's username | the address the codes are sent to |
+| `AUTH_<ROLE>_OTP_EMAIL_SUBJECT` | — | only emails whose subject contains this. `AUTH_OTP_EMAIL_SUBJECT` for every role |
+
 **Codes can only be used once.** Most providers reject a code that was already accepted in the same 30-second window. If several logins as the same user happen within one window (a scenario that logs in twice, or custom login steps in parallel workers), wait for the next window between them. `Given I am logged in as "pm"` avoids this by logging in once per run and sharing the session with every worker (see [Session reuse](#session-reuse)).
 
 ## Keeping secrets out of logs and git

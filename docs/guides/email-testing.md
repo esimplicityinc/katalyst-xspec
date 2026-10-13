@@ -74,4 +74,6 @@ class MyInbox implements MailPort {
 export const { test } = createBddTest({ createMail: () => new MyInbox() });
 ```
 
+Logins that send a one-time code by email can read it from the same inbox: set `AUTH_<ROLE>_OTP_SOURCE=email` (see [Codes from email or elsewhere](./authentication.md#codes-from-email-or-elsewhere)).
+
 In your own steps, `emailLinks`, `emailLink` and `emailCode` (see [Utilities](../reference/api/utilities.md#email)) get links and codes out of a message.

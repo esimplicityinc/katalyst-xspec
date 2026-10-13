@@ -11,8 +11,14 @@ import type { TotpOptions } from './totp';
 type Env = Record<string, string | undefined>;
 
 export type Credentials = { username: string; password: string };
-/** Per-role settings passed in code. `otp` is the role's TOTP secret, or its full settings (see auth/otp.ts). */
-export type RoleCredentials = Record<string, Partial<Credentials> & { otp?: string | TotpOptions }>;
+/** Returns the role's current one-time code (e.g. from an SMS service). */
+export type OtpProvider = () => string | Promise<string>;
+
+/**
+ * Per-role settings passed in code. `otp` is the role's TOTP secret, its full
+ * TOTP settings, or a function returning the current code (see auth/otp.ts).
+ */
+export type RoleCredentials = Record<string, Partial<Credentials> & { otp?: string | TotpOptions | OtpProvider }>;
 
 export class MissingCredentialsError extends Error {
   constructor(message: string) {

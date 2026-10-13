@@ -5,7 +5,7 @@
  * _PERIOD / _ALGORITHM. AUTH_OTP_* set the same things for every role. Roles
  * passed in code (UniversalAuthAdapter `roles: { pm: { otp } }`) take precedence.
  */
-import { MissingCredentialsError, roleEnvPrefix, type RoleCredentials } from './credentials';
+import { MissingCredentialsError, roleEnvPrefix, type OtpProvider, type RoleCredentials } from './credentials';
 import { generateTotp, parseOtpauthUri, totpTimeStep, type TotpAlgorithm, type TotpOptions, type TotpSecretEncoding } from './totp';
 
 type Env = Record<string, string | undefined>;
@@ -48,10 +48,45 @@ export function resolveOtpSettings(
   if (period) settings.period = positiveInt(period[0], period[1]);
   if (algorithm) settings.algorithm = algorithm[0].trim() as TotpAlgorithm;
 
+  if (typeof fromCode === 'function') return undefined;
   if (fromCode) return { ...settings, ...(typeof fromCode === 'string' ? { secret: fromCode } : fromCode) };
   const secret = setting('secret');
   if (!secret) return undefined;
   return { ...settings, secret: secret[0] };
+}
+
+/** Where a role's one-time codes come from. */
+export type OtpSource =
+  | { kind: 'totp'; settings: TotpOptions }
+  | { kind: 'email'; to?: string; subject?: string }
+  | { kind: 'custom'; provide: OtpProvider };
+
+/** Settings for one-time codes sent by email: AUTH_<ROLE>_OTP_SOURCE=email, _OTP_EMAIL, _OTP_EMAIL_SUBJECT. */
+export function otpSourceEnvKeys(role: string): { source: string; email: string; subject: string } {
+  const prefix = `${roleEnvPrefix(role)}_OTP`;
+  return { source: `${prefix}_SOURCE`, email: `${prefix}_EMAIL`, subject: `${prefix}_EMAIL_SUBJECT` };
+}
+
+/**
+ * The role's one-time code source: a function passed in code, email
+ * (AUTH_<ROLE>_OTP_SOURCE=email, or AUTH_OTP_SOURCE for every role), or TOTP
+ * (the default, when the role has a secret). Undefined if none is set up.
+ */
+export function resolveOtpSource(
+  role: string,
+  { env = process.env, roles }: { env?: Env; roles?: RoleCredentials } = {},
+): OtpSource | undefined {
+  const fromCode = roles && Object.entries(roles).find(([name]) => name.toLowerCase() === role.toLowerCase())?.[1]?.otp;
+  if (typeof fromCode === 'function') return { kind: 'custom', provide: fromCode };
+  const keys = otpSourceEnvKeys(role);
+  const raw = env[keys.source] || env.AUTH_OTP_SOURCE;
+  const source = (raw || 'totp').trim().toLowerCase();
+  if (source === 'email') {
+    return { kind: 'email', to: env[keys.email] || undefined, subject: env[keys.subject] || env.AUTH_OTP_EMAIL_SUBJECT || undefined };
+  }
+  if (source !== 'totp') throw new Error(`${env[keys.source] ? keys.source : 'AUTH_OTP_SOURCE'} must be "totp" or "email" (got "${raw}").`);
+  const settings = resolveOtpSettings(role, { env, roles });
+  return settings ? { kind: 'totp', settings } : undefined;
 }
 
 /** The role's current one-time code. Throws MissingCredentialsError naming the variables to set. */
@@ -64,6 +99,7 @@ export function oneTimeCode(
   if (!settings) {
     throw new MissingCredentialsError(
       `No one-time code secret for role "${role}". Set ${keys.secret} in .env (or ${GLOBAL_KEYS.secret} for every role), ` +
+        `set ${otpSourceEnvKeys(role).source}=email for codes sent by email, ` +
         `or pass roles: { '${role}': { otp: { secret } } } to UniversalAuthAdapter.`,
     );
   }

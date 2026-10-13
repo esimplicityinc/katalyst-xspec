@@ -23,5 +23,5 @@ export interface AuthPort {
   /** Forget the role's saved UI session, so the next session-reusing login submits the form again. */
   clearSavedSession?(role: string): void;
   /** The role's current one-time code (e.g. from its TOTP secret). */
-  oneTimeCodeFor?(role: string): Promise<string>;
+  oneTimeCodeFor?(role: string, options?: { since?: Date }): Promise<string>;
 }
