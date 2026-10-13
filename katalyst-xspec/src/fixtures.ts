@@ -168,7 +168,7 @@ export type CreateBddTestOptions = {
    * Build the auth adapter. `ui` is available to UI login methods once a step
    * requests the `ui` fixture; API login never starts a browser.
    */
-  createAuth?: (ctx: CreateContext & { api: ApiPort; ui: UiPort; apiBaseUrl: string }) => AuthPort;
+  createAuth?: (ctx: CreateContext & { api: ApiPort; ui: UiPort; apiBaseUrl: string; mail: MailPort }) => AuthPort;
   createCleanup?: (ctx: CreateContext) => CleanupPort;
   /**
    * Custom auth provider for cleanup operations.
@@ -248,7 +248,7 @@ export function createBddTest(options: CreateBddTestOptions = {}) {
   const {
     createApi = ({ apiRequest }) => new PlaywrightApiAdapter(apiRequest),
     createUi = ({ page }) => new PlaywrightUiAdapter(page),
-    createAuth = ({ api, ui, apiBaseUrl }) => new UniversalAuthAdapter({ api, ui, apiBaseUrl }),
+    createAuth = ({ api, ui, apiBaseUrl, mail }) => new UniversalAuthAdapter({ api, ui, apiBaseUrl, mail }),
     createCleanup = () => new DefaultCleanupAdapter(),
     getCleanupAuth = defaultCleanupAuth,
     createTui,
@@ -353,9 +353,14 @@ export function createBddTest(options: CreateBddTestOptions = {}) {
       await use(ui);
     },
 
-    auth: async ({ api, apiRequest, apiBaseUrl, uiBinding }, use) => {
+    auth: async ({ api, apiRequest, apiBaseUrl, uiBinding, mail }, use) => {
       await use(
-        createAuth({ api, apiRequest, apiBaseUrl, ui: lazyUi(uiBinding) } as CreateContext & { api: ApiPort; ui: UiPort; apiBaseUrl: string }),
+        createAuth({ api, apiRequest, apiBaseUrl, mail, ui: lazyUi(uiBinding) } as CreateContext & {
+          api: ApiPort;
+          ui: UiPort;
+          apiBaseUrl: string;
+          mail: MailPort;
+        }),
       );
     },
 

@@ -549,6 +549,9 @@ function resolveOtpSettings(role: string, options?: { env?: Env; roles?: RoleCre
 function oneTimeCode(role: string, options?: { env?: Env; roles?: RoleCredentials; timestamp?: number }): string;
 function otpEnvKeys(role: string): { secret: string; encoding: string; digits: string; period: string; algorithm: string };
 function oneTimeCodeForRole(auth: AuthPort | undefined, world: World, role: string): Promise<string>;
+
+type OtpSource = { kind: 'totp'; settings: TotpOptions } | { kind: 'email'; to?: string; subject?: string } | { kind: 'custom'; provide: () => string | Promise<string> };
+function resolveOtpSource(role: string, options?: { env?: Env; roles?: RoleCredentials }): OtpSource | undefined;
 ```
 
 | Function | Description |

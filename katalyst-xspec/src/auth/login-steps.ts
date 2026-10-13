@@ -24,6 +24,8 @@ export async function uiLoginAsRole(auth: AuthPort, world: World, role: string, 
 /** The role's current one-time code, from the auth adapter or, for adapters without oneTimeCodeFor, from AUTH_<ROLE>_OTP_*. */
 export async function oneTimeCodeForRole(auth: AuthPort | undefined, world: World, role: string): Promise<string> {
   const name = interpolate(role, world.vars);
-  if (auth?.oneTimeCodeFor) return auth.oneTimeCodeFor(name);
+  // Codes sent by email count only if they arrived during this scenario.
+  const since = world.startedAt ? new Date(world.startedAt - 2000) : undefined;
+  if (auth?.oneTimeCodeFor) return auth.oneTimeCodeFor(name, { since });
   return oneTimeCode(name);
 }

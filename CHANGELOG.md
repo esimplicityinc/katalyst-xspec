@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.18.0] - 2026-10-13
+
+One-time codes from other sources than an authenticator app. See [Codes from email or elsewhere](docs/guides/authentication.md#codes-from-email-or-elsewhere).
+
+### Added
+
+- `AUTH_<ROLE>_OTP_SOURCE=email` (or `AUTH_OTP_SOURCE`): the page-by-page login and the one-time code steps read the code from the newest email to the role (`AUTH_<ROLE>_OTP_EMAIL`, default its username; `AUTH_<ROLE>_OTP_EMAIL_SUBJECT`) that arrived during the login or scenario, using the test inbox (`MAIL_API_URL`). A retry waits for a newer email. `MAIL_CODE_PATTERN` sets the code's format.
+- `roles: { pm: { otp: () => code } }`: a function (sync or async) that returns the current code, e.g. from an SMS test service.
+- `UniversalAuthAdapter` takes `mail` (default: Mailpit at `MAIL_API_URL`); `createAuth` receives the `mail` fixture. `AuthPort.oneTimeCodeFor(role, { since })`. Exported: `resolveOtpSource`, `otpSourceEnvKeys`, `OtpSource`, `OtpProvider`.
+
 ## [0.17.0] - 2026-10-13
 
 Email testing: check what the app sends and use links and codes from it. See [Email Testing](docs/guides/email-testing.md).

@@ -26,7 +26,7 @@ function createBddTest(options?: CreateBddTestOptions): BddTest
 type CreateBddTestOptions = {
   createApi?: (ctx: CreateContext) => ApiPort;
   createUi?: (ctx: CreateContext) => UiPort;
-  createAuth?: (ctx: CreateContext & { api: ApiPort; ui: UiPort }) => AuthPort;
+  createAuth?: (ctx: CreateContext & { api: ApiPort; ui: UiPort; apiBaseUrl: string; mail: MailPort }) => AuthPort;
   createCleanup?: (ctx: CreateContext) => CleanupPort;
   getCleanupAuth?: CleanupAuthProvider;
   createTui?: () => TuiPort | undefined;

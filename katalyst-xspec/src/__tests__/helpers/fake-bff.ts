@@ -5,7 +5,9 @@ import type { AddressInfo } from 'node:net';
 import { generateTotp } from '../../auth/totp.js';
 
 export type FakeIdpOptions = {
-  users: Record<string, { password: string; otpSecret?: string }>;
+  /** `otpByEmail`: after the password, a code is "emailed" (onEmail) instead of using a TOTP app. */
+  users: Record<string, { password: string; otpSecret?: string; otpByEmail?: boolean }>;
+  onEmail?: (to: string, subject: string, text: string) => void;
   /** "combined": username + password on one page (Keycloak); "identifier-first": username, Next, then password. */
   layout?: 'combined' | 'identifier-first';
   consent?: boolean;
@@ -29,6 +31,7 @@ export async function startFakeBff(options: FakeIdpOptions) {
   const period = options.otpPeriod ?? 30;
   const stats = { otpSubmissions: 0, otpRejected: 0, reusedCodes: 0, logins: 0 };
   const usedCodes = new Set<string>();
+  const emailedCodes = new Map<string, string>();
   // Provider-side login transactions: tx id -> state.
   const tx = new Map<string, { user?: string; stage: 'username' | 'password' | 'otp' | 'consent' | 'done'; redirect: string }>();
   const appSessions = new Set<string>();
@@ -72,11 +75,17 @@ export async function startFakeBff(options: FakeIdpOptions) {
           return redirect(`${action}&error=Wrong password.`);
         }
         t.user = user;
-        t.stage = options.users[user].otpSecret ? 'otp' : options.consent ? 'consent' : 'done';
+        if (options.users[user].otpByEmail) {
+          const code = String(100000 + Math.floor(Math.random() * 900000));
+          emailedCodes.set(user, code);
+          options.onEmail?.(user, 'Your sign-in code', `Your sign-in code is ${code}. It expires in 10 minutes.`);
+        }
+        t.stage = options.users[user].otpSecret || options.users[user].otpByEmail ? 'otp' : options.consent ? 'consent' : 'done';
       } else if (t.stage === 'otp') {
         stats.otpSubmissions++;
         const code = f.get('otp') || '';
-        const expected = generateTotp({ secret: options.users[t.user!].otpSecret!, encoding: 'latin1', period });
+        const u = options.users[t.user!];
+        const expected = u.otpByEmail ? emailedCodes.get(t.user!) : generateTotp({ secret: u.otpSecret!, encoding: 'latin1', period });
         if (usedCodes.has(`${t.user}:${code}`)) stats.reusedCodes++;
         if (code !== expected || usedCodes.has(`${t.user}:${code}`)) {
           stats.otpRejected++;

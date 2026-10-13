@@ -41,6 +41,8 @@ See the [Authentication guide](../../guides/authentication.md) for how these fit
 | `AUTH_<ROLE>_USERNAME` / `AUTH_<ROLE>_PASSWORD` | - | Credentials for a role, e.g. `AUTH_ADMIN_*`, `AUTH_PM_*` |
 | `AUTH_<ROLE>_OTP_SECRET` | - | TOTP secret (or `otpauth://` URI) for one-time code steps. `AUTH_OTP_SECRET` for every role |
 | `AUTH_<ROLE>_OTP_ENCODING` | `base32` | `latin1`/`ascii` (plain text) or `hex`. `AUTH_OTP_ENCODING` for every role |
+| `AUTH_<ROLE>_OTP_SOURCE` | `totp` | `email`: one-time codes come from the test inbox (`MAIL_API_URL`). `AUTH_OTP_SOURCE` for every role |
+| `AUTH_<ROLE>_OTP_EMAIL` / `_OTP_EMAIL_SUBJECT` | username / - | Address and subject filter for emailed codes. `AUTH_OTP_EMAIL_SUBJECT` for every role |
 | `AUTH_<ROLE>_OTP_DIGITS` / `_PERIOD` / `_ALGORITHM` | `6` / `30` / `SHA1` | TOTP code length, window in seconds, HMAC algorithm. `AUTH_OTP_*` for every role |
 | `DEFAULT_ADMIN_USERNAME` / `DEFAULT_ADMIN_EMAIL` / `DEFAULT_ADMIN_PASSWORD` | - | Older names for the `admin` role |
 | `XSPEC_SHOW_SECRETS` | `false` | `true`: don't redact credentials in error messages and debug steps (local debugging only). See [Keeping secrets out of logs and git](../../guides/authentication.md#keeping-secrets-out-of-logs-and-git) |

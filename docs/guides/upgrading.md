@@ -251,6 +251,11 @@ const targets = logTargets(resolveTargets());
 
 ## Version History
 
+### 0.18.0
+
+- One-time codes can come from email (`AUTH_<ROLE>_OTP_SOURCE=email`, read from the test inbox) or from a function passed as `roles: { x: { otp: () => code } }`, as well as from a TOTP secret. See [Codes from email or elsewhere](./authentication.md#codes-from-email-or-elsewhere).
+- `createAuth` receives `mail`; the default passes it to `UniversalAuthAdapter`. No breaking changes.
+
 ### 0.17.0
 
 - Email testing: a `mail` fixture (Mailpit at `MAIL_API_URL`, or `createMail`) and steps for checking emails and using their links and codes. See [Email Testing](./email-testing.md).

@@ -413,7 +413,7 @@ interface AuthPort {
   clearSavedSession?(role: string): void;
 
   // Optional (0.10+): the role's current one-time code
-  oneTimeCodeFor?(role: string): Promise<string>;
+  oneTimeCodeFor?(role: string, options?: { since?: Date }): Promise<string>;
 }
 
 type UiLoginOptions = {
@@ -440,7 +440,7 @@ Forgets the role's saved UI session, so the next `uiLoginAs(world, role, { reuse
 
 #### `oneTimeCodeFor(role)`
 
-The role's current one-time code. `UniversalAuthAdapter` generates it from the role's TOTP secret (`AUTH_<ROLE>_OTP_SECRET` or `roles: { x: { otp } }`). Used by the one-time code steps; adapters without it fall back to the `AUTH_<ROLE>_OTP_*` variables.
+The role's current one-time code. `UniversalAuthAdapter` generates it from the role's TOTP secret (`AUTH_<ROLE>_OTP_SECRET` or `roles: { x: { otp } }`), reads it from the newest email received since `since` (`AUTH_<ROLE>_OTP_SOURCE=email`), or calls the function passed as `roles: { x: { otp: () => code } }`. Used by the one-time code steps; adapters without it fall back to the `AUTH_<ROLE>_OTP_*` variables.
 
 #### `apiLoginAsAdmin(world)` / `apiLoginAsUser(world)`
 

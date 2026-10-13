@@ -3,7 +3,10 @@ import type { AuthPort, UiLoginOptions } from '../../ports/auth.port';
 import type { UiPort } from '../../ports/ui.port';
 import type { World } from '../../world';
 import { resolveCredentials, roleEnvKeys, type Credentials, type RoleCredentials } from '../../auth/credentials';
-import { freshOneTimeCode, oneTimeCode, resolveOtpSettings } from '../../auth/otp';
+import { freshOneTimeCode, oneTimeCode, otpSourceEnvKeys, resolveOtpSource } from '../../auth/otp';
+import type { MailPort } from '../../ports/mail.port';
+import { MailpitAdapter } from '../mail/mailpit.adapter';
+import { emailCode, emailCodePattern } from '../../helpers/email';
 import { runLoginFlow } from '../../auth/login-flow';
 import { apiLoginErrorMessage, buildApiLoginRequest, extractToken } from '../../auth/api-login';
 import { apiAuthMode, oidcNeedsUserCredentials } from '../../auth/oidc/settings';
@@ -27,7 +30,12 @@ export type UniversalAuthOptions = {
   env?: Env;
   /** API base URL, used to sign DPoP proofs for relative paths. Defaults to API_BASE_URL resolution. */
   apiBaseUrl?: string;
+  /** Test inbox for one-time codes sent by email (AUTH_<ROLE>_OTP_SOURCE=email). Defaults to Mailpit at MAIL_API_URL. */
+  mail?: MailPort;
 };
+
+// Per role, when the last emailed code used for a login arrived: a retry needs a newer email.
+const lastEmailedCode = new Map<string, number>();
 
 /** Forget every saved UI session, in all workers (e.g. after changing a password mid-run). */
 export function clearUiSessions({ env = process.env }: { env?: Env } = {}): void {
@@ -51,8 +59,10 @@ export class UniversalAuthAdapter implements AuthPort {
   protected readonly env: Env;
   protected readonly apiBaseUrl: string;
   private oidcClient?: OidcClient;
+  private mailPort?: MailPort;
 
   constructor(options: UniversalAuthOptions) {
+    this.mailPort = options.mail;
     this.api = options.api;
     this.ui = options.ui;
     this.roles = options.roles;
@@ -65,9 +75,45 @@ export class UniversalAuthAdapter implements AuthPort {
     return resolveCredentials(role, { env: this.env, roles: this.roles });
   }
 
-  /** The role's current one-time code from its TOTP secret (AUTH_<ROLE>_OTP_SECRET or `roles: { x: { otp } }`). */
-  async oneTimeCodeFor(role: string): Promise<string> {
+  /**
+   * The role's current one-time code: from its TOTP secret (AUTH_<ROLE>_OTP_SECRET),
+   * the newest email to it (AUTH_<ROLE>_OTP_SOURCE=email, received since `since`),
+   * or a function passed as `roles: { x: { otp: () => code } }`.
+   */
+  async oneTimeCodeFor(role: string, { since }: { since?: Date } = {}): Promise<string> {
+    const source = resolveOtpSource(role, { env: this.env, roles: this.roles });
+    if (source?.kind === 'custom') return String(await source.provide());
+    if (source?.kind === 'email') return this.emailedOneTimeCode(role, since);
     return oneTimeCode(role, { env: this.env, roles: this.roles });
+  }
+
+  /** The test inbox for emailed codes. */
+  protected get mail(): MailPort {
+    if (this.mailPort) return this.mailPort;
+    if (!this.env.MAIL_API_URL) {
+      throw new Error(
+        `One-time codes by email (AUTH_<ROLE>_OTP_SOURCE=email) need a test inbox: set MAIL_API_URL to your Mailpit address, ` +
+          'or pass mail to UniversalAuthAdapter.',
+      );
+    }
+    this.mailPort = new MailpitAdapter({ baseUrl: this.env.MAIL_API_URL });
+    return this.mailPort;
+  }
+
+  /** The code in the newest email to the role (AUTH_<ROLE>_OTP_EMAIL, default its username) received since `since`. */
+  protected async emailedOneTimeCode(role: string, since?: Date): Promise<string> {
+    const source = resolveOtpSource(role, { env: this.env, roles: this.roles });
+    const subject = source?.kind === 'email' ? source.subject : undefined;
+    const to = (source?.kind === 'email' && source.to) || this.credentialsFor(role).username;
+    const keys = otpSourceEnvKeys(role);
+    const message = await this.mail.waitFor({ to, subject, since }, Number(this.env.MAIL_TIMEOUT) || 10_000).catch((err: Error) => {
+      throw new Error(`One-time code for "${role}" by email: ${err.message} Check ${keys.email} (default: the role's username) and ${keys.subject}.`);
+    });
+    const pattern = emailCodePattern(this.env);
+    const code = emailCode(message, pattern);
+    if (!code) throw new Error(`One-time code for "${role}": no code matching ${pattern} in the email "${message.subject}" to ${to}. Set MAIL_CODE_PATTERN.`);
+    lastEmailedCode.set(role.toLowerCase(), message.date.getTime());
+    return code;
   }
 
   apiSetBearer(world: World, token: string): void {
@@ -309,18 +355,30 @@ export class UniversalAuthAdapter implements AuthPort {
    */
   protected async uiLogin(world: World, role: string, creds: Credentials): Promise<void> {
     if (!this.ui.loginPage) return this.singlePageUiLogin(world, role, creds);
-    const hasOtp = resolveOtpSettings(role, { env: this.env, roles: this.roles }) !== undefined;
+    const hasOtp = resolveOtpSource(role, { env: this.env, roles: this.roles }) !== undefined;
+    // Emailed codes for this login arrive after it starts (allowing for the mail server's clock).
+    const startedAt = new Date(Date.now() - 2000);
     await runLoginFlow({
       page: this.ui.loginPage(),
       role,
       creds,
       env: this.env,
-      oneTimeCode: hasOtp ? () => this.loginOneTimeCode(role) : undefined,
+      oneTimeCode: hasOtp ? () => this.loginOneTimeCode(role, startedAt) : undefined,
     });
   }
 
-  /** The one-time code for a login: never one this process already used (waits for the next window instead). */
-  protected loginOneTimeCode(role: string): Promise<string> {
+  /**
+   * The one-time code for a login, never one already used: a TOTP code from a
+   * new window, or an email newer than the last one used.
+   */
+  protected async loginOneTimeCode(role: string, loginStartedAt = new Date()): Promise<string> {
+    const source = resolveOtpSource(role, { env: this.env, roles: this.roles });
+    if (source?.kind === 'email') {
+      const used = lastEmailedCode.get(role.toLowerCase());
+      const since = used !== undefined && used >= loginStartedAt.getTime() ? new Date(used + 1) : loginStartedAt;
+      return this.emailedOneTimeCode(role, since);
+    }
+    if (source?.kind === 'custom') return String(await source.provide());
     return freshOneTimeCode(role, { env: this.env, roles: this.roles });
   }
 
