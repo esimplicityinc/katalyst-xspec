@@ -16,6 +16,8 @@ import { initWorld } from '../world.js';
 //    login page whose username field has a label but no placeholder. ────────
 const USERS: Record<string, string> = { 'pm@x.com': 'pm-pass' };
 let uiLoginPosts = 0;
+// UI sessions the app still accepts; clearing it logs everyone out server-side.
+const liveUiSessions = new Set<string>();
 
 function readBody(req: http.IncomingMessage): Promise<string> {
   return new Promise((resolve) => {
@@ -57,10 +59,12 @@ const server = http.createServer(async (req, res) => {
     uiLoginPosts++;
     const f = new URLSearchParams(await readBody(req));
     if (USERS[f.get('email')!] !== f.get('password')) return send(303, '', { Location: '/login?error=1' });
-    return send(303, '', { Location: '/home', 'Set-Cookie': 'sid=ui-session; Path=/' });
+    const id = `ui-session-${uiLoginPosts}`;
+    liveUiSessions.add(id);
+    return send(303, '', { Location: '/home', 'Set-Cookie': `sid=${id}; Path=/` });
   }
   if (url.pathname === '/home') {
-    if (!sid(req)) return send(303, '', { Location: '/login' });
+    if (!liveUiSessions.has(sid(req) || '')) return send(303, '', { Location: '/login' });
     return send(200, `<h1>Welcome</h1><script>localStorage.setItem('prefs','dark')</script>`);
   }
   send(404, { error: 'not found' });
@@ -296,6 +300,53 @@ describe('UniversalAuthAdapter: UI login', { skip: skipUi }, () => {
       await s.context.close();
     }
     assert.deepEqual(fs.readdirSync(sessionDir), []);
+  });
+
+  describe('expired sessions', () => {
+    const login = async (env: Record<string, string>) => {
+      const s = await uiSetup(env);
+      try {
+        await s.auth.uiLoginAs(s.world, 'pm', { reuseSession: true });
+        return s.page.url();
+      } finally {
+        await s.context.close();
+      }
+    };
+
+    it('a session the app has logged out is replaced by a fresh login', async () => {
+      const env = uiEnv({ UI_SESSION_CHECK_PATH: '/home' });
+      await login(env);
+      liveUiSessions.clear();
+      const url = await login(env);
+      assert.equal(uiLoginPosts, 2, 'logged in again');
+      assert.match(url, /\/home$/);
+      // The new session was saved: the next scenario restores it without logging in.
+      assert.match(await login(env), /\/home$/);
+      assert.equal(uiLoginPosts, 2);
+    });
+
+    it('a valid session costs one page load and no login', async () => {
+      const env = uiEnv({ UI_SESSION_CHECK_PATH: '/home' });
+      await login(env);
+      assert.match(await login(env), /\/home$/, 'left on the check page');
+      assert.equal(uiLoginPosts, 1);
+    });
+
+    it('UI_LOGIN_SUCCESS_TEXT is used as the check when set', async () => {
+      const env = uiEnv({ UI_SESSION_CHECK_PATH: '/home', UI_LOGIN_SUCCESS_TEXT: 'Welcome', UI_LOGIN_TIMEOUT: '1500' });
+      await login(env);
+      liveUiSessions.clear();
+      await login(env);
+      assert.equal(uiLoginPosts, 2);
+    });
+
+    it('UI_SESSION_CHECK=false restores without checking', async () => {
+      const env = uiEnv({ UI_SESSION_CHECK_PATH: '/home', UI_SESSION_CHECK: 'false' });
+      await login(env);
+      liveUiSessions.clear();
+      await login(env);
+      assert.equal(uiLoginPosts, 1);
+    });
   });
 
   it('without reuseSession every call submits the form', async () => {

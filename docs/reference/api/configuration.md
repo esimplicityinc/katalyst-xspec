@@ -48,6 +48,9 @@ See the [Authentication guide](../../guides/authentication.md) for how these fit
 | `UI_SESSION_TTL` | `30m` | How long a saved session is used (`90s`, `30m`, `2h`; plain numbers are seconds) |
 | `UI_SESSION_SCOPE` | `run` | `persistent`: also use sessions saved by earlier runs |
 | `UI_SESSION_LOCK_TIMEOUT` | `2m` | A login holding the lock longer than this is assumed crashed |
+| `UI_SESSION_CHECK` | `true` | Check a restored session is still logged in; `false` skips it |
+| `UI_SESSION_CHECK_PATH` | `/` | Page loaded for that check; landing on the login page means the session expired |
+| `UI_LOGIN_SUCCESS_URL_EXCLUDES` | - | Comma-separated URL parts that mean "still on the login / identity provider pages", e.g. `/realms/` |
 | `XSPEC_RUN_ID` | the runner's process id | Identifies the run for `UI_SESSION_SCOPE=run` |
 | `DEFAULT_USER_USERNAME` / `DEFAULT_USER_PASSWORD`, `NON_ADMIN_USERNAME` / `NON_ADMIN_PASSWORD` | - | Older names for the `user` role |
 | `API_AUTH_LOGIN_PATH` | `/auth/login` | API login endpoint |
