@@ -9,7 +9,8 @@ import { isOidcMode, oidcNeedsUserCredentials } from '../../auth/oidc/settings';
 import { OidcClient, type OidcSession } from '../../auth/oidc/client';
 import { createBrowserAuthorize, createHttpAuthorize, type AuthorizeRequest } from '../../auth/oidc/code-flow';
 import { resolveApiBaseUrl, resolveTargets } from '../../targets';
-import { SessionStore, type SessionKey } from '../../auth/session-store';
+import { SessionStore, type SavedSession, type SessionKey } from '../../auth/session-store';
+import { loginPageMatcher, loginUrlExcludes, sessionCheckSettings, sessionCookiesExpired } from '../../auth/session-check';
 
 type Env = Record<string, string | undefined>;
 
@@ -91,15 +92,41 @@ export class UniversalAuthAdapter implements AuthPort {
     const store = SessionStore.fromEnv(this.env);
     const key = this.sessionKey(role, creds);
     const saved = store.read(key);
-    if (saved) return this.ui.restoreSession!(saved.state);
+    if (saved && (await this.restoreSavedSession(role, saved))) return;
 
     await store.withLock(key, async () => {
-      // Another worker may have logged in while this one waited for the lock.
+      // Another worker may have logged in again while this one waited for the lock.
       const theirs = store.read(key);
-      if (theirs) return this.ui.restoreSession!(theirs.state);
+      if (theirs && theirs.savedAt !== saved?.savedAt && (await this.restoreSavedSession(role, theirs))) return;
       await this.uiLogin(world, role, creds);
       store.write(key, await this.ui.saveSession!());
     });
+  }
+
+  /**
+   * Restore a saved session and check it's still logged in (UI_SESSION_CHECK):
+   * load UI_SESSION_CHECK_PATH and make sure it doesn't end up on the login
+   * page (or, with UI_LOGIN_SUCCESS_TEXT, that the text appears). Returns false
+   * if the session has expired, so the caller logs in again.
+   */
+  protected async restoreSavedSession(role: string, saved: SavedSession): Promise<boolean> {
+    const check = sessionCheckSettings(this.env);
+    const app = resolveTargets(this.env).frontendUrl;
+    const expired = (reason: string) => {
+      console.log(`katalyst-xspec: the saved session for "${role}" ${reason}; logging in again.`);
+      return false;
+    };
+    if (sessionCookiesExpired(saved.state, { host: new URL(app).hostname })) return expired('has expired cookies');
+    await this.ui.restoreSession!(saved.state);
+    if (!check.enabled) return true;
+
+    await this.ui.goto(check.path);
+    if (check.text && this.ui.waitForText) {
+      return (await this.ui.waitForText(check.text, check.timeoutMs)) || expired(`doesn't show "${check.text}" on ${check.path}`);
+    }
+    await this.ui.waitForPageLoad();
+    const url = await this.ui.getCurrentUrl();
+    return !loginPageMatcher(this.env)(url) || expired(`is logged out (${check.path} went to ${new URL(url).pathname})`);
   }
 
   /** What a saved UI session is for: the role, its username, the login page and the app. */
@@ -232,8 +259,12 @@ export class UniversalAuthAdapter implements AuthPort {
       ok = await this.ui.waitForText(successText, timeoutMs);
     } else if (this.ui.waitForUrl) {
       const loginPathname = new URL(loginUrl).pathname;
+      const excludes = loginUrlExcludes(this.env);
       ok = await this.ui.waitForUrl(
-        (u) => (successUrl ? u.includes(successUrl) : new URL(u).pathname !== loginPathname),
+        (u) =>
+          successUrl
+            ? u.includes(successUrl) && !excludes.some((part) => u.includes(part))
+            : new URL(u).pathname !== loginPathname && !excludes.some((part) => u.includes(part)),
         timeoutMs,
       );
     }

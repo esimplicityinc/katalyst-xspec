@@ -251,6 +251,11 @@ const targets = logTargets(resolveTargets());
 
 ## Version History
 
+### 0.13.0
+
+- Restored UI sessions are checked: `I am logged in as` loads `UI_SESSION_CHECK_PATH` (default `/`) and logs in again if that ends up on the login page. This adds one page load per scenario that restores a session; point `UI_SESSION_CHECK_PATH` at a light page, or set `UI_SESSION_CHECK=false`. The browser is left on that page, so start scenarios with a navigation step.
+- New `UI_LOGIN_SUCCESS_URL_EXCLUDES`: URL parts that mean "still logging in", used both to tell a finished login and to spot a logged-out session.
+
 ### 0.12.0
 
 - `Given I am logged in as "<role>"` now logs in **once per role per run** and shares the session with every worker, through files in `.xspec/auth/` (`UI_SESSION_DIR`). Before, each worker logged in separately. New settings: `UI_SESSION_TTL` (default `30m`), `UI_SESSION_SCOPE` (`run` / `persistent`), `UI_SESSION_LOCK_TIMEOUT`, `XSPEC_RUN_ID`. New steps: `Given I clear the saved session for {string}`, `Given I clear saved sessions`. See [Session reuse](./authentication.md#session-reuse).

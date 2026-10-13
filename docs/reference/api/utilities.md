@@ -626,6 +626,16 @@ class SessionStore {
 function clearUiSessions(options?: { env?: Env }): void; // delete every saved session
 ```
 
+Helpers for checking a restored session:
+
+```typescript
+import { loginPageMatcher, sessionCookiesExpired, sessionCheckSettings } from '@esimplicitylabs/katalyst-xspec';
+
+const isLoginPage = loginPageMatcher(process.env);   // UI_LOGIN_PATH, UI_LOGIN_SUCCESS_URL_EXCLUDES, other origins
+isLoginPage(page.url());
+sessionCookiesExpired(saved.state, { host: 'app.example.gov' });
+```
+
 Example: a custom login that runs once per run, however many workers need it:
 
 ```typescript

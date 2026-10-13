@@ -376,7 +376,9 @@ Logs in through the UI as a named role, reusing the session. The form is submitt
 **Environment Variables:**
 - `AUTH_<ROLE>_USERNAME` / `AUTH_<ROLE>_PASSWORD`
 - `UI_LOGIN_PATH`, `UI_USERNAME_FIELD`, `UI_PASSWORD_FIELD`, `UI_LOGIN_BUTTON`, `UI_LOGIN_SUCCESS_URL`, `UI_LOGIN_SUCCESS_TEXT`, `UI_LOGIN_TIMEOUT`
-- `UI_SESSION_REUSE`, `UI_SESSION_DIR`, `UI_SESSION_TTL`, `UI_SESSION_SCOPE`, `UI_SESSION_LOCK_TIMEOUT`, `XSPEC_RUN_ID`
+- `UI_SESSION_REUSE`, `UI_SESSION_DIR`, `UI_SESSION_TTL`, `UI_SESSION_SCOPE`, `UI_SESSION_LOCK_TIMEOUT`, `UI_SESSION_CHECK`, `UI_SESSION_CHECK_PATH`, `UI_LOGIN_SUCCESS_URL_EXCLUDES`, `XSPEC_RUN_ID`
+
+A restored session is checked by loading `UI_SESSION_CHECK_PATH` (default `/`); if that lands on the login page, the role logs in again.
 
 `UI_USERNAME_FIELD` / `UI_PASSWORD_FIELD` match the field's label, placeholder, or `name` attribute.
 

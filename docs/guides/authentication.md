@@ -194,12 +194,15 @@ This covers API logins. For browser logins that redirect to the provider's page,
 | `UI_LOGIN_BUTTON` | `Login` | the button's text |
 | `UI_LOGIN_SUCCESS_URL` | *(any page other than the login page)* | e.g. `/dashboard` |
 | `UI_LOGIN_SUCCESS_TEXT` | — | text shown once logged in; use when the URL doesn't change |
+| `UI_LOGIN_SUCCESS_URL_EXCLUDES` | — | comma-separated URL parts that mean "still logging in", e.g. `/realms/` for Keycloak pages |
 | `UI_LOGIN_TIMEOUT` | `10000` | milliseconds |
 | `UI_SESSION_REUSE` | `true` | `false` makes `I am logged in as` submit the form every time |
 | `UI_SESSION_DIR` | `.xspec/auth` | where saved sessions are kept (git-ignored) |
 | `UI_SESSION_TTL` | `30m` | how long a saved session is used; e.g. `90s`, `30m`, `2h`. Set it below your app's session timeout |
 | `UI_SESSION_SCOPE` | `run` | `persistent`: keep using sessions saved by earlier runs (until the TTL), for fast local re-runs |
 | `UI_SESSION_LOCK_TIMEOUT` | `2m` | how long a login may hold the lock before another worker takes over |
+| `UI_SESSION_CHECK` | `true` | `false`: restore saved sessions without checking they're still logged in |
+| `UI_SESSION_CHECK_PATH` | `/` | the page loaded to check a restored session |
 
 ### Session reuse
 
@@ -211,7 +214,9 @@ This covers API logins. For browser logins that redirect to the provider's page,
 
 This is much faster than logging in every time, and it avoids problems with login pages that rate-limit or lock accounts, and with [one-time codes](#one-time-passcodes-totp), which a provider accepts only once.
 
-A saved session is used if it was saved **by this run** (with `UI_SESSION_SCOPE=run`, the default) and **within `UI_SESSION_TTL`**; otherwise the role logs in again. Sessions are kept apart by role, username, `UI_LOGIN_PATH` and `FRONTEND_URL`, so changing any of them logs in again. Workers recognize their run by the Playwright runner's process; set `XSPEC_RUN_ID` to choose the run id yourself.
+A saved session is used if it was saved **by this run** (with `UI_SESSION_SCOPE=run`, the default) and **within `UI_SESSION_TTL`**; otherwise the role logs in again.
+
+**Expired sessions are replaced automatically.** After restoring a session, `I am logged in as` loads `UI_SESSION_CHECK_PATH` (default `/`). If that ends up on the login page, the session has expired on the server: the role logs in again, the new session is saved for the other workers, and the scenario carries on. "The login page" means `UI_LOGIN_PATH`, a URL containing one of `UI_LOGIN_SUCCESS_URL_EXCLUDES`, or (when `FRONTEND_URL` is set) any page outside the app, such as the identity provider. With `UI_LOGIN_SUCCESS_TEXT` set, the check is that the text appears instead. A session whose cookies have passed their expiry date is replaced without loading anything. The check leaves the browser on `UI_SESSION_CHECK_PATH`; set it to a light page that requires login, or `UI_SESSION_CHECK=false` to skip it. Sessions are kept apart by role, username, `UI_LOGIN_PATH` and `FRONTEND_URL`, so changing any of them logs in again. Workers recognize their run by the Playwright runner's process; set `XSPEC_RUN_ID` to choose the run id yourself.
 
 If a scenario logs out or changes the password, later scenarios may restore a dead session. Clear it in that scenario, use `When I log in as "pm" in UI` (always submits the form), or set `UI_SESSION_REUSE=false`:
 

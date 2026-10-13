@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.0] - 2026-10-13
+
+Expired saved sessions are replaced instead of failing the scenario. See [Session reuse](docs/guides/authentication.md#session-reuse).
+
+### Added
+
+- After restoring a saved session, `Given I am logged in as` loads `UI_SESSION_CHECK_PATH` (default `/`). If the browser ends up on the login page (`UI_LOGIN_PATH`, a URL containing one of `UI_LOGIN_SUCCESS_URL_EXCLUDES`, or another origin than `FRONTEND_URL`), it logs in again and saves the new session for every worker. With `UI_LOGIN_SUCCESS_TEXT`, the check waits for that text instead. `UI_SESSION_CHECK=false` turns it off.
+- Saved sessions whose app cookies have passed their expiry date are replaced without a page load.
+- `UI_LOGIN_SUCCESS_URL_EXCLUDES`: comma-separated URL parts (e.g. `/realms/`) that don't count as a finished login.
+- Exported: `loginPageMatcher`, `loginUrlExcludes`, `sessionCookiesExpired`, `sessionCheckSettings`.
+
+### Changed
+
+- A scenario that restores a session now starts on `UI_SESSION_CHECK_PATH` instead of a blank page.
+
 ## [0.12.0] - 2026-10-13
 
 UI login sessions are shared by every worker: each role logs in once per run. See [Session reuse](docs/guides/authentication.md#session-reuse).
