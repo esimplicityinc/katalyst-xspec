@@ -636,6 +636,16 @@ isLoginPage(page.url());
 sessionCookiesExpired(saved.state, { host: 'app.example.gov' });
 ```
 
+For using a browser session outside the browser:
+
+```typescript
+import { cookieHeaderFor, apiSessionCookies, newLoginContext, closeLoginBrowser } from '@esimplicitylabs/katalyst-xspec';
+
+cookieHeaderFor(saved.state, 'https://app.example.gov/api/me');   // "sid=…; other=…", as a browser would send
+apiSessionCookies({ jar, cookieHeader, apiBaseUrl });            // cookies for page.context().addCookies()
+const context = await newLoginContext({ baseURL: process.env.FRONTEND_URL! }); // headless, shared per worker
+```
+
 Example: a custom login that runs once per run, however many workers need it:
 
 ```typescript

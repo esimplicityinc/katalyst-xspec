@@ -134,6 +134,11 @@ export async function startFakeBff(options: FakeIdpOptions) {
       res.writeHead(302, { Location: '/home', 'Set-Cookie': `app_sid=${id}; Path=/; HttpOnly` });
       return res.end();
     }
+    if (url.pathname.startsWith('/api/')) {
+      const ok = sid && appSessions.has(sid);
+      res.writeHead(ok ? 200 : 401, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify(ok ? { session: sid } : { error: 'unauthenticated' }));
+    }
     if (!sid || !appSessions.has(sid)) {
       res.writeHead(302, { Location: '/auth/start' });
       return res.end();

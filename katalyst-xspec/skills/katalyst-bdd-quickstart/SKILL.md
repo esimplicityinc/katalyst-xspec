@@ -130,6 +130,7 @@ Then use relative paths in features, e.g. `Given I navigate to "/login"`, `When 
 | Login steps (`Given I am authenticated as "pm" via API`, `Given I am logged in as "pm"`) | `AUTH_PM_USERNAME`, `AUTH_PM_PASSWORD` (one pair per role) |
 | One-time code steps, or a login page that asks for an authenticator code | `AUTH_PM_OTP_SECRET` (base32; `AUTH_OTP_ENCODING=latin1` for a plain-text secret) |
 | Login through an identity provider (BFF `/auth/start`, SSO) | `UI_LOGIN_PATH=/auth/start`, `FRONTEND_URL` |
+| API that only accepts the browser session (BFF) | `API_AUTH_MODE=ui-session` (API steps send the login's session cookie) |
 
 Missing credentials fail the login step with a message naming the variables. Each run prints `katalyst-xspec targets: UI … | API …` showing where tests point. Login settings: docs/guides/authentication.md.
 

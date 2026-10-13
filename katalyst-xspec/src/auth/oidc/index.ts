@@ -1,5 +1,7 @@
 export {
   isOidcMode,
+  apiAuthMode,
+  type ApiAuthMode,
   oidcGrantType,
   oidcNeedsUserCredentials,
   readOidcSettings,

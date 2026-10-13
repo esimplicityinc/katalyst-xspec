@@ -6,7 +6,10 @@ import { resolveCredentials, roleEnvKeys, type Credentials, type RoleCredentials
 import { freshOneTimeCode, oneTimeCode, resolveOtpSettings } from '../../auth/otp';
 import { runLoginFlow } from '../../auth/login-flow';
 import { apiLoginErrorMessage, buildApiLoginRequest, extractToken } from '../../auth/api-login';
-import { isOidcMode, oidcNeedsUserCredentials } from '../../auth/oidc/settings';
+import { apiAuthMode, oidcNeedsUserCredentials } from '../../auth/oidc/settings';
+import { cookieHeaderFor, newLoginContext } from '../../auth/ui-session';
+import { PlaywrightUiAdapter } from '../ui/playwright-ui.adapter';
+import type { UiSessionState } from '../../ports/ui.port';
 import { OidcClient, type OidcSession } from '../../auth/oidc/client';
 import { createBrowserAuthorize, createHttpAuthorize, type AuthorizeRequest } from '../../auth/oidc/code-flow';
 import { resolveApiBaseUrl, resolveTargets } from '../../targets';
@@ -74,11 +77,87 @@ export class UniversalAuthAdapter implements AuthPort {
   }
 
   async apiLoginAs(world: World, role: string): Promise<void> {
-    if (isOidcMode(this.env)) {
-      await this.oidcLogin(world, role);
-      return;
-    }
+    const mode = apiAuthMode(this.env);
+    if (mode === 'oidc') return this.oidcLogin(world, role);
+    if (mode === 'ui-session') return this.uiSessionApiLogin(world, role);
     await this.apiLogin(world, role, this.credentialsFor(role));
+  }
+
+  /**
+   * API_AUTH_MODE=ui-session: send the role's browser session cookie with API
+   * requests, for APIs that only accept the app's session (a BFF). Uses the
+   * session saved by `I am logged in as`, or logs in through a browser first.
+   */
+  protected async uiSessionApiLogin(world: World, role: string): Promise<void> {
+    const state = await this.savedUiSession(world, role);
+    const cookie = cookieHeaderFor(state, this.apiBaseUrl);
+    if (!cookie) {
+      throw new Error(
+        `API login as "${role}" (API_AUTH_MODE=ui-session): the browser session has no cookies for ${new URL(this.apiBaseUrl).origin}. ` +
+          `The API must be on the app's site (API_BASE_URL on the same host as FRONTEND_URL, or a subdomain the session cookie covers).`,
+      );
+    }
+    world.headers = { ...(world.headers || {}), Cookie: cookie };
+    delete world.headers.Authorization;
+    delete world.apiAuth;
+    delete world.idTokenClaims;
+  }
+
+  /**
+   * The role's saved UI session, logging in (once, across workers) if there
+   * is none or it has expired. Logs in through a browser of its own, so API
+   * scenarios don't need one.
+   */
+  protected async savedUiSession(world: World, role: string): Promise<UiSessionState> {
+    const creds = this.credentialsFor(role);
+    const store = SessionStore.fromEnv(this.env);
+    const key = this.sessionKey(role, creds);
+    const saved = store.read(key);
+    if (saved && (await this.savedSessionWorks(role, saved))) return saved.state;
+
+    return store.withLock(key, async () => {
+      const theirs = store.read(key);
+      if (theirs && theirs.savedAt !== saved?.savedAt && (await this.savedSessionWorks(role, theirs))) return theirs.state;
+      const state = await this.uiLoginInOwnBrowser(world, role, creds);
+      store.write(key, state);
+      return state;
+    });
+  }
+
+  /** A saved session's cookies are current, and (UI_SESSION_CHECK) the app still accepts them, checked without a browser. */
+  protected async savedSessionWorks(role: string, saved: SavedSession): Promise<boolean> {
+    const app = resolveTargets(this.env).frontendUrl;
+    const expired = (reason: string) => {
+      console.log(`katalyst-xspec: the saved session for "${role}" ${reason}; logging in again.`);
+      return false;
+    };
+    if (sessionCookiesExpired(saved.state, { host: new URL(app).hostname })) return expired('has expired cookies');
+    const check = sessionCheckSettings(this.env);
+    if (!check.enabled) return true;
+    const url = new URL(check.path, app).href;
+    const cookie = cookieHeaderFor(saved.state, url);
+    if (!cookie) return expired(`has no cookies for ${new URL(app).origin}`);
+    const res = await this.api.sendJson('GET', url, undefined, { Accept: 'text/html,application/json', Cookie: cookie });
+    const finalUrl = res.response?.url?.() ?? url;
+    if (res.status === 401 || res.status === 403) return expired(`is refused by ${check.path} (${res.status})`);
+    if (loginPageMatcher(this.env)(finalUrl)) return expired(`is logged out (${check.path} went to ${new URL(finalUrl).pathname})`);
+    return true;
+  }
+
+  /** Run the UI login in a headless browser of its own and return the session. */
+  protected async uiLoginInOwnBrowser(world: World, role: string, creds: Credentials): Promise<UiSessionState> {
+    const insecure = /^(1|true|yes)$/i.test(this.env.UI_LOGIN_IGNORE_HTTPS_ERRORS?.trim() ?? '');
+    const context = await newLoginContext({ baseURL: resolveTargets(this.env).frontendUrl, ignoreHTTPSErrors: insecure });
+    try {
+      const ui = new PlaywrightUiAdapter(await context.newPage());
+      // Same adapter (subclass overrides included), different browser.
+      const self = Object.create(this) as this;
+      Object.defineProperty(self, 'ui', { value: ui });
+      await self.uiLogin(world, role, creds);
+      return await ui.saveSession();
+    } finally {
+      await context.close();
+    }
   }
 
   async uiLoginAs(world: World, role: string, options: UiLoginOptions = {}): Promise<void> {

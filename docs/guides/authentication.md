@@ -32,6 +32,7 @@ No username for role "reviewer". Set AUTH_REVIEWER_USERNAME in .env, or pass rol
 |----------|-----|-----------|
 | API with a login endpoint that returns a token | `Given I am authenticated as "pm" via API` | `API_AUTH_*` if not the defaults |
 | API with a cookie session | same step | `API_AUTH_LOGIN_PATH` (the cookie is kept automatically) |
+| API that only accepts the browser login's session (BFF, SSO) | same step | `API_AUTH_MODE=ui-session`, see [API calls with the browser session](#api-calls-with-the-browser-session) |
 | API protected by an OIDC provider (Keycloak, Auth0, Okta, Entra ID): password, client credentials or authorization code + PKCE; secret, JWT or mTLS client auth; DPoP | same step | `API_AUTH_MODE=oidc` + `OIDC_*`, see [OIDC login](#oidc-login) |
 | A token you already have (CI secret, previous step) | `Given I set bearer token from variable "token"` | nothing |
 | Web app with a login form | `Given I am logged in as "pm"` | `UI_*` if not the defaults |
@@ -239,6 +240,33 @@ With `FRONTEND_URL` set, any page on another origin counts as part of the login,
 **Keycloak** (for example as a local stand-in for login.gov): username and password are on one page, then the "One-time code" page. The defaults recognize both, and the submit button (`Sign In`) is pressed with Enter. Give each test user an OTP credential with a known secret and set `AUTH_<ROLE>_OTP_SECRET` to it.
 
 **login.gov:** use its sandbox (`idp.int.identitysandbox.gov`) with test accounts that use an authentication app. Automating sign-ins against login.gov (sandbox or production) is up to login.gov's partner terms, so check with login.gov first; for production, prefer tests that don't sign in, or a test login the app itself provides.
+
+### API calls with the browser session
+
+In a BFF the API accepts only the app's session cookie, so there's no token for API steps to get. With `API_AUTH_MODE=ui-session`, `Given I am authenticated as "<role>" via API` uses the role's **browser session** instead: the one `I am logged in as` saved, or, if there's none yet, it logs in through a headless browser of its own (the same page-by-page login, one-time code included). Later API steps send the session cookie.
+
+```bash
+API_AUTH_MODE=ui-session
+FRONTEND_URL=http://localhost:3000
+UI_LOGIN_PATH=/auth/start
+```
+
+```gherkin
+Scenario: Create an application, then see it
+  Given I am authenticated as "applicant" via API
+  When I POST "/api/applications" with JSON body:
+    """
+    { "name": "Test" }
+    """
+  Then the response status should be 201
+  Given I am logged in as "applicant"
+  When I navigate to "/applications"
+  Then I should see text "Test"
+```
+
+API and UI steps share the same saved session, so the role logs in once per run however it's used. The API must be on the app's site: the same host as `FRONTEND_URL`, or a subdomain the session cookie covers. Before using a saved session, it's checked without a browser: a request to `UI_SESSION_CHECK_PATH` that ends on the login page or returns 401/403 means it has expired, and the role logs in again. Set `UI_LOGIN_IGNORE_HTTPS_ERRORS=true` if the headless login browser should accept self-signed certificates.
+
+The other way round: after an API login that set a session cookie (a cookie-session `API_AUTH_LOGIN_PATH`, or `ui-session`), `Given I use the API session in the browser` gives the browser the same cookies.
 
 ### Session reuse
 

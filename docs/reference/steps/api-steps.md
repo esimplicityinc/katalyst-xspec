@@ -39,10 +39,13 @@ If credentials are missing, the step fails with a message naming the variables t
 
 With `API_AUTH_MODE=oidc`, the role logs in to an OIDC provider instead (password, client credentials or authorization code + PKCE). Later API steps send the token, refreshed when it expires, with a DPoP proof per request when `OIDC_DPOP=true`. See [OIDC login](../../guides/authentication.md#oidc-login).
 
+With `API_AUTH_MODE=ui-session`, the step uses the role's browser login session (saved by `I am logged in as`, or logged in through a headless browser) and later API steps send its cookie. For APIs that only accept the app's session, such as a BFF. See [API calls with the browser session](../../guides/authentication.md#api-calls-with-the-browser-session).
+
 **Environment Variables:**
 - `AUTH_<ROLE>_USERNAME` / `AUTH_<ROLE>_PASSWORD`
 - `API_AUTH_LOGIN_PATH`, `API_AUTH_BODY`, `API_AUTH_USERNAME_FIELD`, `API_AUTH_PASSWORD_FIELD`, `API_AUTH_TOKEN_PATH`
 - `API_AUTH_MODE=oidc` and the `OIDC_*` settings
+- `API_AUTH_MODE=ui-session` and the `UI_*` login settings
 
 **Example:**
 ```gherkin
