@@ -15,7 +15,7 @@ describe('OIDC settings', () => {
     assert.equal(isOidcMode({}), false);
     assert.equal(isOidcMode({ OIDC_ISSUER: 'https://idp' }), false);
     assert.equal(isOidcMode({ API_AUTH_MODE: ' OIDC ' }), true);
-    assert.throws(() => isOidcMode({ API_AUTH_MODE: 'saml' }), /API_AUTH_MODE must be "login" or "oidc"/);
+    assert.throws(() => isOidcMode({ API_AUTH_MODE: 'saml' }), /API_AUTH_MODE must be "login", "oidc" or "ui-session"/);
   });
 
   it('defaults: password grant, secret in the body when there is one, public client otherwise', () => {

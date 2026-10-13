@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.15.0] - 2026-10-13
+
+API steps can use the browser login session, for APIs that only accept the app's session cookie (BFF). See [API calls with the browser session](docs/guides/authentication.md#api-calls-with-the-browser-session).
+
+### Added
+
+- `API_AUTH_MODE=ui-session`: `Given I am authenticated as "<role>" via API` sends the role's browser session cookie (domain, path and secure rules applied) on later API steps. It uses the session `I am logged in as` saved, or logs in once through a headless browser of its own, OTP included, so API-only scenarios need no browser. UI and API steps share one login per role per run.
+- Saved sessions used for API calls are checked without a browser: a request to `UI_SESSION_CHECK_PATH` that ends on the login page or returns 401/403 means log in again.
+- `Given I use the API session in the browser`: copies the API login's session cookies (cookie-session API login or `ui-session`) into the browser.
+- `UI_LOGIN_IGNORE_HTTPS_ERRORS` for the headless login browser.
+- Exported: `apiAuthMode`, `cookieHeaderFor`, `apiSessionCookies`, `newLoginContext`, `closeLoginBrowser`.
+
 ## [0.14.0] - 2026-10-13
 
 Logins that span several pages: identity providers, BFF `/auth/start` → `/auth/callback` flows, username-first pages, one-time codes and consent pages. See [Apps with a BFF login](docs/guides/authentication.md#apps-with-a-bff-login).

@@ -61,7 +61,8 @@ See the [Authentication guide](../../guides/authentication.md) for how these fit
 | `API_AUTH_USERNAME_FIELD` | `username` | Body field for the username |
 | `API_AUTH_PASSWORD_FIELD` | `password` | Body field for the password |
 | `API_AUTH_TOKEN_PATH` | common names | Where the token is in the response, e.g. `data.jwt` |
-| `API_AUTH_MODE` | `login` | `oidc`: API login gets a token from an OIDC provider (see [OIDC login](#oidc-login)) |
+| `API_AUTH_MODE` | `login` | `oidc`: API login gets a token from an OIDC provider (see [OIDC login](#oidc-login)). `ui-session`: API steps use the role's browser login session cookie |
+| `UI_LOGIN_IGNORE_HTTPS_ERRORS` | `false` | `true`: the headless browser `ui-session` logs in with accepts self-signed certificates |
 | `UI_LOGIN_PATH` | `/login` | Where the login starts (e.g. `/auth/start` for a BFF) |
 | `UI_USERNAME_FIELD` | *(recognized)* | Label, placeholder or `name` of the username field. Unset: a `Username` label or a usual username/email field |
 | `UI_PASSWORD_FIELD` | *(recognized)* | Label, placeholder or `name` of the password field. Unset: a `Password` label or any password field |

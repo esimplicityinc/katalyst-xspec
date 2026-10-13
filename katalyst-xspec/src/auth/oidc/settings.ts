@@ -72,12 +72,19 @@ const CLIENT_AUTH_ALIASES: Record<string, OidcClientAuthMethod> = {
   none: 'none',
 };
 
-export function isOidcMode(env: Env = process.env): boolean {
+export type ApiAuthMode = 'login' | 'oidc' | 'ui-session';
+
+/** API_AUTH_MODE: how the API login steps get their credentials. */
+export function apiAuthMode(env: Env = process.env): ApiAuthMode {
   const mode = (env.API_AUTH_MODE || 'login').trim().toLowerCase();
-  if (mode !== 'login' && mode !== 'oidc') {
-    throw new Error(`API_AUTH_MODE must be "login" or "oidc" (got "${env.API_AUTH_MODE}")`);
+  if (mode !== 'login' && mode !== 'oidc' && mode !== 'ui-session') {
+    throw new Error(`API_AUTH_MODE must be "login", "oidc" or "ui-session" (got "${env.API_AUTH_MODE}")`);
   }
-  return mode === 'oidc';
+  return mode;
+}
+
+export function isOidcMode(env: Env = process.env): boolean {
+  return apiAuthMode(env) === 'oidc';
 }
 
 function flag(value: string | undefined, fallback: boolean): boolean {

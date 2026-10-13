@@ -44,6 +44,7 @@ When I GET "/users/{userId}"  # Becomes /users/123
 | `Given I am authenticated as an admin via API` | Shorthand for role `"admin"` |
 | `Given I am authenticated as a user via API` | Shorthand for role `"user"` |
 | `Given I set header {string} to {string}` | `Given I set header "X-Custom" to "value"` |
+| `Given I use the API session in the browser` | After a cookie-session API login: the browser gets the same session |
 
 ### UI Steps
 

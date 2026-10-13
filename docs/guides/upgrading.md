@@ -251,6 +251,12 @@ const targets = logTargets(resolveTargets());
 
 ## Version History
 
+### 0.15.0
+
+- `API_AUTH_MODE=ui-session`: API steps use the role's browser login session cookie, for APIs that only accept the app's session (BFF). API-only scenarios log in through a headless browser of their own. See [API calls with the browser session](./authentication.md#api-calls-with-the-browser-session).
+- New step `Given I use the API session in the browser`.
+- The `API_AUTH_MODE` error message lists the new value. No breaking changes.
+
 ### 0.14.0
 
 - UI login goes page by page: username-first pages, one-time code pages and (with `UI_CONSENT_BUTTON`) consent pages, until the browser is back on the app. BFF logins work with `UI_LOGIN_PATH=/auth/start`. See [Apps with a BFF login](./authentication.md#apps-with-a-bff-login).

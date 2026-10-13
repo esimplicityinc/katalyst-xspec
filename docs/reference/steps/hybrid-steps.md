@@ -32,6 +32,21 @@ Scenario: Navigate with variables
 
 ---
 
+### Given I use the API session in the browser
+
+Gives the browser the session cookies of the scenario's API login, so UI steps continue as the same user without logging in again. Works after a cookie-session API login (`API_AUTH_LOGIN_PATH` that sets a cookie) and with `API_AUTH_MODE=ui-session`. A bearer token can't be moved to the browser; use `Given I am authenticated in UI with bearer token "..."` for that.
+
+**Example:**
+```gherkin
+Scenario: Set up through the API, check in the UI
+  Given I am authenticated as "pm" via API
+  And I use the API session in the browser
+  When I navigate to "/projects"
+  Then I should see text "Projects"
+```
+
+---
+
 ## Using Hybrid Tests
 
 Hybrid tests combine API and UI steps in the same scenario. Every built-in step works in any scenario, so no tag is required.
