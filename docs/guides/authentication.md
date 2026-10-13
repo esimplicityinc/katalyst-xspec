@@ -435,7 +435,7 @@ roles: {
 | `AUTH_<ROLE>_OTP_EMAIL` | the role's username | the address the codes are sent to |
 | `AUTH_<ROLE>_OTP_EMAIL_SUBJECT` | — | only emails whose subject contains this. `AUTH_OTP_EMAIL_SUBJECT` for every role |
 
-**Codes can only be used once.** Most providers reject a code that was already accepted in the same 30-second window. If several logins as the same user happen within one window (a scenario that logs in twice, or custom login steps in parallel workers), wait for the next window between them. `Given I am logged in as "pm"` avoids this by logging in once per run and sharing the session with every worker (see [Session reuse](#session-reuse)).
+**Codes can only be used once.** Most providers (login.gov, Keycloak) reject a code that was already accepted, and Keycloak also accepts the next window's code early, then refuses it in its own window. The built-in logins never submit a code that any worker of the run already used for that account: workers record the last window they used in `UI_SESSION_DIR`, and a login that would reuse it waits for the next window (up to one period, 30 s). `Given I am logged in as "pm"` logs in once per run, so this only comes up when the same account logs in again, for example `When I log in as "pm" in UI`, or a UI and an API scenario starting at the same time. Give such scenarios room: set Playwright's `timeout` to at least 60 s, or use different test users (each with its own secret) for them. Custom steps that use `I generate a one-time code` are not coordinated.
 
 ## Keeping secrets out of logs and git
 
