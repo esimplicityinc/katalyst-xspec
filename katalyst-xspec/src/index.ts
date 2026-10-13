@@ -25,6 +25,8 @@ export * from './auth/otp';
 export * from './auth/secrets';
 export * from './auth/session-store';
 export * from './auth/session-check';
+export * from './auth/login-flow';
+export * from './adapters/ui/playwright-login-page';
 export { buildApiLoginRequest, extractToken, type ApiLoginRequest } from './auth/api-login';
 export * from './auth/oidc';
 export { apiLoginAsRole, uiLoginAsRole, oneTimeCodeForRole } from './auth/login-steps';

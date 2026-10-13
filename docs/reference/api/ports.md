@@ -177,6 +177,21 @@ interface UiPort {
   waitForText?(text: string, timeoutMs: number): Promise<boolean>;
   saveSession?(): Promise<UiSessionState>;
   restoreSession?(state: UiSessionState): Promise<void>;
+  loginPage?(): LoginPage;   // 0.14+: page-by-page login
+}
+
+type LoginFieldKind = 'username' | 'password' | 'otp';
+
+interface LoginPage {
+  url(): string;
+  goto(path: string): Promise<void>;
+  hasField(kind: LoginFieldKind, field?: string): Promise<boolean>;
+  fill(kind: LoginFieldKind, value: string, field?: string): Promise<void>;
+  hasButton(name: string): Promise<boolean>;
+  submit(last: LoginFieldKind | undefined, buttons: string[], timeoutMs: number): Promise<void>;
+  hasText(text: string): Promise<boolean>;
+  errorText(): Promise<string | undefined>;
+  wait(ms: number): Promise<void>;
 }
 ```
 
@@ -245,6 +260,7 @@ await ui.expectText('Login successful');
 | `waitForText(text, timeoutMs)` | Resolves `true` once `text` is visible, `false` on timeout |
 | `saveSession()` | Snapshot cookies + localStorage |
 | `restoreSession(state)` | Apply a snapshot from `saveSession()` to the current browser context |
+| `loginPage()` | The primitives `UniversalAuthAdapter` uses to log in page by page. `field` is the configured label/placeholder/name, used on its own; without it, the adapter recognizes common login fields. Without `loginPage`, UI login fills one page only. |
 
 ---
 

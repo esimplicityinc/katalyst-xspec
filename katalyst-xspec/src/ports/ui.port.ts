@@ -60,6 +60,37 @@ export interface UiPort {
   saveSession?(): Promise<UiSessionState>;
   /** Apply a snapshot from saveSession() to the current browser context. */
   restoreSession?(state: UiSessionState): Promise<void>;
+  /** Primitives for logins that span several pages (see auth/login-flow.ts). */
+  loginPage?(): LoginPage;
+}
+
+/** A field a login page can ask for. */
+export type LoginFieldKind = 'username' | 'password' | 'otp';
+
+/**
+ * What the page-by-page login needs from a browser. `field` is the configured
+ * label/placeholder/name (UI_USERNAME_FIELD, …), used on its own; without it,
+ * the adapter recognizes common login fields itself.
+ */
+export interface LoginPage {
+  url(): string;
+  goto(path: string): Promise<void>;
+  /** Whether a field of this kind is visible and editable right now. */
+  hasField(kind: LoginFieldKind, field?: string): Promise<boolean>;
+  fill(kind: LoginFieldKind, value: string, field?: string): Promise<void>;
+  /** Whether a button with this text is visible right now. */
+  hasButton(name: string): Promise<boolean>;
+  /**
+   * Submit what was just filled: click the first visible button among
+   * `buttons`, or press Enter in the field of kind `last`. Resolves once the
+   * page navigates or the field goes away, or after `timeoutMs`.
+   */
+  submit(last: LoginFieldKind | undefined, buttons: string[], timeoutMs: number): Promise<void>;
+  /** Whether `text` is visible on the page. */
+  hasText(text: string): Promise<boolean>;
+  /** An error message shown on the page, if any. */
+  errorText(): Promise<string | undefined>;
+  wait(ms: number): Promise<void>;
 }
 
 /** Opaque browser session snapshot (Playwright `storageState()` shape). */

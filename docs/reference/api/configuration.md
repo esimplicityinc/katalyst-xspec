@@ -44,6 +44,9 @@ See the [Authentication guide](../../guides/authentication.md) for how these fit
 | `AUTH_<ROLE>_OTP_DIGITS` / `_PERIOD` / `_ALGORITHM` | `6` / `30` / `SHA1` | TOTP code length, window in seconds, HMAC algorithm. `AUTH_OTP_*` for every role |
 | `DEFAULT_ADMIN_USERNAME` / `DEFAULT_ADMIN_EMAIL` / `DEFAULT_ADMIN_PASSWORD` | - | Older names for the `admin` role |
 | `XSPEC_SHOW_SECRETS` | `false` | `true`: don't redact credentials in error messages and debug steps (local debugging only). See [Keeping secrets out of logs and git](../../guides/authentication.md#keeping-secrets-out-of-logs-and-git) |
+| `UI_OTP_FIELD` | *(recognized)* | One-time code field (label, placeholder or `name`) on a login page |
+| `UI_OTP_BUTTON` | `UI_LOGIN_BUTTON` | Button that submits the one-time code |
+| `UI_CONSENT_BUTTON` | - | Button to click on a login page with nothing to fill (consent) |
 | `UI_SESSION_DIR` | `.xspec/auth` | Where `I am logged in as` saves sessions, shared by all workers |
 | `UI_SESSION_TTL` | `30m` | How long a saved session is used (`90s`, `30m`, `2h`; plain numbers are seconds) |
 | `UI_SESSION_SCOPE` | `run` | `persistent`: also use sessions saved by earlier runs |
@@ -59,13 +62,13 @@ See the [Authentication guide](../../guides/authentication.md) for how these fit
 | `API_AUTH_PASSWORD_FIELD` | `password` | Body field for the password |
 | `API_AUTH_TOKEN_PATH` | common names | Where the token is in the response, e.g. `data.jwt` |
 | `API_AUTH_MODE` | `login` | `oidc`: API login gets a token from an OIDC provider (see [OIDC login](#oidc-login)) |
-| `UI_LOGIN_PATH` | `/login` | Login page |
-| `UI_USERNAME_FIELD` | `Username` | Label, placeholder or `name` of the username field |
-| `UI_PASSWORD_FIELD` | `Password` | Label, placeholder or `name` of the password field |
-| `UI_LOGIN_BUTTON` | `Login` | Submit button text |
+| `UI_LOGIN_PATH` | `/login` | Where the login starts (e.g. `/auth/start` for a BFF) |
+| `UI_USERNAME_FIELD` | *(recognized)* | Label, placeholder or `name` of the username field. Unset: a `Username` label or a usual username/email field |
+| `UI_PASSWORD_FIELD` | *(recognized)* | Label, placeholder or `name` of the password field. Unset: a `Password` label or any password field |
+| `UI_LOGIN_BUTTON` | `Login` | Submit button text; Enter is pressed if there's no such button |
 | `UI_LOGIN_SUCCESS_URL` | - | URL part that means "logged in" (default: left the login page) |
 | `UI_LOGIN_SUCCESS_TEXT` | - | Text that means "logged in" |
-| `UI_LOGIN_TIMEOUT` | `10000` | Milliseconds to wait for the login to finish |
+| `UI_LOGIN_TIMEOUT` | `10000` | Milliseconds to wait for each login page |
 | `UI_SESSION_REUSE` | `true` | `false`: `I am logged in as` submits the form every time |
 | `CLEANUP_AUTH_TOKEN` | - | Static bearer token for cleanup (skips login) |
 

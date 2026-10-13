@@ -3,7 +3,8 @@ import type { AuthPort, UiLoginOptions } from '../../ports/auth.port';
 import type { UiPort } from '../../ports/ui.port';
 import type { World } from '../../world';
 import { resolveCredentials, roleEnvKeys, type Credentials, type RoleCredentials } from '../../auth/credentials';
-import { oneTimeCode } from '../../auth/otp';
+import { freshOneTimeCode, oneTimeCode, resolveOtpSettings } from '../../auth/otp';
+import { runLoginFlow } from '../../auth/login-flow';
 import { apiLoginErrorMessage, buildApiLoginRequest, extractToken } from '../../auth/api-login';
 import { isOidcMode, oidcNeedsUserCredentials } from '../../auth/oidc/settings';
 import { OidcClient, type OidcSession } from '../../auth/oidc/client';
@@ -222,8 +223,30 @@ export class UniversalAuthAdapter implements AuthPort {
     };
   }
 
-  /** Fill and submit the login form, then confirm the login worked. */
-  protected async uiLogin(_world: World, role: string, creds: Credentials): Promise<void> {
+  /**
+   * Log in through the browser: the login page (UI_LOGIN_PATH), then page by
+   * page (username, password, one-time code, consent) until it's back on the
+   * app. See auth/login-flow.ts.
+   */
+  protected async uiLogin(world: World, role: string, creds: Credentials): Promise<void> {
+    if (!this.ui.loginPage) return this.singlePageUiLogin(world, role, creds);
+    const hasOtp = resolveOtpSettings(role, { env: this.env, roles: this.roles }) !== undefined;
+    await runLoginFlow({
+      page: this.ui.loginPage(),
+      role,
+      creds,
+      env: this.env,
+      oneTimeCode: hasOtp ? () => this.loginOneTimeCode(role) : undefined,
+    });
+  }
+
+  /** The one-time code for a login: never one this process already used (waits for the next window instead). */
+  protected loginOneTimeCode(role: string): Promise<string> {
+    return freshOneTimeCode(role, { env: this.env, roles: this.roles });
+  }
+
+  /** For UiPort adapters without loginPage(): fill the username and password on one page and submit. */
+  protected async singlePageUiLogin(_world: World, role: string, creds: Credentials): Promise<void> {
     const loginPath = this.env.UI_LOGIN_PATH || '/login';
     const usernameField = this.env.UI_USERNAME_FIELD || 'Username';
     const passwordField = this.env.UI_PASSWORD_FIELD || 'Password';

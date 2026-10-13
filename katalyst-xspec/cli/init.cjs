@@ -517,13 +517,18 @@ AUTH_ADMIN_PASSWORD=changeme
 #                                    # No token but a session cookie also works.
 
 # ── UI login (defaults shown) ──────────────────────────────────
+# Logs in page by page until it's back on the app (username, password,
+# one-time code, consent). For a BFF / SSO login use UI_LOGIN_PATH=/auth/start.
 # UI_LOGIN_PATH=/login
-# UI_USERNAME_FIELD=Username         # label, placeholder or name of the field
+# UI_USERNAME_FIELD=Username         # label, placeholder or name; unset = recognized
 # UI_PASSWORD_FIELD=Password
-# UI_LOGIN_BUTTON=Login
+# UI_LOGIN_BUTTON=Login              # no such button: presses Enter
 # UI_LOGIN_SUCCESS_URL=/dashboard    # default: any page other than the login page
 # UI_LOGIN_SUCCESS_TEXT=Welcome      # use if the URL doesn't change after login
-# UI_SESSION_REUSE=true              # "I am logged in as" reuses the session
+# UI_LOGIN_SUCCESS_URL_EXCLUDES=/realms/   # identity provider pages on the app's origin
+# UI_CONSENT_BUTTON=Agree and continue
+# UI_SESSION_REUSE=true              # "I am logged in as" logs in once per run
+# AUTH_PM_OTP_SECRET=                # TOTP secret, if the login asks for a one-time code
 
 # ── Other ──────────────────────────────────────────────────────
 # CLEANUP_RULES=[{"varMatch":"user","path":"/api/users/{id}"}]

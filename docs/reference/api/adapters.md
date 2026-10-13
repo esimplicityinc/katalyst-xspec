@@ -130,6 +130,7 @@ const test = createBddTest({
 | `waitForText(text, timeoutMs)` | `true` once `text` is visible, `false` on timeout |
 | `saveSession()` | `page.context().storageState()` (cookies + localStorage) |
 | `restoreSession(state)` | Adds the saved cookies and localStorage to the current context |
+| `loginPage()` | A `PlaywrightLoginPage`: finds username, password and one-time code fields by the configured name or by common attributes (`autocomplete`, `type`, `name`), clicks a submit button by text or presses Enter, and reads `[role="alert"]` / error elements for messages |
 
 ---
 
