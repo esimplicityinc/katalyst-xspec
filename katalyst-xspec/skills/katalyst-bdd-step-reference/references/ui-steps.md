@@ -355,6 +355,7 @@ Given I am logged in as {string}
 When I log in as {string} in UI
 When I log in as admin in UI
 When I log in as user in UI
+When I fill the one-time code for {string} in {string}
 ```
 
 **Examples:**
@@ -366,6 +367,7 @@ When I log in as "pm" in UI
 - `I am logged in as "<role>"` fills the login form once per role per worker, then restores the saved cookies + localStorage in later scenarios (`UI_SESSION_REUSE=false` disables).
 - `I log in as "<role>" in UI` always submits the form (use when testing login).
 - `admin` / `user` variants are shorthand for those roles.
+- `I fill the one-time code for "<role>" in "<field>"` fills the role's current TOTP code (from `AUTH_<ROLE>_OTP_SECRET`, base32 by default; `AUTH_<ROLE>_OTP_ENCODING=latin1|hex`, `_DIGITS`, `_PERIOD`, `_ALGORITHM`, or `AUTH_OTP_*` for every role) into a field found by label, placeholder or `name`. A code can't be reused within its 30-second window.
 - Credentials: `AUTH_<ROLE>_USERNAME` / `AUTH_<ROLE>_PASSWORD`. Missing credentials fail the step with a message naming the variables. Staying on the login page also fails.
 - Settings: `UI_LOGIN_PATH` (`/login`), `UI_USERNAME_FIELD` (`Username`), `UI_PASSWORD_FIELD` (`Password`) match the field's label, placeholder or `name`; `UI_LOGIN_BUTTON` (`Login`), `UI_LOGIN_SUCCESS_URL`, `UI_LOGIN_SUCCESS_TEXT`, `UI_LOGIN_TIMEOUT` (`10000`).
 

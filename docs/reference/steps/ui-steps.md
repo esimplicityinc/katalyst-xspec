@@ -405,6 +405,27 @@ When I log in as "pm" in UI
 
 ---
 
+### When I fill the one-time code for {string} in {string}
+
+Fills the role's current one-time code from its TOTP secret into a field, found by label, placeholder or `name`. Use it for login pages that ask for a code from an authenticator app.
+
+**Parameters:**
+| Name | Type | Description |
+|------|------|-------------|
+| role | string | Any role name. Reads `AUTH_<ROLE>_OTP_SECRET`. |
+| field | string | The field's label, placeholder or `name` |
+
+**Environment Variables:**
+- `AUTH_<ROLE>_OTP_SECRET`, plus optional `AUTH_<ROLE>_OTP_ENCODING` / `_DIGITS` / `_PERIOD` / `_ALGORITHM` (or `AUTH_OTP_*` for every role). See [One-time passcodes](../../guides/authentication.md#one-time-passcodes-totp).
+
+**Example:**
+```gherkin
+When I fill the one-time code for "pm" in "One-time code"
+And I click the button "Verify"
+```
+
+---
+
 ### When I log in as admin in UI
 
 Shorthand for `When I log in as "admin" in UI` (reads `AUTH_ADMIN_*`; older `DEFAULT_ADMIN_*` also work).

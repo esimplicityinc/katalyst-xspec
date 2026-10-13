@@ -501,7 +501,7 @@ import {
 ```typescript
 type Env = Record<string, string | undefined>;
 type Credentials = { username: string; password: string };
-type RoleCredentials = Record<string, Partial<Credentials>>;
+type RoleCredentials = Record<string, Partial<Credentials> & { otp?: string | TotpOptions }>;
 
 function roleEnvKeys(role: string): { username: string; password: string };
 function resolveCredentials(role: string, options?: { env?: Env; roles?: RoleCredentials }): Credentials;
@@ -518,6 +518,55 @@ function extractToken(json: unknown, env?: Env): string | undefined;
 | `resolveCredentials(role, { env, roles })` | `roles` in code, then `AUTH_<ROLE>_*`, then the older names for `admin`/`user`. Throws `MissingCredentialsError` naming the variables to set. |
 | `buildApiLoginRequest(creds, env)` | Login path, body type and fields from `API_AUTH_LOGIN_PATH`, `API_AUTH_BODY`, `API_AUTH_USERNAME_FIELD`, `API_AUTH_PASSWORD_FIELD` |
 | `extractToken(json, env)` | Token at `API_AUTH_TOKEN_PATH`, or the first of `access_token`, `token`, `accessToken`, `data.access_token`, `data.token`, `data.accessToken` |
+
+---
+
+## One-Time Codes (TOTP)
+
+RFC 6238 codes, the 6-digit codes from authenticator apps. See [One-time passcodes](../../guides/authentication.md#one-time-passcodes-totp).
+
+```typescript
+import { generateTotp, oneTimeCode, resolveOtpSettings, otpEnvKeys, oneTimeCodeForRole } from '@esimplicitylabs/katalyst-xspec';
+```
+
+```typescript
+type TotpOptions = {
+  secret: string;                                     // or a full otpauth://totp/... URI
+  encoding?: 'base32' | 'latin1' | 'ascii' | 'hex';   // default base32
+  digits?: number;                                    // default 6
+  period?: number;                                    // seconds, default 30
+  algorithm?: 'SHA1' | 'SHA256' | 'SHA512';           // default SHA1
+};
+
+function generateTotp(options: TotpOptions & { timestamp?: number }): string;
+function totpTimeStep(options?: { period?: number; timestamp?: number }): number;
+function parseOtpauthUri(uri: string): TotpOptions;
+function decodeTotpSecret(secret: string, encoding?: TotpSecretEncoding): Buffer;
+
+function resolveOtpSettings(role: string, options?: { env?: Env; roles?: RoleCredentials }): TotpOptions | undefined;
+function oneTimeCode(role: string, options?: { env?: Env; roles?: RoleCredentials; timestamp?: number }): string;
+function otpEnvKeys(role: string): { secret: string; encoding: string; digits: string; period: string; algorithm: string };
+function oneTimeCodeForRole(auth: AuthPort | undefined, world: World, role: string): Promise<string>;
+```
+
+| Function | Description |
+|----------|-------------|
+| `generateTotp({ secret, encoding: 'latin1' })` | The current code for a secret |
+| `totpTimeStep({ period })` | The number of the current window; codes change when it does |
+| `resolveOtpSettings(role, { env, roles })` | `roles[role].otp` in code, then `AUTH_<ROLE>_OTP_*`, then `AUTH_OTP_*`. `undefined` if the role has no secret |
+| `oneTimeCode(role, { env, roles })` | The role's current code. Throws `MissingCredentialsError` naming the variables to set |
+| `oneTimeCodeForRole(auth, world, role)` | What the built-in steps use: `auth.oneTimeCodeFor(role)` if the adapter has it, otherwise `oneTimeCode(role)` |
+
+Example, in a custom step:
+
+```typescript
+import { generateTotp } from '@esimplicitylabs/katalyst-xspec';
+
+When('I confirm with my authenticator', async ({ page }) => {
+  await page.locator('#otp').fill(generateTotp({ secret: process.env.MY_OTP_SECRET!, encoding: 'latin1' }));
+  await page.locator('#kc-login').click();
+});
+```
 
 ---
 

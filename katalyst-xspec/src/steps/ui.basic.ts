@@ -1,7 +1,7 @@
 import { createBdd } from 'playwright-bdd';
 import { expect } from '@playwright/test';
 import { interpolate } from '../utils';
-import { uiLoginAsRole } from '../auth/login-steps';
+import { oneTimeCodeForRole, uiLoginAsRole } from '../auth/login-steps';
 import { expectElementAttribute, setFileInputContent } from '../helpers/ui-element';
 
 export function registerUiBasicSteps(test: any): void {
@@ -48,6 +48,19 @@ export function registerUiBasicSteps(test: any): void {
   When('I log in as {string} in UI', async ({ auth, ui, world }: any, role: string) => {
     void ui;
     await uiLoginAsRole(auth, world, role);
+  });
+
+  // Fills the role's current one-time code (AUTH_<ROLE>_OTP_SECRET) into a field found by label, placeholder or name.
+  When('I fill the one-time code for {string} in {string}', async ({ auth, ui, world }: any, role: string, field: string) => {
+    const name = interpolate(field, world.vars);
+    const code = await oneTimeCodeForRole(auth, world, role);
+    if (ui.fillField) {
+      if (!(await ui.fillField(name, code))) {
+        throw new Error(`No field "${name}" for the one-time code (looked for a label, placeholder or name).`);
+      }
+    } else {
+      await ui.fillLabel(name, code);
+    }
   });
 
   When('I log in as admin in UI', async ({ auth, ui, world }: any) => {
