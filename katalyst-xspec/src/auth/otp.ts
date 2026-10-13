@@ -6,6 +6,10 @@
  * passed in code (UniversalAuthAdapter `roles: { pm: { otp } }`) take precedence.
  */
 import { MissingCredentialsError, roleEnvPrefix, type OtpProvider, type RoleCredentials } from './credentials';
+import { createHash } from 'node:crypto';
+import fs from 'node:fs';
+import { SessionStore } from './session-store';
+import { writeSecretFile } from './secrets';
 import { generateTotp, parseOtpauthUri, totpTimeStep, type TotpAlgorithm, type TotpOptions, type TotpSecretEncoding } from './totp';
 
 type Env = Record<string, string | undefined>;
@@ -113,12 +117,15 @@ export function oneTimeCode(
   }
 }
 
-// Time window last used per role and secret, in this process: a provider accepts each code once.
+// Time window last used per secret, in this process (the shared file below covers other workers).
 const lastUsedWindow = new Map<string, number>();
 
 /**
- * The role's one-time code for a login: never the same code twice. If this
- * process already used the current window's code, waits for the next window.
+ * The role's one-time code for a login: never a code any worker of the run
+ * already used. Providers accept each code once (login.gov, Keycloak), so if
+ * the current window's code was used, by this process or another (e.g. a UI
+ * and an API scenario logging in as the same user), this waits for the next
+ * window. Workers coordinate through a file next to the saved sessions.
  */
 export async function freshOneTimeCode(
   role: string,
@@ -127,18 +134,45 @@ export async function freshOneTimeCode(
     roles,
     now = Date.now,
     sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms)),
-  }: { env?: Env; roles?: RoleCredentials; now?: () => number; sleep?: (ms: number) => Promise<void> } = {},
+    store = SessionStore.fromEnv(env),
+    username,
+  }: {
+    env?: Env;
+    roles?: RoleCredentials;
+    now?: () => number;
+    sleep?: (ms: number) => Promise<void>;
+    store?: SessionStore;
+    /** The account the code is for. Providers track used codes per account; default: the role. */
+    username?: string;
+  } = {},
 ): Promise<string> {
   const settings = resolveOtpSettings(role, { env, roles });
   const fromUri = settings?.secret.trim().toLowerCase().startsWith('otpauth://') ? parseOtpauthUri(settings.secret.trim()) : undefined;
   const period = settings?.period ?? fromUri?.period ?? 30;
-  const key = `${role.toLowerCase()}\u0000${settings?.secret ?? ''}`;
-  let window = totpTimeStep({ period, timestamp: now() });
-  if (lastUsedWindow.get(key) === window) {
-    await sleep((window + 1) * period * 1000 - now() + 50);
-    window = totpTimeStep({ period, timestamp: now() });
-  }
-  const code = oneTimeCode(role, { env, roles, timestamp: now() });
-  lastUsedWindow.set(key, window);
-  return code;
+  // Per account and secret: two roles can be the same user, and test users often share a secret.
+  const secretId = createHash('sha256')
+    .update(`${(username ?? role).toLowerCase()}\u0000${settings?.secret ?? ''}`)
+    .digest('hex')
+    .slice(0, 16);
+  const lockKey = { role: 'otp', username: secretId, loginPath: '', app: '' };
+  const file = `${store.fileFor(lockKey)}.used`;
+
+  return store.withLock(lockKey, async () => {
+    let shared: number | undefined;
+    try {
+      shared = Number(JSON.parse(fs.readFileSync(file, 'utf8')).window);
+    } catch {
+      shared = undefined;
+    }
+    const used = Math.max(lastUsedWindow.get(secretId) ?? -1, Number.isFinite(shared) ? shared! : -1);
+    let window = totpTimeStep({ period, timestamp: now() });
+    if (window <= used) {
+      await sleep((used + 1) * period * 1000 - now() + 50);
+      window = totpTimeStep({ period, timestamp: now() });
+    }
+    const code = oneTimeCode(role, { env, roles, timestamp: now() });
+    lastUsedWindow.set(secretId, window);
+    writeSecretFile(file, JSON.stringify({ window }));
+    return code;
+  });
 }

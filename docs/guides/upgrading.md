@@ -251,6 +251,10 @@ const targets = logTargets(resolveTargets());
 
 ## Version History
 
+### 0.19.2
+
+- Fix: parallel workers no longer submit the same one-time code for an account. A login may wait up to 30 s for a fresh code, so give scenarios that log the same account in again a Playwright `timeout` of at least 60 s.
+
 ### 0.19.1
 
 - Fix: UI logins against Keycloak's one-time code page no longer restart the sign-in (an icon button labelled "Restart login" matched the default `UI_LOGIN_BUTTON=Login`).

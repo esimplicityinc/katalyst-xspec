@@ -379,7 +379,7 @@ export class UniversalAuthAdapter implements AuthPort {
       return this.emailedOneTimeCode(role, since);
     }
     if (source?.kind === 'custom') return String(await source.provide());
-    return freshOneTimeCode(role, { env: this.env, roles: this.roles });
+    return freshOneTimeCode(role, { env: this.env, roles: this.roles, username: this.credentialsFor(role).username });
   }
 
   /** For UiPort adapters without loginPage(): fill the username and password on one page and submit. */

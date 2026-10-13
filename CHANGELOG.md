@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.19.2] - 2026-10-13
+
+Found by running parallel scenarios against a real Keycloak 26.
+
+### Fixed
+
+- One-time codes are no longer reused across workers. Two workers logging in as the same account in the same 30-second window (e.g. a UI and an API scenario) submitted the same code, and the provider rejected the second. Workers now record the last window used per account and secret in `UI_SESSION_DIR`, under a lock; a login that would reuse it waits for the next window. Accounts that only share a secret don't wait for each other.
+
+### Docs
+
+- A login can now wait up to one TOTP period; the guide recommends a Playwright `timeout` of at least 60 s for scenarios that log the same account in again.
+
 ## [0.19.1] - 2026-10-13
 
 Fixes found by running the page-by-page login against a real Keycloak 26.
