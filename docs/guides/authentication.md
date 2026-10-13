@@ -38,7 +38,8 @@ No username for role "reviewer". Set AUTH_REVIEWER_USERNAME in .env, or pass rol
 | Testing the login page itself | `When I log in as "pm" in UI` (always submits the form) | same as above |
 | SPA whose API accepts test headers (no real login) | `Given I am authenticated in UI as "pm"` | see [Header-based UI auth](#header-based-ui-auth) |
 | A one-time code from an authenticator app (TOTP) | `When I fill the one-time code for "pm" in "One-time code"` | `AUTH_<ROLE>_OTP_SECRET`, see [One-time passcodes](#one-time-passcodes-totp) |
-| SSO, MFA, multi-step login | subclass the adapter | see [Extending](#extending-the-login) |
+| Login on an identity provider's pages (BFF `/auth/start`, SSO), username-first pages, consent pages | `Given I am logged in as "pm"` | `UI_LOGIN_PATH` and the `UI_*` settings, see [Apps with a BFF login](#apps-with-a-bff-login) |
+| Anything the page-by-page login can't handle (CAPTCHA, SMS, custom widgets) | subclass the adapter | see [Extending](#extending-the-login) |
 
 ## API login
 
@@ -184,18 +185,27 @@ This covers API logins. For browser logins that redirect to the provider's page,
 
 ## UI login
 
-`Given I am logged in as "<role>"` opens the login page, fills the username and password, clicks the button, and waits until it leaves the login page.
+`Given I am logged in as "<role>"` opens the login page and logs in **page by page** until it's back on the app. On each page it fills whatever is asked for and submits:
+
+- username and password on one page, or the username first and the password on the next page (Okta, Entra ID, Google, Auth0)
+- a one-time code from an authenticator app, if the role has an [OTP secret](#one-time-passcodes-totp)
+- a consent page, if `UI_CONSENT_BUTTON` is set
+
+That covers an app's own login form, and apps that send the browser to an identity provider and back (see [Apps with a BFF login](#apps-with-a-bff-login)).
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| `UI_LOGIN_PATH` | `/login` | relative to `FRONTEND_URL` |
-| `UI_USERNAME_FIELD` | `Username` | the field's **label, placeholder, or `name`** |
-| `UI_PASSWORD_FIELD` | `Password` | same |
-| `UI_LOGIN_BUTTON` | `Login` | the button's text |
+| `UI_LOGIN_PATH` | `/login` | where the login starts, relative to `FRONTEND_URL`, e.g. `/auth/start` |
+| `UI_USERNAME_FIELD` | *(recognized)* | the field's **label, placeholder, or `name`**. Unset: a field labelled `Username`, or a usual username/email field |
+| `UI_PASSWORD_FIELD` | *(recognized)* | same. Unset: a field labelled `Password`, or any password field |
+| `UI_OTP_FIELD` | *(recognized)* | the one-time code field. Unset: `autocomplete="one-time-code"`, a name like `otp`/`code`/`totp`, or a label like "One-time code" |
+| `UI_LOGIN_BUTTON` | `Login` | the button's text. If there's no such button, Enter is pressed in the field |
+| `UI_OTP_BUTTON` | `UI_LOGIN_BUTTON` | the button that submits the one-time code |
+| `UI_CONSENT_BUTTON` | — | a button to click on a page with nothing to fill, e.g. `Agree and continue` |
 | `UI_LOGIN_SUCCESS_URL` | *(any page other than the login page)* | e.g. `/dashboard` |
 | `UI_LOGIN_SUCCESS_TEXT` | — | text shown once logged in; use when the URL doesn't change |
 | `UI_LOGIN_SUCCESS_URL_EXCLUDES` | — | comma-separated URL parts that mean "still logging in", e.g. `/realms/` for Keycloak pages |
-| `UI_LOGIN_TIMEOUT` | `10000` | milliseconds |
+| `UI_LOGIN_TIMEOUT` | `10000` | milliseconds to wait for each page |
 | `UI_SESSION_REUSE` | `true` | `false` makes `I am logged in as` submit the form every time |
 | `UI_SESSION_DIR` | `.xspec/auth` | where saved sessions are kept (git-ignored) |
 | `UI_SESSION_TTL` | `30m` | how long a saved session is used; e.g. `90s`, `30m`, `2h`. Set it below your app's session timeout |
@@ -203,6 +213,32 @@ This covers API logins. For browser logins that redirect to the provider's page,
 | `UI_SESSION_LOCK_TIMEOUT` | `2m` | how long a login may hold the lock before another worker takes over |
 | `UI_SESSION_CHECK` | `true` | `false`: restore saved sessions without checking they're still logged in |
 | `UI_SESSION_CHECK_PATH` | `/` | the page loaded to check a restored session |
+
+When a login doesn't work, the error names the page it stopped on, quotes the page's error message, and says which setting to change: for example `the password was asked for again (the page says "Invalid username or password.")`, or `/realms/app/login-actions asks for a one-time code. Set AUTH_PM_OTP_SECRET`.
+
+### Apps with a BFF login
+
+In a backend-for-frontend (BFF) setup, the app owns the login: `/auth/start` sends the browser to an OIDC provider, the provider sends it back to `/auth/callback`, and the app sets a session cookie. API calls then use that cookie. Tests drive the provider's pages and let the app finish the login:
+
+```bash
+FRONTEND_URL=http://localhost:3000
+UI_LOGIN_PATH=/auth/start
+AUTH_APPLICANT_USERNAME=facial@test.local
+AUTH_APPLICANT_PASSWORD=password
+AUTH_APPLICANT_OTP_SECRET=logingov-local-otp-secret
+AUTH_OTP_ENCODING=latin1
+```
+
+```gherkin
+Given I am logged in as "applicant"
+When I navigate to "/applications"
+```
+
+With `FRONTEND_URL` set, any page on another origin counts as part of the login, so the login is done when the browser is back on the app. If the provider shares the app's origin, set `UI_LOGIN_SUCCESS_URL_EXCLUDES` to part of its URLs (`/realms/` for Keycloak). Thanks to [session reuse](#session-reuse) each role goes through the provider once per run, which keeps one-time codes from clashing and puts little load on the provider.
+
+**Keycloak** (for example as a local stand-in for login.gov): username and password are on one page, then the "One-time code" page. The defaults recognize both, and the submit button (`Sign In`) is pressed with Enter. Give each test user an OTP credential with a known secret and set `AUTH_<ROLE>_OTP_SECRET` to it.
+
+**login.gov:** use its sandbox (`idp.int.identitysandbox.gov`) with test accounts that use an authentication app. Automating sign-ins against login.gov (sandbox or production) is up to login.gov's partner terms, so check with login.gov first; for production, prefer tests that don't sign in, or a test login the app itself provides.
 
 ### Session reuse
 
@@ -343,7 +379,7 @@ Cleanup is best-effort: if no admin credentials are set, it runs unauthenticated
 
 ## Extending the login
 
-Subclass `UniversalAuthAdapter` and override only the part that differs. Role lookup, the steps, and session reuse keep working.
+Subclass `UniversalAuthAdapter` and override only the part that differs. Role lookup, the steps, and session reuse keep working. The built-in UI login already handles multi-page, one-time code and consent pages (see [UI login](#ui-login)); override `uiLogin` for pages it can't handle. `runLoginFlow` (from `auth/login-flow`) and `this.loginOneTimeCode(role)` are available to reuse in your override.
 
 ```typescript
 // features/steps/my-auth.ts

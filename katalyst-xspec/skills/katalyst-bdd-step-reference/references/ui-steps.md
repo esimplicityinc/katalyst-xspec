@@ -371,7 +371,8 @@ When I log in as "pm" in UI
 - `admin` / `user` variants are shorthand for those roles.
 - `I fill the one-time code for "<role>" in "<field>"` fills the role's current TOTP code (from `AUTH_<ROLE>_OTP_SECRET`, base32 by default; `AUTH_<ROLE>_OTP_ENCODING=latin1|hex`, `_DIGITS`, `_PERIOD`, `_ALGORITHM`, or `AUTH_OTP_*` for every role) into a field found by label, placeholder or `name`. A code can't be reused within its 30-second window.
 - Credentials: `AUTH_<ROLE>_USERNAME` / `AUTH_<ROLE>_PASSWORD`. Missing credentials fail the step with a message naming the variables. Staying on the login page also fails.
-- Settings: `UI_LOGIN_PATH` (`/login`), `UI_USERNAME_FIELD` (`Username`), `UI_PASSWORD_FIELD` (`Password`) match the field's label, placeholder or `name`; `UI_LOGIN_BUTTON` (`Login`), `UI_LOGIN_SUCCESS_URL`, `UI_LOGIN_SUCCESS_TEXT`, `UI_LOGIN_TIMEOUT` (`10000`).
+- The login goes page by page until it's back on the app: username + password (one page or username first), the role's one-time code (`AUTH_<ROLE>_OTP_SECRET`), consent (`UI_CONSENT_BUTTON`). BFF/SSO apps: `UI_LOGIN_PATH=/auth/start` with `FRONTEND_URL` set (other origins count as the provider) or `UI_LOGIN_SUCCESS_URL_EXCLUDES=/realms/`.
+- Settings: `UI_LOGIN_PATH` (`/login`); `UI_USERNAME_FIELD`, `UI_PASSWORD_FIELD`, `UI_OTP_FIELD` (label, placeholder or `name`; unset = recognized automatically); `UI_LOGIN_BUTTON` (`Login`, else Enter), `UI_OTP_BUTTON`, `UI_LOGIN_SUCCESS_URL`, `UI_LOGIN_SUCCESS_TEXT`, `UI_LOGIN_TIMEOUT` (`10000` per page).
 
 ## UI Authentication Steps (header-based)
 

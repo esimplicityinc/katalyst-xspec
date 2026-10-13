@@ -6,7 +6,7 @@
  * passed in code (UniversalAuthAdapter `roles: { pm: { otp } }`) take precedence.
  */
 import { MissingCredentialsError, roleEnvPrefix, type RoleCredentials } from './credentials';
-import { generateTotp, type TotpAlgorithm, type TotpOptions, type TotpSecretEncoding } from './totp';
+import { generateTotp, parseOtpauthUri, totpTimeStep, type TotpAlgorithm, type TotpOptions, type TotpSecretEncoding } from './totp';
 
 type Env = Record<string, string | undefined>;
 
@@ -75,4 +75,34 @@ export function oneTimeCode(
         `Check ${keys.secret} and ${keys.encoding} / ${keys.digits} / ${keys.period} / ${keys.algorithm} (or the AUTH_OTP_* defaults).`,
     );
   }
+}
+
+// Time window last used per role and secret, in this process: a provider accepts each code once.
+const lastUsedWindow = new Map<string, number>();
+
+/**
+ * The role's one-time code for a login: never the same code twice. If this
+ * process already used the current window's code, waits for the next window.
+ */
+export async function freshOneTimeCode(
+  role: string,
+  {
+    env = process.env,
+    roles,
+    now = Date.now,
+    sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms)),
+  }: { env?: Env; roles?: RoleCredentials; now?: () => number; sleep?: (ms: number) => Promise<void> } = {},
+): Promise<string> {
+  const settings = resolveOtpSettings(role, { env, roles });
+  const fromUri = settings?.secret.trim().toLowerCase().startsWith('otpauth://') ? parseOtpauthUri(settings.secret.trim()) : undefined;
+  const period = settings?.period ?? fromUri?.period ?? 30;
+  const key = `${role.toLowerCase()}\u0000${settings?.secret ?? ''}`;
+  let window = totpTimeStep({ period, timestamp: now() });
+  if (lastUsedWindow.get(key) === window) {
+    await sleep((window + 1) * period * 1000 - now() + 50);
+    window = totpTimeStep({ period, timestamp: now() });
+  }
+  const code = oneTimeCode(role, { env, roles, timestamp: now() });
+  lastUsedWindow.set(key, window);
+  return code;
 }

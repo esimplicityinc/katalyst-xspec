@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.0] - 2026-10-13
+
+Logins that span several pages: identity providers, BFF `/auth/start` → `/auth/callback` flows, username-first pages, one-time codes and consent pages. See [Apps with a BFF login](docs/guides/authentication.md#apps-with-a-bff-login).
+
+### Added
+
+- `Given I am logged in as` / `When I log in as … in UI` log in page by page until the browser is back on the app. Each page gets whatever it asks for: username and password (together or one after the other), the role's one-time code (from `AUTH_<ROLE>_OTP_SECRET`), or a click on `UI_CONSENT_BUTTON`.
+- One-time codes are never reused: a second login in the same time window waits for the next code. A rejected code is retried once with the next code.
+- Settings: `UI_OTP_FIELD`, `UI_OTP_BUTTON`, `UI_CONSENT_BUTTON`. With `FRONTEND_URL` set, any other origin counts as part of the login; `UI_LOGIN_SUCCESS_URL_EXCLUDES` covers providers on the same origin.
+- Errors name the page and quote its error message, e.g. `the password was asked for again (the page says "Invalid username or password.")`, `asks for a one-time code. Set AUTH_PM_OTP_SECRET`, `the one-time code was rejected twice`.
+- `UiPort.loginPage()` (optional) with the `LoginPage` interface, implemented by `PlaywrightUiAdapter` (`PlaywrightLoginPage`). Also exported: `runLoginFlow`, `loginFlowSettings`, `freshOneTimeCode`.
+
+### Changed
+
+- `UI_USERNAME_FIELD` / `UI_PASSWORD_FIELD` have no default value any more. Unset, common login fields are recognized as well as `Username` / `Password` labels; set, only that field is used.
+- If no `UI_LOGIN_BUTTON` button is visible, Enter is pressed in the last filled field.
+- `UI_LOGIN_TIMEOUT` is per page.
+
 ## [0.13.0] - 2026-10-13
 
 Expired saved sessions are replaced instead of failing the scenario. See [Session reuse](docs/guides/authentication.md#session-reuse).

@@ -7,7 +7,9 @@ import type {
   UiPort,
   UiSessionState,
   UiUrlAssertMode,
+  LoginPage,
 } from '../../ports/ui.port';
+import { PlaywrightLoginPage } from './playwright-login-page';
 
 export class PlaywrightUiAdapter implements UiPort {
   constructor(private readonly page: Page) {}
@@ -248,6 +250,10 @@ export class PlaywrightUiAdapter implements UiPort {
     } catch {
       return false;
     }
+  }
+
+  loginPage(): LoginPage {
+    return new PlaywrightLoginPage(this.page);
   }
 
   async saveSession(): Promise<UiSessionState> {

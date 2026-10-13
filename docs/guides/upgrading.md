@@ -251,6 +251,14 @@ const targets = logTargets(resolveTargets());
 
 ## Version History
 
+### 0.14.0
+
+- UI login goes page by page: username-first pages, one-time code pages and (with `UI_CONSENT_BUTTON`) consent pages, until the browser is back on the app. BFF logins work with `UI_LOGIN_PATH=/auth/start`. See [Apps with a BFF login](./authentication.md#apps-with-a-bff-login).
+- `UI_USERNAME_FIELD` / `UI_PASSWORD_FIELD` are now unset by default. Unset, they match a `Username` / `Password` label as before, **and** common username, email and password fields. When you set them, only that field is used.
+- If no button matches `UI_LOGIN_BUTTON`, Enter is pressed in the last field instead of failing.
+- `UI_LOGIN_TIMEOUT` applies to each page of the login.
+- Custom `UiPort` adapters without the new optional `loginPage()` keep the previous single-page login.
+
 ### 0.13.0
 
 - Restored UI sessions are checked: `I am logged in as` loads `UI_SESSION_CHECK_PATH` (default `/`) and logs in again if that ends up on the login page. This adds one page load per scenario that restores a session; point `UI_SESSION_CHECK_PATH` at a light page, or set `UI_SESSION_CHECK=false`. The browser is left on that page, so start scenarios with a navigation step.
