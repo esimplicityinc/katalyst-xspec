@@ -251,6 +251,11 @@ const targets = logTargets(resolveTargets());
 
 ## Version History
 
+### 0.16.0
+
+- With `API_AUTH_MODE=ui-session`, cleanup uses the `admin` role's (or `CLEANUP_AUTH_ROLE`'s) browser session cookie. A BFF app with one-time codes now needs only `.env` settings: see [API calls with the browser session](./authentication.md#api-calls-with-the-browser-session).
+- The built-in cleanup auth is exported as `defaultCleanupAuth`. No breaking changes.
+
 ### 0.15.0
 
 - `API_AUTH_MODE=ui-session`: API steps use the role's browser login session cookie, for APIs that only accept the app's session (BFF). API-only scenarios log in through a headless browser of their own. See [API calls with the browser session](./authentication.md#api-calls-with-the-browser-session).

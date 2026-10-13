@@ -33,7 +33,10 @@ type CreateBddTestOptions = {
   worldFactory?: () => World;
 };
 
-type CleanupAuthProvider = (request: APIRequestContext) => Promise<Record<string, string>>;
+type CleanupAuthProvider = (
+  request: APIRequestContext,
+  target?: { method: string; url: string },   // the cleanup request about to be sent
+) => Promise<Record<string, string>>;
 
 type CreateContext = PlaywrightTestArgs & PlaywrightWorkerArgs & {
   apiRequest: APIRequestContext;
@@ -61,7 +64,7 @@ When options are not provided, defaults are used:
 | `createUi` | `PlaywrightUiAdapter` |
 | `createAuth` | `UniversalAuthAdapter` |
 | `createCleanup` | `DefaultCleanupAdapter` |
-| `getCleanupAuth` | `CLEANUP_AUTH_TOKEN`, else API login as the `admin` role (`AUTH_ADMIN_*`, older `DEFAULT_ADMIN_*`) with the `API_AUTH_*` settings; unauthenticated if no credentials |
+| `getCleanupAuth` | `defaultCleanupAuth`: `CLEANUP_AUTH_TOKEN`, else API login as the `admin` role (`AUTH_ADMIN_*`, older `DEFAULT_ADMIN_*`) with the `API_AUTH_*` settings (OIDC with `API_AUTH_MODE=oidc`; the role's browser session cookie with `API_AUTH_MODE=ui-session`, role from `CLEANUP_AUTH_ROLE`); unauthenticated if no credentials |
 | `createTui` | `undefined` (disabled) |
 | `worldFactory` | `initWorld()` |
 
@@ -119,7 +122,7 @@ export const test = createBddTest({
 #### Custom Cleanup Authentication
 
 ```typescript
-import { createBddTest, createOidcCleanupAuth } from '@esimplicitylabs/katalyst-xspec';
+import { createBddTest, createOidcCleanupAuth, defaultCleanupAuth } from '@esimplicitylabs/katalyst-xspec';
 
 // Use OIDC provider (Keycloak, Auth0, Okta, etc.)
 export const test = createBddTest({
@@ -134,6 +137,11 @@ export const test2 = createBddTest({
   getCleanupAuth: async (request) => {
     return { Authorization: 'Bearer my-static-token' };
   },
+});
+
+// Or add to the built-in one
+export const test3 = createBddTest({
+  getCleanupAuth: async (request, target) => ({ ...(await defaultCleanupAuth(request, target)), 'x-cleanup': 'true' }),
 });
 ```
 

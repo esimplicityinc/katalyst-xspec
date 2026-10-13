@@ -1,4 +1,4 @@
-export { createBddTest, type CreateBddTestOptions, type CleanupAuthProvider, type TuiFactory, baseTest } from './fixtures';
+export { createBddTest, defaultCleanupAuth, type CreateBddTestOptions, type CleanupAuthProvider, type TuiFactory, baseTest } from './fixtures';
 export * from './world';
 export * from './utils';
 export * from './ports/api.port';

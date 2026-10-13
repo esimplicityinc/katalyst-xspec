@@ -72,6 +72,7 @@ See the [Authentication guide](../../guides/authentication.md) for how these fit
 | `UI_LOGIN_TIMEOUT` | `10000` | Milliseconds to wait for each login page |
 | `UI_SESSION_REUSE` | `true` | `false`: `I am logged in as` submits the form every time |
 | `CLEANUP_AUTH_TOKEN` | - | Static bearer token for cleanup (skips login) |
+| `CLEANUP_AUTH_ROLE` | `admin` | With `API_AUTH_MODE=ui-session`: the role whose session cleanup uses |
 
 ### Cleanup Configuration
 
