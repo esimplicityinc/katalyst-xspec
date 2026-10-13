@@ -45,6 +45,8 @@ playwright.config.ts            # api and ui projects (tui commented out)
 package.json, tsconfig.json, .gitignore, .env.example, README.md
 ```
 
+The `.gitignore` ignores `.env` and `.xspec/` (saved login sessions). If the folder already has a `.gitignore`, it's kept and `.xspec/` is added to it.
+
 The examples call public demo sites, so the project passes its first run with no configuration:
 
 ```bash
@@ -75,6 +77,7 @@ Besides upgrading, `upgrade` handles changes from older releases:
 
 - **Old package names.** Projects on `@esimplicity/stack-tests` or `@esimplicityinc/katalyst-xspec` are moved to `@esimplicitylabs/katalyst-xspec`: imports in `features/` and `playwright.config.*` are rewritten, the dependency is swapped, and the obsolete GitHub Packages line is removed from `.npmrc`.
 - **Old CLI names** in `package.json` scripts (`upgrade-stack-tests`, `upgrade-katalyst-xspec`, `generate-step-stubs`) are rewritten to `katalyst-xspec upgrade` / `katalyst-xspec stubs`.
+- **Saved sessions** in `.xspec/` are added to `.gitignore` if missing (0.11+).
 - **Type-tag filters** (`tags: '@ui'` on Playwright projects, from 0.6 and earlier) are removed by `--migrate`; plain `upgrade` warns if they're still there. See [Tags](../concepts/tag-system.md).
 
 More detail: [Upgrading](../guides/upgrading.md).

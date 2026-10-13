@@ -10,6 +10,7 @@ import { OidcClient } from './auth/oidc/client';
 import { clientCertificateFor } from './auth/oidc/transport';
 import { resolveCredentials } from './auth/credentials';
 import { withApiRequestAuth } from './auth/request-auth';
+import { redactError, redactSecrets } from './auth/secrets';
 import type { ApiPort } from './ports/api.port';
 import type { UiPort } from './ports/ui.port';
 import type { AuthPort } from './ports/auth.port';
@@ -73,7 +74,7 @@ async function defaultGetAdminHeaders(request: APIRequestContext, target?: { met
       const session = await cleanupOidc.login('admin', creds);
       return target ? session.requestHeaders(target.method, target.url) : { Authorization: `${session.scheme} ${session.token}` };
     } catch (err) {
-      console.warn(`cleanup auth failed: ${(err as Error).message}`);
+      console.warn(`cleanup auth failed: ${redactSecrets((err as Error).message)}`);
       return {};
     }
   }
@@ -89,10 +90,14 @@ async function defaultGetAdminHeaders(request: APIRequestContext, target?: { met
 
   // Same settings as the API login steps (API_AUTH_LOGIN_PATH, API_AUTH_BODY, ...).
   const req = buildApiLoginRequest({ username, password });
-  const resp = await request.post(req.path, {
-    headers: { Accept: 'application/json' },
-    ...(req.body === 'json' ? { data: req.fields } : { form: req.fields }),
-  });
+  const resp = await request
+    .post(req.path, {
+      headers: { Accept: 'application/json' },
+      ...(req.body === 'json' ? { data: req.fields } : { form: req.fields }),
+    })
+    .catch((err) => {
+      throw redactError(err);
+    });
 
   if (!resp.ok()) {
     console.warn(`cleanup auth failed: ${resp.status()} ${resp.statusText()}`);
@@ -245,7 +250,7 @@ export function createBddTest(options: CreateBddTestOptions = {}) {
             console.warn(`cleanup ${item.method} ${item.path} failed`, status);
           }
         } catch (err) {
-          console.warn('cleanup error', item.method, item.path, err);
+          console.warn('cleanup error', item.method, item.path, redactSecrets(err instanceof Error ? err.message : String(err)));
         }
       }
     },

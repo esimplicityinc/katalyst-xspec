@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0] - 2026-10-13
+
+Keeps credentials out of logs, reports and git, ahead of saving login sessions to disk. No breaking changes. See [Keeping secrets out of logs and git](docs/guides/authentication.md#keeping-secrets-out-of-logs-and-git).
+
+### Changed
+
+- When an API request fails, Playwright's error lists the request headers. `PlaywrightApiAdapter`, the default cleanup login and cleanup warnings now replace `Authorization`, `Cookie`, `Set-Cookie`, `DPoP`, `Proxy-Authorization`, `X-Api-Key`, `X-Auth-Token` and `X-CSRF-Token` values, and `Bearer` / `DPoP` / `Basic` credentials, with `[redacted]`.
+- `Then I log all cookies` prints values as `[redacted, N chars]`; `Then I log localStorage` does the same for token- or session-like keys and JWT-like values. `XSPEC_SHOW_SECRETS=true` prints them in full.
+
+### Added
+
+- `katalyst-xspec init` and `upgrade` (including `--migrate` and legacy-name migrations) add `.xspec/` to `.gitignore`, once.
+- Exported helpers: `redactSecrets`, `redactHeaders`, `redactError`, `maskValue`, `isSecretHeader`, `looksSecretKey`, `looksLikeJwt`, `showSecrets`, `writeSecretFile` (owner-only `0600` files, written atomically) and `DEFAULT_SESSION_DIR` (`.xspec/auth`).
+
 ## [0.10.0] - 2026-10-13
 
 One-time passcodes (TOTP) for logins that ask for a code from an authenticator app. No breaking changes and no new dependencies. See [One-time passcodes](docs/guides/authentication.md#one-time-passcodes-totp).

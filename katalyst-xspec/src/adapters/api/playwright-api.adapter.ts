@@ -1,6 +1,7 @@
 import type { APIRequestContext } from '@playwright/test';
 import type { ApiMethod, ApiPort, ApiResult } from '../../ports/api.port';
 import { tryParseJson } from '../../utils';
+import { redactError } from '../../auth/secrets';
 
 export class PlaywrightApiAdapter implements ApiPort {
   constructor(private readonly request: APIRequestContext) {}
@@ -14,7 +15,10 @@ export class PlaywrightApiAdapter implements ApiPort {
       opts.headers['Content-Type'] = 'application/json';
     }
 
-    const resp = await this.request.fetch(path, { method, ...opts });
+    // Playwright's error call logs list the request headers; keep credentials out of reports.
+    const resp = await this.request.fetch(path, { method, ...opts }).catch((err) => {
+      throw redactError(err);
+    });
     const text = await resp.text();
     const respHeaders = resp.headers();
     const contentType = respHeaders['content-type'] || '';
@@ -40,6 +44,8 @@ export class PlaywrightApiAdapter implements ApiPort {
         ...(headers || {}),
       },
       data: body,
+    }).catch((err) => {
+      throw redactError(err);
     });
     const text = await resp.text();
     const respHeaders = resp.headers();

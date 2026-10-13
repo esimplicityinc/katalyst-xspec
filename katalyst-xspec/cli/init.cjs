@@ -4,6 +4,7 @@
 const fs = require('fs/promises');
 const path = require('path');
 const readline = require('readline');
+const { ensureGitignoreEntries } = require('./gitignore.cjs');
 
 // Agent skill directories configuration
 const SKILL_AGENTS = {
@@ -487,6 +488,8 @@ test-results
 cucumber-report
 storage
 .env
+# katalyst-xspec: saved login sessions (contain session cookies)
+.xspec/
 `; 
 
   const envExample = `# ── Where to test ──────────────────────────────────────────────
@@ -645,6 +648,12 @@ async function main() {
     // Enable merging for .env.example files
     const merge = rel.endsWith('.env.example');
     await writeFileSafe(filePath, content, { force: args.force, results, merge });
+  }
+
+  // An existing .gitignore is kept; make sure it still ignores saved sessions.
+  const ignored = ensureGitignoreEntries(targetDir);
+  if (ignored.length && !results.created.includes(path.join(targetDir, '.gitignore'))) {
+    results.merged.push(path.join(targetDir, '.gitignore'));
   }
 
   console.log(`\nScaffold complete at ${targetDir}`);

@@ -570,6 +570,39 @@ When('I confirm with my authenticator', async ({ page }) => {
 
 ---
 
+## Secrets
+
+Redaction and owner-only files, used by the built-in adapters and steps. See [Keeping secrets out of logs and git](../../guides/authentication.md#keeping-secrets-out-of-logs-and-git).
+
+```typescript
+import { redactSecrets, redactHeaders, redactError, maskValue, writeSecretFile, DEFAULT_SESSION_DIR } from '@esimplicitylabs/katalyst-xspec';
+```
+
+```typescript
+function redactSecrets(text: string, env?: Env): string;
+function redactHeaders<T extends Record<string, string | string[] | undefined>>(headers: T, env?: Env): T;
+function redactError<T>(err: T, env?: Env): T;
+function maskValue(value: string, env?: Env): string;
+function isSecretHeader(name: string): boolean;
+function looksSecretKey(key: string): boolean;
+function looksLikeJwt(value: string): boolean;
+function showSecrets(env?: Env): boolean;
+function writeSecretFile(file: string, content: string): void;
+const DEFAULT_SESSION_DIR = '.xspec/auth';
+```
+
+| Function | Description |
+|----------|-------------|
+| `redactSecrets(text)` | Replaces credential header values (`Authorization: …`, `Cookie: …`, as in Playwright call logs) and `Bearer` / `DPoP` / `Basic` credentials with `[redacted]` |
+| `redactHeaders(headers)` | A copy with `Authorization`, `Cookie`, `Set-Cookie`, `DPoP`, `Proxy-Authorization`, `X-Api-Key`, `X-Auth-Token`, `X-CSRF-Token` values replaced |
+| `redactError(err)` | Redacts an error's message and stack in place (its type is kept) and returns it: `.catch((e) => { throw redactError(e); })` |
+| `maskValue(value)` | `[redacted, N chars]` |
+| `writeSecretFile(path, content)` | Writes a `0600` file in a `0700` folder, atomically |
+
+All of them do nothing when `XSPEC_SHOW_SECRETS=true`.
+
+---
+
 ## Usage in Step Definitions
 
 ### Complete Example

@@ -22,6 +22,7 @@ export * from './targets';
 export * from './auth/credentials';
 export * from './auth/totp';
 export * from './auth/otp';
+export * from './auth/secrets';
 export { buildApiLoginRequest, extractToken, type ApiLoginRequest } from './auth/api-login';
 export * from './auth/oidc';
 export { apiLoginAsRole, uiLoginAsRole, oneTimeCodeForRole } from './auth/login-steps';
