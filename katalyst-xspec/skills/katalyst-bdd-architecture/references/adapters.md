@@ -200,7 +200,7 @@ UI_LOGIN_BUTTON=Login
 1. Navigates to `UI_LOGIN_PATH`
 2. Fills username/password fields matched by label, placeholder or `name`
 3. Clicks `UI_LOGIN_BUTTON` and waits to leave the login page (or for `UI_LOGIN_SUCCESS_URL` / `UI_LOGIN_SUCCESS_TEXT`); fails if it doesn't
-4. With `reuseSession` (used by `Given I am logged in as`), saves cookies + localStorage per role per worker and restores them later
+4. With `reuseSession` (used by `Given I am logged in as`), logs in once per role per run: saves cookies + localStorage to `.xspec/auth/` (shared by all workers, with a lock so concurrent workers wait instead of logging in twice) and restores them later
 
 **Missing credentials fail** with `MissingCredentialsError` naming the variables to set (no hardcoded defaults, no silent skip).
 

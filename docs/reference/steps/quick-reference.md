@@ -65,6 +65,8 @@ All available steps at a glance. Steps are untagged: once registered, any step w
 |------|-------------|
 | `Given I am logged in as {string}` | UI login as a role, session reused |
 | `When I log in as {string} in UI` | UI login as a role, always submits the form |
+| `Given I clear the saved session for {string}` | Next `I am logged in as` for the role logs in again |
+| `Given I clear saved sessions` | Same, for every role |
 | `When I fill the one-time code for {string} in {string}` | Fill the role's current TOTP code |
 | `When I log in as admin in UI` | Shorthand for role `"admin"` |
 | `When I log in as user in UI` | Shorthand for role `"user"` |

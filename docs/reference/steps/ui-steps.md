@@ -366,7 +366,7 @@ These log in through your app's login form. See the [Authentication guide](../..
 
 ### Given I am logged in as {string}
 
-Logs in through the UI as a named role, reusing the session. The form is submitted the first time a worker needs the role; the cookies and localStorage are saved and restored in later scenarios. `UI_SESSION_REUSE=false` makes it submit the form every time.
+Logs in through the UI as a named role, reusing the session. The form is submitted once per role per run: the first worker that needs the role logs in and saves the cookies and localStorage to `UI_SESSION_DIR`; every other scenario, in any worker, restores them. `UI_SESSION_REUSE=false` makes it submit the form every time. See [Session reuse](../../guides/authentication.md#session-reuse).
 
 **Parameters:**
 | Name | Type | Description |
@@ -375,7 +375,8 @@ Logs in through the UI as a named role, reusing the session. The form is submitt
 
 **Environment Variables:**
 - `AUTH_<ROLE>_USERNAME` / `AUTH_<ROLE>_PASSWORD`
-- `UI_LOGIN_PATH`, `UI_USERNAME_FIELD`, `UI_PASSWORD_FIELD`, `UI_LOGIN_BUTTON`, `UI_LOGIN_SUCCESS_URL`, `UI_LOGIN_SUCCESS_TEXT`, `UI_LOGIN_TIMEOUT`, `UI_SESSION_REUSE`
+- `UI_LOGIN_PATH`, `UI_USERNAME_FIELD`, `UI_PASSWORD_FIELD`, `UI_LOGIN_BUTTON`, `UI_LOGIN_SUCCESS_URL`, `UI_LOGIN_SUCCESS_TEXT`, `UI_LOGIN_TIMEOUT`
+- `UI_SESSION_REUSE`, `UI_SESSION_DIR`, `UI_SESSION_TTL`, `UI_SESSION_SCOPE`, `UI_SESSION_LOCK_TIMEOUT`, `XSPEC_RUN_ID`
 
 `UI_USERNAME_FIELD` / `UI_PASSWORD_FIELD` match the field's label, placeholder, or `name` attribute.
 
@@ -385,6 +386,29 @@ Scenario: Project manager sees the dashboard
   Given I am logged in as "pm"
   When I navigate to "/dashboard"
   Then I should see text "Projects"
+```
+
+---
+
+### Given I clear the saved session for {string}
+
+Forgets the role's saved session in every worker, so the next `Given I am logged in as` for that role submits the form again. Use it after a scenario logs out or changes the role's password.
+
+**Example:**
+```gherkin
+When I click the button "Sign out"
+And I clear the saved session for "pm"
+```
+
+---
+
+### Given I clear saved sessions
+
+Forgets every role's saved session (deletes the files in `UI_SESSION_DIR`).
+
+**Example:**
+```gherkin
+Given I clear saved sessions
 ```
 
 ---

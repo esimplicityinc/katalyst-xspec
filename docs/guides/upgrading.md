@@ -251,6 +251,13 @@ const targets = logTargets(resolveTargets());
 
 ## Version History
 
+### 0.12.0
+
+- `Given I am logged in as "<role>"` now logs in **once per role per run** and shares the session with every worker, through files in `.xspec/auth/` (`UI_SESSION_DIR`). Before, each worker logged in separately. New settings: `UI_SESSION_TTL` (default `30m`), `UI_SESSION_SCOPE` (`run` / `persistent`), `UI_SESSION_LOCK_TIMEOUT`, `XSPEC_RUN_ID`. New steps: `Given I clear the saved session for {string}`, `Given I clear saved sessions`. See [Session reuse](./authentication.md#session-reuse).
+- If your app's sessions last less than 30 minutes, set `UI_SESSION_TTL` below that.
+- Make sure `.xspec/` is git-ignored (`katalyst-xspec upgrade` adds it).
+- `clearUiSessions()` now deletes the saved session files, so it affects every worker.
+
 ### 0.11.0
 
 - Credentials are redacted in API error messages, cleanup warnings and the cookie/localStorage debug steps. `XSPEC_SHOW_SECRETS=true` turns this off locally. See [Keeping secrets out of logs and git](./authentication.md#keeping-secrets-out-of-logs-and-git).

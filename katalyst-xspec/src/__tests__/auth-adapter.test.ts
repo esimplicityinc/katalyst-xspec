@@ -1,6 +1,9 @@
 import { after, before, beforeEach, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import type { AddressInfo } from 'node:net';
 import { chromium, request as pwRequest, type Browser, type APIRequestContext } from '@playwright/test';
 import { PlaywrightApiAdapter } from '../adapters/api/playwright-api.adapter.js';
@@ -164,11 +167,14 @@ describe('UniversalAuthAdapter: API login', () => {
 });
 
 describe('UniversalAuthAdapter: UI login', { skip: skipUi }, () => {
-  const uiEnv = () => pmEnv({ UI_USERNAME_FIELD: 'Email', UI_LOGIN_BUTTON: 'Sign in' });
+  const sessionDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kx-ui-sessions-'));
+  const uiEnv = (extra: Record<string, string> = {}) =>
+    pmEnv({ UI_USERNAME_FIELD: 'Email', UI_LOGIN_BUTTON: 'Sign in', UI_SESSION_DIR: sessionDir, XSPEC_RUN_ID: 'test-run', ...extra });
   beforeEach(() => {
-    clearUiSessions();
+    clearUiSessions({ env: uiEnv() });
     uiLoginPosts = 0;
   });
+  after(() => fs.rmSync(sessionDir, { recursive: true, force: true }));
 
   async function uiSetup(env: Record<string, string>) {
     const context = await browser!.newContext({ baseURL: base });
@@ -223,6 +229,73 @@ describe('UniversalAuthAdapter: UI login', { skip: skipUi }, () => {
     } finally {
       await second.context.close();
     }
+  });
+
+  it('saves the session to UI_SESSION_DIR, readable only by the owner', async () => {
+    const s = await uiSetup(uiEnv());
+    try {
+      await s.auth.uiLoginAs(s.world, 'pm', { reuseSession: true });
+    } finally {
+      await s.context.close();
+    }
+    const files = fs.readdirSync(sessionDir).filter((f) => f.endsWith('.json'));
+    assert.equal(files.length, 1);
+    assert.match(files[0], /^pm-/);
+    if (process.platform !== 'win32') assert.equal(fs.statSync(path.join(sessionDir, files[0])).mode & 0o777, 0o600);
+    assert.match(fs.readFileSync(path.join(sessionDir, files[0]), 'utf8'), /ui-session/);
+  });
+
+  it('several workers asking for the same role at once log in once', async () => {
+    const workers = await Promise.all([1, 2, 3].map(() => uiSetup(uiEnv())));
+    try {
+      await Promise.all(workers.map((w) => w.auth.uiLoginAs(w.world, 'pm', { reuseSession: true })));
+      assert.equal(uiLoginPosts, 1, 'the login form should only be submitted once');
+      for (const w of workers) {
+        await w.page.goto('/home');
+        assert.match(w.page.url(), /\/home$/);
+      }
+    } finally {
+      await Promise.all(workers.map((w) => w.context.close()));
+    }
+  });
+
+  it('a new run logs in again (UI_SESSION_SCOPE=run); persistent scope reuses the earlier run', async () => {
+    const login = async (env: Record<string, string>) => {
+      const s = await uiSetup(env);
+      try {
+        await s.auth.uiLoginAs(s.world, 'pm', { reuseSession: true });
+      } finally {
+        await s.context.close();
+      }
+    };
+    await login(uiEnv({ XSPEC_RUN_ID: 'run-a' }));
+    await login(uiEnv({ XSPEC_RUN_ID: 'run-b' }));
+    assert.equal(uiLoginPosts, 2);
+    await login(uiEnv({ XSPEC_RUN_ID: 'run-c', UI_SESSION_SCOPE: 'persistent' }));
+    assert.equal(uiLoginPosts, 2);
+  });
+
+  it('clearSavedSession makes the next login submit the form again', async () => {
+    for (let i = 0; i < 2; i++) {
+      const s = await uiSetup(uiEnv());
+      try {
+        await s.auth.uiLoginAs(s.world, 'pm', { reuseSession: true });
+        if (i === 0) s.auth.clearSavedSession('pm');
+      } finally {
+        await s.context.close();
+      }
+    }
+    assert.equal(uiLoginPosts, 2);
+  });
+
+  it('a failed login saves nothing and releases the lock', async () => {
+    const s = await uiSetup(uiEnv({ AUTH_PM_PASSWORD: 'wrong', UI_LOGIN_TIMEOUT: '1000' }));
+    try {
+      await assert.rejects(s.auth.uiLoginAs(s.world, 'pm', { reuseSession: true }), /stayed on \/login/);
+    } finally {
+      await s.context.close();
+    }
+    assert.deepEqual(fs.readdirSync(sessionDir), []);
   });
 
   it('without reuseSession every call submits the form', async () => {

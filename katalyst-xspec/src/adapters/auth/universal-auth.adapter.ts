@@ -1,6 +1,6 @@
 import type { ApiPort } from '../../ports/api.port';
 import type { AuthPort, UiLoginOptions } from '../../ports/auth.port';
-import type { UiPort, UiSessionState } from '../../ports/ui.port';
+import type { UiPort } from '../../ports/ui.port';
 import type { World } from '../../world';
 import { resolveCredentials, roleEnvKeys, type Credentials, type RoleCredentials } from '../../auth/credentials';
 import { oneTimeCode } from '../../auth/otp';
@@ -8,7 +8,8 @@ import { apiLoginErrorMessage, buildApiLoginRequest, extractToken } from '../../
 import { isOidcMode, oidcNeedsUserCredentials } from '../../auth/oidc/settings';
 import { OidcClient, type OidcSession } from '../../auth/oidc/client';
 import { createBrowserAuthorize, createHttpAuthorize, type AuthorizeRequest } from '../../auth/oidc/code-flow';
-import { resolveApiBaseUrl } from '../../targets';
+import { resolveApiBaseUrl, resolveTargets } from '../../targets';
+import { SessionStore, type SessionKey } from '../../auth/session-store';
 
 type Env = Record<string, string | undefined>;
 
@@ -23,12 +24,9 @@ export type UniversalAuthOptions = {
   apiBaseUrl?: string;
 };
 
-// Saved UI sessions, per worker process: role + username + login path -> state.
-const uiSessions = new Map<string, UiSessionState>();
-
-/** Forget saved UI sessions (e.g. after changing a password mid-run). */
-export function clearUiSessions(): void {
-  uiSessions.clear();
+/** Forget every saved UI session, in all workers (e.g. after changing a password mid-run). */
+export function clearUiSessions({ env = process.env }: { env?: Env } = {}): void {
+  SessionStore.fromEnv(env).clear();
 }
 
 /**
@@ -83,18 +81,40 @@ export class UniversalAuthAdapter implements AuthPort {
 
   async uiLoginAs(world: World, role: string, options: UiLoginOptions = {}): Promise<void> {
     const creds = this.credentialsFor(role);
-    const reuse = options.reuseSession && this.sessionReuseEnabled();
-    const key = `${role.toLowerCase()}\u0000${creds.username}\u0000${this.env.UI_LOGIN_PATH || '/login'}`;
-
-    if (reuse && this.ui.restoreSession) {
-      const saved = uiSessions.get(key);
-      if (saved) {
-        await this.ui.restoreSession(saved);
-        return;
-      }
+    const reuse = options.reuseSession && this.sessionReuseEnabled() && this.ui.restoreSession && this.ui.saveSession;
+    if (!reuse) {
+      await this.uiLogin(world, role, creds);
+      return;
     }
-    await this.uiLogin(world, role, creds);
-    if (reuse && this.ui.saveSession) uiSessions.set(key, await this.ui.saveSession());
+
+    // Shared by every worker: one login per role per run (see auth/session-store.ts).
+    const store = SessionStore.fromEnv(this.env);
+    const key = this.sessionKey(role, creds);
+    const saved = store.read(key);
+    if (saved) return this.ui.restoreSession!(saved.state);
+
+    await store.withLock(key, async () => {
+      // Another worker may have logged in while this one waited for the lock.
+      const theirs = store.read(key);
+      if (theirs) return this.ui.restoreSession!(theirs.state);
+      await this.uiLogin(world, role, creds);
+      store.write(key, await this.ui.saveSession!());
+    });
+  }
+
+  /** What a saved UI session is for: the role, its username, the login page and the app. */
+  protected sessionKey(role: string, creds: Credentials): SessionKey {
+    return {
+      role,
+      username: creds.username,
+      loginPath: this.env.UI_LOGIN_PATH || '/login',
+      app: resolveTargets(this.env).frontendUrl,
+    };
+  }
+
+  /** Forget the role's saved UI session in every worker, so the next `I am logged in as` logs in again. */
+  clearSavedSession(role: string): void {
+    SessionStore.fromEnv(this.env).clear(this.sessionKey(role, this.credentialsFor(role)));
   }
 
   apiLoginAsAdmin(world: World): Promise<void> {

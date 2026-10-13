@@ -356,6 +356,8 @@ When I log in as {string} in UI
 When I log in as admin in UI
 When I log in as user in UI
 When I fill the one-time code for {string} in {string}
+Given I clear the saved session for {string}
+Given I clear saved sessions
 ```
 
 **Examples:**
@@ -364,7 +366,7 @@ Given I am logged in as "pm"
 When I log in as "pm" in UI
 ```
 
-- `I am logged in as "<role>"` fills the login form once per role per worker, then restores the saved cookies + localStorage in later scenarios (`UI_SESSION_REUSE=false` disables).
+- `I am logged in as "<role>"` fills the login form once per role per run (shared by all workers through `.xspec/auth/`), then restores the saved cookies + localStorage in later scenarios. `UI_SESSION_TTL` (`30m`), `UI_SESSION_SCOPE` (`run`|`persistent`), `UI_SESSION_REUSE=false` disables. `I clear the saved session for "<role>"` / `I clear saved sessions` force a fresh login (after logout or a password change).
 - `I log in as "<role>" in UI` always submits the form (use when testing login).
 - `admin` / `user` variants are shorthand for those roles.
 - `I fill the one-time code for "<role>" in "<field>"` fills the role's current TOTP code (from `AUTH_<ROLE>_OTP_SECRET`, base32 by default; `AUTH_<ROLE>_OTP_ENCODING=latin1|hex`, `_DIGITS`, `_PERIOD`, `_ALGORITHM`, or `AUTH_OTP_*` for every role) into a field found by label, placeholder or `name`. A code can't be reused within its 30-second window.

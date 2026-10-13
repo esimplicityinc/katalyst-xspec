@@ -603,6 +603,45 @@ All of them do nothing when `XSPEC_SHOW_SECRETS=true`.
 
 ---
 
+## Session Store
+
+The shared, on-disk store behind [Session reuse](../../guides/authentication.md#session-reuse). Useful if you write your own login and want the same once-per-run behaviour.
+
+```typescript
+import { SessionStore, sessionStoreSettings, clearUiSessions } from '@esimplicitylabs/katalyst-xspec';
+```
+
+```typescript
+type SessionKey = { role: string; username: string; loginPath: string; app: string };
+
+class SessionStore {
+  static fromEnv(env?: Env): SessionStore;            // UI_SESSION_DIR / _TTL / _SCOPE / _LOCK_TIMEOUT, XSPEC_RUN_ID
+  read(key: SessionKey): SavedSession | undefined;    // undefined if missing, expired or from another run
+  write(key: SessionKey, state: UiSessionState): SavedSession;
+  withLock<T>(key: SessionKey, fn: () => Promise<T>): Promise<T>;  // one caller at a time, across workers
+  clear(key?: SessionKey): void;
+  fileFor(key: SessionKey): string;
+}
+
+function clearUiSessions(options?: { env?: Env }): void; // delete every saved session
+```
+
+Example: a custom login that runs once per run, however many workers need it:
+
+```typescript
+const store = SessionStore.fromEnv();
+const key = { role: 'pm', username, loginPath: '/auth/start', app: process.env.FRONTEND_URL! };
+let saved = store.read(key);
+if (!saved) {
+  await store.withLock(key, async () => {
+    saved = store.read(key) ?? store.write(key, await logInAndGetStorageState());
+  });
+}
+await page.context().addCookies(saved!.state.cookies as any);
+```
+
+---
+
 ## Usage in Step Definitions
 
 ### Complete Example

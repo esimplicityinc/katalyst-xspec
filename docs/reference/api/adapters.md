@@ -276,7 +276,7 @@ API login does not start a browser.
 3. Click `UI_LOGIN_BUTTON`
 4. Wait until the page leaves the login page (or shows `UI_LOGIN_SUCCESS_TEXT`, or reaches `UI_LOGIN_SUCCESS_URL`); fail if it doesn't
 
-With `reuseSession`, the session is saved after the first login per role per worker and restored later. `clearUiSessions()` forgets saved sessions.
+With `reuseSession`, the session is saved to `UI_SESSION_DIR` after the first login per role per run and restored later, in every worker; concurrent workers wait for that login instead of logging in themselves. `clearUiSessions()` deletes the saved sessions and `clearSavedSession(role)` one role's. See [Session reuse](../../guides/authentication.md#session-reuse).
 
 ### Extending
 
