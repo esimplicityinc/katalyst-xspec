@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.16.0] - 2026-10-13
+
+Cleanup through the saved browser session. With this, a BFF app behind an identity provider with one-time codes is configured entirely in `.env`. See [API calls with the browser session](docs/guides/authentication.md#api-calls-with-the-browser-session).
+
+### Added
+
+- With `API_AUTH_MODE=ui-session`, the default cleanup auth sends the `admin` role's browser session cookie, using the shared saved sessions (logging in once if there's none). `CLEANUP_AUTH_ROLE` picks another role. The cookie is cached per worker and dropped when a cleanup request gets 401/403.
+- `defaultCleanupAuth` is exported, for `getCleanupAuth` providers that wrap or fall back to it.
+
 ## [0.15.0] - 2026-10-13
 
 API steps can use the browser login session, for APIs that only accept the app's session cookie (BFF). See [API calls with the browser session](docs/guides/authentication.md#api-calls-with-the-browser-session).

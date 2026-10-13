@@ -266,6 +266,25 @@ Scenario: Create an application, then see it
 
 API and UI steps share the same saved session, so the role logs in once per run however it's used. The API must be on the app's site: the same host as `FRONTEND_URL`, or a subdomain the session cookie covers. Before using a saved session, it's checked without a browser: a request to `UI_SESSION_CHECK_PATH` that ends on the login page or returns 401/403 means it has expired, and the role logs in again. Set `UI_LOGIN_IGNORE_HTTPS_ERRORS=true` if the headless login browser should accept self-signed certificates.
 
+Cleanup uses the same session (as `admin`, or `CLEANUP_AUTH_ROLE`), see [Cleanup authentication](#cleanup-authentication).
+
+**All together**, a BFF app behind Keycloak with one-time codes needs only `.env`:
+
+```bash
+FRONTEND_URL=http://localhost:3000
+UI_LOGIN_PATH=/auth/start
+API_AUTH_MODE=ui-session
+
+AUTH_APPLICANT_USERNAME=facial@test.local
+AUTH_APPLICANT_PASSWORD=password
+AUTH_ADMIN_USERNAME=admin@test.local
+AUTH_ADMIN_PASSWORD=admin-password
+AUTH_OTP_SECRET=logingov-local-otp-secret   # every role's TOTP secret
+AUTH_OTP_ENCODING=latin1
+```
+
+Each role then logs in once per run, through `/auth/start`, the provider's pages and the one-time code, and the session is used by UI steps, API steps and cleanup in every worker.
+
 The other way round: after an API login that set a session cookie (a cookie-session `API_AUTH_LOGIN_PATH`, or `ui-session`), `Given I use the API session in the browser` gives the browser the same cookies.
 
 ### Session reuse
@@ -397,11 +416,11 @@ See [UI steps](../reference/steps/ui-steps.md).
 
 ## Cleanup authentication
 
-Data registered for cleanup is deleted after each scenario as the `admin` role, using the same `API_AUTH_*` settings (including `API_AUTH_MODE=oidc`, with DPoP proofs per request). Alternatives:
+Data registered for cleanup is deleted after each scenario as the `admin` role, using the same `API_AUTH_*` settings (including `API_AUTH_MODE=oidc`, with DPoP proofs per request). With `API_AUTH_MODE=ui-session`, cleanup sends the `admin` role's browser session cookie, from the same shared saved sessions (logging in once if needed); set `CLEANUP_AUTH_ROLE` to clean up as another role. Alternatives:
 
 - `CLEANUP_AUTH_TOKEN`: a static bearer token, so no login is needed
 - `createOidcCleanupAuth` (see [Utilities](../reference/api/utilities.md)): OIDC for cleanup only
-- `getCleanupAuth` in `createBddTest({...})` for anything else
+- `getCleanupAuth` in `createBddTest({...})` for anything else; `defaultCleanupAuth` is the built-in one, to wrap or fall back to
 
 Cleanup is best-effort: if no admin credentials are set, it runs unauthenticated instead of failing the scenario.
 

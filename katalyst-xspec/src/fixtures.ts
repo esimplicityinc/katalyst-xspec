@@ -5,7 +5,7 @@ import { initWorld, type World } from './world';
 import { resolveApiRequestTarget } from './network';
 import { resolveApiBaseUrl } from './targets';
 import { buildApiLoginRequest, extractToken } from './auth/api-login';
-import { isOidcMode, oidcNeedsUserCredentials, readOidcTls } from './auth/oidc/settings';
+import { apiAuthMode, isOidcMode, oidcNeedsUserCredentials, readOidcTls } from './auth/oidc/settings';
 import { OidcClient } from './auth/oidc/client';
 import { clientCertificateFor } from './auth/oidc/transport';
 import { resolveCredentials } from './auth/credentials';
@@ -22,6 +22,8 @@ import { UniversalAuthAdapter } from './adapters/auth/universal-auth.adapter';
 import { DefaultCleanupAdapter } from './adapters/cleanup/default-cleanup.adapter';
 
 let cachedAdminToken: string | undefined;
+// API_AUTH_MODE=ui-session: session cookies per cleanup role, per worker.
+const cachedCleanupCookies = new Map<string, string>();
 
 /**
  * Callback type for obtaining admin auth headers for cleanup operations.
@@ -44,9 +46,11 @@ let cleanupOidc: OidcClient | undefined;
  *
  * If a static CLEANUP_AUTH_TOKEN is set, uses that directly (no login needed).
  * With API_AUTH_MODE=oidc, gets the admin token from the OIDC provider.
+ * With API_AUTH_MODE=ui-session, sends the admin's (CLEANUP_AUTH_ROLE's)
+ * browser session cookie, from the shared saved sessions.
  * If credentials are not configured, returns empty headers (cleanup runs unauthenticated).
  */
-async function defaultGetAdminHeaders(request: APIRequestContext, target?: { method: string; url: string }): Promise<Record<string, string>> {
+export async function defaultCleanupAuth(request: APIRequestContext, target?: { method: string; url: string }): Promise<Record<string, string>> {
   // Fast path: reuse cached token
   if (cachedAdminToken) {
     return { Authorization: `Bearer ${cachedAdminToken}` };
@@ -57,6 +61,33 @@ async function defaultGetAdminHeaders(request: APIRequestContext, target?: { met
   if (staticToken) {
     cachedAdminToken = staticToken;
     return { Authorization: `Bearer ${staticToken}` };
+  }
+
+  if (apiAuthMode() === 'ui-session') {
+    const role = process.env.CLEANUP_AUTH_ROLE?.trim() || 'admin';
+    const cached = cachedCleanupCookies.get(role);
+    if (cached) return { Cookie: cached };
+    try {
+      resolveCredentials(role);
+    } catch {
+      return {}; // No credentials for the cleanup role -- cleanup runs unauthenticated.
+    }
+    try {
+      const auth = new UniversalAuthAdapter({
+        api: new PlaywrightApiAdapter(request),
+        ui: undefined as never,
+        ...(target ? { apiBaseUrl: new URL(target.url).origin } : {}),
+      });
+      const world = initWorld();
+      await auth.apiLoginAs(world, role);
+      const cookie = world.headers.Cookie;
+      if (!cookie) return {};
+      cachedCleanupCookies.set(role, cookie);
+      return { Cookie: cookie };
+    } catch (err) {
+      console.warn(`cleanup auth failed: ${redactSecrets((err as Error).message)}`);
+      return {};
+    }
   }
 
   // OIDC mode: same provider settings as the API login steps; sessions are cached and refreshed.
@@ -198,7 +229,7 @@ export function createBddTest(options: CreateBddTestOptions = {}) {
     createUi = ({ page }) => new PlaywrightUiAdapter(page),
     createAuth = ({ api, ui, apiBaseUrl }) => new UniversalAuthAdapter({ api, ui, apiBaseUrl }),
     createCleanup = () => new DefaultCleanupAdapter(),
-    getCleanupAuth = defaultGetAdminHeaders,
+    getCleanupAuth = defaultCleanupAuth,
     createTui,
     worldFactory = initWorld,
   } = options;
@@ -243,6 +274,7 @@ export function createBddTest(options: CreateBddTestOptions = {}) {
           const status = resp.status();
           if (status === 401 || status === 403) {
             cachedAdminToken = undefined;
+            cachedCleanupCookies.clear();
             console.warn(`cleanup auth expired (${status}) for ${item.method} ${item.path}`);
             continue;
           }
