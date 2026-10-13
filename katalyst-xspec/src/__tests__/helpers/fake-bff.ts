@@ -56,6 +56,10 @@ export async function startFakeBff(options: FakeIdpOptions) {
     }
     const id = cookie(req, 'kc_tx');
     const t = id ? tx.get(id) : undefined;
+    if (url.pathname === '/realms/app/restart' && t) {
+      t.stage = layout === 'combined' ? 'password' : 'username';
+      return redirect(`/realms/app/login-actions?tx=${id}`);
+    }
     if (url.pathname !== '/realms/app/login-actions' || !t) return html(page('Error', '<p>Unknown login</p>'), 400);
     const error = url.searchParams.get('error');
     const alert = error ? `<div class="alert-error" role="alert">${error}</div>` : '';
@@ -121,7 +125,8 @@ export async function startFakeBff(options: FakeIdpOptions) {
         <button type="submit">Verify</button></form>`));
     }
     if (t.stage === 'otp') {
-      return html(page('Sign in to app', `${alert}<form method="post" action="${action}">
+      // Like Keycloak: an icon button next to the form that starts the sign-in over.
+      return html(page('Sign in to app', `${alert}<button type="button" aria-label="Restart login" onclick="location.href='/realms/app/restart'">↻</button><form method="post" action="${action}">
         <label for="otp">One-time code</label><input id="otp" name="otp" type="text" autocomplete="off">
         <input type="submit" id="kc-login" value="Sign In"></form>`));
     }

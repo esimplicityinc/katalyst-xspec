@@ -251,6 +251,11 @@ const targets = logTargets(resolveTargets());
 
 ## Version History
 
+### 0.19.1
+
+- Fix: UI logins against Keycloak's one-time code page no longer restart the sign-in (an icon button labelled "Restart login" matched the default `UI_LOGIN_BUTTON=Login`).
+- `katalyst-xspec init` now scaffolds with the current version. Projects created with 0.10 to 0.19.0 have `"^0.8.0"`: update it to `"^0.19.1"`.
+
 ### 0.19.0
 
 - `createAuthSetup({ roles })` logs roles in from a Playwright setup project and saves the sessions where `I am logged in as` and `API_AUTH_MODE=ui-session` find them. See [Session reuse](./authentication.md#session-reuse). No breaking changes.

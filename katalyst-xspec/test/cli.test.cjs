@@ -53,7 +53,7 @@ describe('katalyst-xspec init', () => {
       assert.equal(pkg.name, 'my-tests');
       assert.equal(pkg.scripts['gen:stubs'], 'katalyst-xspec stubs');
       assert.equal(pkg.scripts.upgrade, 'katalyst-xspec upgrade');
-      assert.ok(pkg.devDependencies['@esimplicitylabs/katalyst-xspec']);
+      assert.equal(pkg.devDependencies['@esimplicitylabs/katalyst-xspec'], `^${require('../package.json').version}`);
       // Published on npmjs.com: no registry mapping or token needed.
       assert.equal(fs.existsSync(path.join(cwd, 'my-tests', '.npmrc')), false);
     } finally {
