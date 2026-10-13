@@ -251,6 +251,11 @@ const targets = logTargets(resolveTargets());
 
 ## Version History
 
+### 0.17.0
+
+- Email testing: a `mail` fixture (Mailpit at `MAIL_API_URL`, or `createMail`) and steps for checking emails and using their links and codes. See [Email Testing](./email-testing.md).
+- `registerSharedSteps` now also registers the email steps. They only do something when used. No breaking changes.
+
 ### 0.16.0
 
 - With `API_AUTH_MODE=ui-session`, cleanup uses the `admin` role's (or `CLEANUP_AUTH_ROLE`'s) browser session cookie. A BFF app with one-time codes now needs only `.env` settings: see [API calls with the browser session](./authentication.md#api-calls-with-the-browser-session).

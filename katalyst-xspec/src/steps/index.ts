@@ -5,6 +5,7 @@ import { registerHybridSteps } from './hybrid';
 import { registerSharedCleanupSteps } from './shared.cleanup';
 import { registerSharedVarSteps } from './shared.vars';
 import { registerFlagSteps } from './shared.flags';
+import { registerMailSteps } from './shared.mail';
 import { registerUiBasicSteps } from './ui.basic';
 import { registerWizardSteps } from './ui.wizard';
 import { registerFormSteps } from './ui.form';
@@ -50,11 +51,13 @@ export function registerUiSteps(test: any): void {
  * - Variable management steps
  * - Cleanup steps
  * - Feature flag steps
+ * - Email steps (test inbox, MAIL_API_URL)
  */
 export function registerSharedSteps(test: any): void {
   registerSharedVarSteps(test);
   registerSharedCleanupSteps(test);
   registerFlagSteps(test);
+  registerMailSteps(test);
 }
 
 /**
@@ -125,6 +128,7 @@ export {
   registerSharedCleanupSteps,
   registerSharedVarSteps,
   registerFlagSteps,
+  registerMailSteps,
   // Hybrid
   registerHybridSteps,
   // TUI

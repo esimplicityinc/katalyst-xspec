@@ -456,6 +456,31 @@ UI login as the `admin` / `user` role.
 
 ---
 
+## MailPort
+
+A test inbox for the [email steps](../steps/shared-steps.md#email-steps). The built-in adapter is `MailpitAdapter`.
+
+```typescript
+import type { MailPort, MailMessage, MailQuery } from '@esimplicitylabs/katalyst-xspec';
+
+interface MailPort {
+  latest(query: MailQuery): Promise<MailMessage | undefined>;
+  waitFor(query: MailQuery, timeoutMs: number): Promise<MailMessage>;
+  clear(): Promise<void>;
+}
+
+type MailQuery = { to?: string; subject?: string; since?: Date };
+type MailMessage = { id: string; from: string; to: string[]; subject: string; text: string; html: string; date: Date };
+```
+
+| Method | Description |
+|--------|-------------|
+| `latest(query)` | The newest message to `to` (case-insensitive) whose subject contains `subject`, received at or after `since` |
+| `waitFor(query, timeoutMs)` | Same, waiting for one to arrive; throws saying what it looked for |
+| `clear()` | Delete every message |
+
+---
+
 ## CleanupPort
 
 Resource cleanup interface.

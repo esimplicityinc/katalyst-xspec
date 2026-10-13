@@ -44,6 +44,7 @@ npm test
 - [TUI Testing](./guides/tui-testing.md) - Terminal UI testing
 - [Hybrid Testing](./guides/hybrid-testing.md) - Cross-layer tests
 - [Authentication](./guides/authentication.md) - Log in by role (API and UI)
+- [Email Testing](./guides/email-testing.md) - Verification emails, magic links and codes
 - [Custom Adapters](./guides/custom-adapters.md) - Extend the framework
 - [Custom Steps](./guides/custom-steps.md) - Domain-specific steps
 - [CI/CD Integration](./guides/ci-cd.md) - GitHub Actions, pipelines

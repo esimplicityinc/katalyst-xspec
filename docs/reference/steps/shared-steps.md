@@ -13,6 +13,8 @@ registerSharedSteps(test);
 This registers:
 - `registerSharedVarSteps` - Variable management
 - `registerSharedCleanupSteps` - Cleanup registration
+- `registerFlagSteps` - Feature flags
+- `registerMailSteps` - Email steps
 
 ---
 
@@ -168,6 +170,88 @@ Registers a PUT cleanup action.
 **Example:**
 ```gherkin
 Given I register cleanup PUT "/users/{userId}/restore"
+```
+
+---
+
+## Email Steps
+
+Read emails the app sent to a test inbox (Mailpit at `MAIL_API_URL`). Each step waits up to `MAIL_TIMEOUT` (10 s) and only considers emails received since the scenario started. See the [Email Testing guide](../../guides/email-testing.md).
+
+### Then {string} receives an email with subject {string}
+
+Waits for an email to the address whose subject contains the text.
+
+**Example:**
+```gherkin
+Then "pm@test.local" receives an email with subject "Verify your email"
+```
+
+---
+
+### Then the latest email to {string} should contain {string}
+
+Checks the subject, text or HTML of the newest email to the address.
+
+**Example:**
+```gherkin
+Then the latest email to "pm@test.local" should contain "expires in 15 minutes"
+```
+
+---
+
+### When I open the link in the latest email to {string}
+
+Opens the first link of the newest email to the address in the browser.
+
+**Example:**
+```gherkin
+When I open the link in the latest email to "pm@test.local"
+```
+
+---
+
+### When I open the link containing {string} in the latest email to {string}
+
+Opens the first link containing the text.
+
+**Example:**
+```gherkin
+When I open the link containing "/reset" in the latest email to "pm@test.local"
+```
+
+---
+
+### Then I store the link from the latest email to {string} as {string}
+
+Stores the first link in a variable.
+
+**Example:**
+```gherkin
+Then I store the link from the latest email to "pm@test.local" as "resetLink"
+```
+
+---
+
+### Then I store the code from the latest email to {string} as {string}
+
+Stores a code from the newest email: the first 4 to 8 digit number, or what `MAIL_CODE_PATTERN` matches (its first group, if any).
+
+**Example:**
+```gherkin
+Then I store the code from the latest email to "pm@test.local" as "code"
+When I fill the field "Code" with "{code}"
+```
+
+---
+
+### Given I clear the inbox
+
+Deletes every email in the test inbox (for all workers).
+
+**Example:**
+```gherkin
+Given I clear the inbox
 ```
 
 ---

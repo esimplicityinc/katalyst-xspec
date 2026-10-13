@@ -319,7 +319,9 @@ type World = {
   headers: Record<string, string>;
   cleanup: CleanupItem[];
   skipCleanup?: boolean;
-  
+  startedAt?: number;        // when the scenario started; email steps look at mail since
+  lastEmail?: MailMessage;   // set by the email steps
+
   // Response state (set by API steps)
   lastResponse?: APIResponse;
   lastStatus?: number;
@@ -658,6 +660,20 @@ if (!saved) {
   });
 }
 await page.context().addCookies(saved!.state.cookies as any);
+```
+
+---
+
+## Email
+
+Links and codes from a `MailMessage` (see [Email Testing](../../guides/email-testing.md)).
+
+```typescript
+import { emailLinks, emailLink, emailCode, emailCodePattern } from '@esimplicitylabs/katalyst-xspec';
+
+emailLinks(message);              // hrefs from the HTML, then URLs in the text, no duplicates
+emailLink(message, '/reset');     // the first link containing "/reset"
+emailCode(message);               // first 4-8 digit number, or MAIL_CODE_PATTERN's first group
 ```
 
 ---

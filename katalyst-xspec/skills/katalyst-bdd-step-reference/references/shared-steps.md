@@ -48,6 +48,20 @@ Given I generate a one-time code for "pm" as "otp"
 When I fill the field "Code" with "{otp}"
 ```
 
+### Email (test inbox)
+
+```gherkin
+Then {string} receives an email with subject {string}
+Then the latest email to {string} should contain {string}
+When I open the link in the latest email to {string}
+When I open the link containing {string} in the latest email to {string}
+Then I store the link from the latest email to {string} as {string}
+Then I store the code from the latest email to {string} as {string}
+Given I clear the inbox
+```
+
+Needs `MAIL_API_URL` (Mailpit). Steps wait up to `MAIL_TIMEOUT` (10 s) and only see emails received since the scenario started; use unique addresses per scenario. Codes: first 4-8 digits, or `MAIL_CODE_PATTERN`.
+
 ### Assert Variable Value
 
 ```gherkin

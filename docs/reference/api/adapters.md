@@ -399,6 +399,20 @@ When `allowHeuristic: true` (or `CLEANUP_ALLOW_ALL=true`), cleanup is registered
 
 ---
 
+## MailpitAdapter
+
+`MailPort` for [Mailpit](https://mailpit.axllent.org), through its REST API (`/api/v1/messages`, `/api/v1/message/{ID}`). Used by default when `MAIL_API_URL` is set.
+
+```typescript
+import { MailpitAdapter } from '@esimplicitylabs/katalyst-xspec';
+
+new MailpitAdapter({ baseUrl: 'http://localhost:8025', searchLimit: 50, pollMs: 250 });
+```
+
+It searches the newest `searchLimit` messages, matching the recipient exactly and the subject by "contains" (both case-insensitive), then fetches the full message for its text and HTML.
+
+---
+
 ## Cleanup Authentication
 
 By default, cleanup operations log in to the API as the `admin` role (`AUTH_ADMIN_*`, or the older `DEFAULT_ADMIN_*`), using the same `API_AUTH_*` settings. If no admin credentials are set, cleanup runs unauthenticated (best effort). You can customize this with:
