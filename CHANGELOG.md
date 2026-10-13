@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.17.0] - 2026-10-13
+
+Email testing: check what the app sends and use links and codes from it. See [Email Testing](docs/guides/email-testing.md).
+
+### Added
+
+- `MailPort` (`latest`, `waitFor`, `clear`) and `MailpitAdapter` for [Mailpit](https://mailpit.axllent.org). A `mail` fixture uses Mailpit at `MAIL_API_URL`, or `createMail` in `createBddTest()` for other mail catchers.
+- Steps (registered with the shared steps): `Then {string} receives an email with subject {string}`, `Then the latest email to {string} should contain {string}`, `When I open the link in the latest email to {string}`, `When I open the link containing {string} in the latest email to {string}`, `Then I store the link from the latest email to {string} as {string}`, `Then I store the code from the latest email to {string} as {string}`, `Given I clear the inbox`. They wait up to `MAIL_TIMEOUT` and only consider emails received since the scenario started.
+- `MAIL_CODE_PATTERN` for codes that aren't 4 to 8 digits.
+- Helpers `emailLinks`, `emailLink`, `emailCode`, `emailCodePattern`; `World.startedAt` and `World.lastEmail`; `registerMailSteps`.
+
 ## [0.16.0] - 2026-10-13
 
 Cleanup through the saved browser session. With this, a BFF app behind an identity provider with one-time codes is configured entirely in `.env`. See [API calls with the browser session](docs/guides/authentication.md#api-calls-with-the-browser-session).

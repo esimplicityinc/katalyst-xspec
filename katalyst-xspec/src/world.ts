@@ -1,4 +1,5 @@
 import type { APIResponse } from '@playwright/test';
+import type { MailMessage } from './ports/mail.port';
 
 export type CleanupItem = {
   method: 'DELETE' | 'POST' | 'PATCH' | 'PUT';
@@ -33,6 +34,11 @@ export type World = {
   /** Validated ID token claims from the last OIDC login. */
   idTokenClaims?: Record<string, unknown>;
 
+  /** When the scenario started (ms). Email steps only look at mail received since. */
+  startedAt?: number;
+  /** The email the last email step found. */
+  lastEmail?: MailMessage;
+
   lastResponse?: APIResponse;
   lastStatus?: number;
   lastText?: string;
@@ -46,5 +52,6 @@ export function initWorld(): World {
     vars: {},
     headers: {},
     cleanup: [],
+    startedAt: Date.now(),
   };
 }

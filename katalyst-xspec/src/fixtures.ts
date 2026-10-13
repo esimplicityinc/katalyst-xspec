@@ -15,6 +15,8 @@ import type { ApiPort } from './ports/api.port';
 import type { UiPort } from './ports/ui.port';
 import type { AuthPort } from './ports/auth.port';
 import type { CleanupPort } from './ports/cleanup.port';
+import type { MailPort } from './ports/mail.port';
+import { MailpitAdapter } from './adapters/mail/mailpit.adapter';
 import type { TuiPort, TuiConfig } from './ports/tui.port';
 import { PlaywrightApiAdapter } from './adapters/api/playwright-api.adapter';
 import { PlaywrightUiAdapter } from './adapters/ui/playwright-ui.adapter';
@@ -196,8 +198,27 @@ export type CreateBddTestOptions = {
    * ```
    */
   createTui?: TuiFactory;
+  /**
+   * Build the test inbox for the email steps. Default: Mailpit at MAIL_API_URL.
+   */
+  createMail?: () => MailPort;
   worldFactory?: () => World;
 };
+
+/** A MailPort that explains how to configure one when used without MAIL_API_URL. */
+function unconfiguredMail(): MailPort {
+  const fail = async (): Promise<never> => {
+    throw new Error(
+      'Email steps need a test inbox: set MAIL_API_URL to your Mailpit address (e.g. http://localhost:8025), ' +
+        'or pass createMail to createBddTest() for another mail catcher.',
+    );
+  };
+  return { latest: fail, waitFor: fail, clear: fail };
+}
+
+function defaultMail(): MailPort {
+  return process.env.MAIL_API_URL ? new MailpitAdapter({ baseUrl: process.env.MAIL_API_URL }) : unconfiguredMail();
+}
 
 /**
  * A UiPort that forwards to the scenario's real UI adapter once a step has
@@ -231,6 +252,7 @@ export function createBddTest(options: CreateBddTestOptions = {}) {
     createCleanup = () => new DefaultCleanupAdapter(),
     getCleanupAuth = defaultCleanupAuth,
     createTui,
+    createMail = defaultMail,
     worldFactory = initWorld,
   } = options;
 
@@ -241,6 +263,7 @@ export function createBddTest(options: CreateBddTestOptions = {}) {
     auth: AuthPort;
     cleanup: CleanupPort;
     tui: TuiPort | undefined;
+    mail: MailPort;
     apiRequest: APIRequestContext;
     apiBaseUrl: string;
     uiBinding: { current?: UiPort };
@@ -314,6 +337,10 @@ export function createBddTest(options: CreateBddTestOptions = {}) {
     // Requests carrying the scenario's OIDC token get refreshed tokens and DPoP proofs, also from custom steps.
     api: async ({ apiRequest, world }, use) => {
       await use(withApiRequestAuth(createApi({ apiRequest } as CreateContext), () => world));
+    },
+
+    mail: async ({}, use) => {
+      await use(createMail());
     },
 
     cleanup: async ({ apiRequest }, use) => {

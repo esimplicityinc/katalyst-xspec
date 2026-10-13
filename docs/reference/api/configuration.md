@@ -74,6 +74,14 @@ See the [Authentication guide](../../guides/authentication.md) for how these fit
 | `CLEANUP_AUTH_TOKEN` | - | Static bearer token for cleanup (skips login) |
 | `CLEANUP_AUTH_ROLE` | `admin` | With `API_AUTH_MODE=ui-session`: the role whose session cleanup uses |
 
+### Email
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `MAIL_API_URL` | - | Mailpit address for the email steps, e.g. `http://localhost:8025` |
+| `MAIL_TIMEOUT` | `10000` | Milliseconds the email steps wait for an email |
+| `MAIL_CODE_PATTERN` | 4-8 digits | Regex for `I store the code from the latest email`; first group is the code |
+
 ### Cleanup Configuration
 
 | Variable | Default | Description |

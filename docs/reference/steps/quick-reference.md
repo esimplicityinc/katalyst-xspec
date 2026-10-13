@@ -135,6 +135,9 @@ See the [Authentication guide](../../guides/authentication.md).
 |------|-------------|
 | `Given I generate a UUID and store as {string}` | Create unique ID |
 | `Given I generate a one-time code for {string} as {string}` | Store the role's current TOTP code |
+| `Then {string} receives an email with subject {string}` | Wait for an email (Mailpit, `MAIL_API_URL`) |
+| `When I open the link in the latest email to {string}` | Open the email's first link |
+| `Then I store the code from the latest email to {string} as {string}` | Store a code from the email |
 | `Given I set variable {string} to {string}` | Set variable |
 | `Then the variable {string} should equal {string}` | Assert variable |
 | `Given I register cleanup for {string} {string}` | Register cleanup |

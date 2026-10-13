@@ -30,6 +30,7 @@ type CreateBddTestOptions = {
   createCleanup?: (ctx: CreateContext) => CleanupPort;
   getCleanupAuth?: CleanupAuthProvider;
   createTui?: () => TuiPort | undefined;
+  createMail?: () => MailPort;          // default: Mailpit at MAIL_API_URL
   worldFactory?: () => World;
 };
 
@@ -186,6 +187,16 @@ The API adapter for HTTP operations.
 ```typescript
 test('example', async ({ api, world }) => {
   const result = await api.sendJson('GET', '/users', undefined, world.headers);
+});
+```
+
+### mail
+
+The test inbox for the [email steps](../steps/shared-steps.md#email-steps): Mailpit at `MAIL_API_URL`, or what `createMail` returns. Without `MAIL_API_URL`, using it fails with a message saying what to set.
+
+```typescript
+test('example', async ({ mail }) => {
+  const message = await mail.waitFor({ to: 'pm@test.local', subject: 'Welcome' }, 10_000);
 });
 ```
 
