@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.19.0] - 2026-10-13
+
+Log roles in before the run with a Playwright setup project. See [Session reuse](docs/guides/authentication.md#session-reuse).
+
+### Added
+
+- `createAuthSetup({ roles, fresh, createAuth })`: registers one setup test per role that logs it in (the page-by-page login, one-time codes included) and saves the session to `UI_SESSION_DIR`. `I am logged in as`, `API_AUTH_MODE=ui-session` and cleanup then use it. Usable saved sessions are reused unless `fresh: true`.
+
 ## [0.18.0] - 2026-10-13
 
 One-time codes from other sources than an authenticator app. See [Codes from email or elsewhere](docs/guides/authentication.md#codes-from-email-or-elsewhere).

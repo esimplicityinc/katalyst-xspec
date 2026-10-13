@@ -30,6 +30,7 @@ export * from './auth/session-store';
 export * from './auth/session-check';
 export * from './auth/login-flow';
 export * from './auth/ui-session';
+export * from './auth/auth-setup';
 export * from './adapters/ui/playwright-login-page';
 export { buildApiLoginRequest, extractToken, type ApiLoginRequest } from './auth/api-login';
 export * from './auth/oidc';
