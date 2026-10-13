@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.0] - 2026-10-13
+
+UI login sessions are shared by every worker: each role logs in once per run. See [Session reuse](docs/guides/authentication.md#session-reuse).
+
+### Changed
+
+- `Given I am logged in as "<role>"` saves the session to `.xspec/auth/` (`UI_SESSION_DIR`) instead of keeping it in the worker's memory. The first worker that needs a role takes a lock and logs in; workers that need it at the same time wait and use that session; restarted workers read it from disk. Fewer logins, and no one-time code is submitted twice.
+- Session files are `0600` and keyed by role, username, `UI_LOGIN_PATH` and `FRONTEND_URL`.
+- `clearUiSessions()` deletes the saved session files (all workers).
+
+### Added
+
+- `UI_SESSION_TTL` (default `30m`), `UI_SESSION_SCOPE` (`run`, the default, ignores sessions from earlier runs; `persistent` keeps them until the TTL), `UI_SESSION_LOCK_TIMEOUT` (default `2m`; locks left by crashed workers are also taken over) and `XSPEC_RUN_ID`.
+- Steps: `Given I clear the saved session for {string}` and `Given I clear saved sessions`. `AuthPort.clearSavedSession(role)` (optional), implemented by `UniversalAuthAdapter`.
+- `SessionStore` exported for custom logins that should also run once per run.
+
 ## [0.11.0] - 2026-10-13
 
 Keeps credentials out of logs, reports and git, ahead of saving login sessions to disk. No breaking changes. See [Keeping secrets out of logs and git](docs/guides/authentication.md#keeping-secrets-out-of-logs-and-git).

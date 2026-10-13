@@ -172,7 +172,7 @@ Scenario: Project manager sees projects
   Then I should see text "Projects"
 ```
 
-`Given I am logged in as "<role>"` fills the app's login form with `AUTH_<ROLE>_USERNAME` / `AUTH_<ROLE>_PASSWORD` once per worker and reuses the session afterwards. Use `When I log in as "<role>" in UI` to always submit the form. For API calls use `Given I am authenticated as "<role>" via API`. Any role name works; tell the user which `AUTH_<ROLE>_*` variables to add to `.env`. Login paths and field names are configured with `API_AUTH_*` / `UI_*` (see docs/guides/authentication.md).
+`Given I am logged in as "<role>"` fills the app's login form with `AUTH_<ROLE>_USERNAME` / `AUTH_<ROLE>_PASSWORD` once per run (the session is shared by all workers) and reuses it afterwards. Use `When I log in as "<role>" in UI` to always submit the form. For API calls use `Given I am authenticated as "<role>" via API`. Any role name works; tell the user which `AUTH_<ROLE>_*` variables to add to `.env`. Login paths and field names are configured with `API_AUTH_*` / `UI_*` (see docs/guides/authentication.md).
 
 **Pattern: Login Flow (testing the form itself)**
 ```gherkin

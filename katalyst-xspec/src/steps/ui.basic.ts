@@ -2,6 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import { expect } from '@playwright/test';
 import { interpolate } from '../utils';
 import { oneTimeCodeForRole, uiLoginAsRole } from '../auth/login-steps';
+import { clearUiSessions } from '../adapters/auth/universal-auth.adapter';
 import { expectElementAttribute, setFileInputContent } from '../helpers/ui-element';
 
 export function registerUiBasicSteps(test: any): void {
@@ -42,6 +43,17 @@ export function registerUiBasicSteps(test: any): void {
   Given('I am logged in as {string}', async ({ auth, ui, world }: any, role: string) => {
     void ui; // binds the browser for the auth adapter
     await uiLoginAsRole(auth, world, role, { reuseSession: true });
+  });
+
+  // Saved sessions are shared by all workers; these make the next "I am logged in as" log in again.
+  Given('I clear saved sessions', async () => {
+    clearUiSessions();
+  });
+
+  Given('I clear the saved session for {string}', async ({ auth, world }: any, role: string) => {
+    const name = interpolate(role, world.vars);
+    if (!auth.clearSavedSession) throw new Error("Your auth adapter doesn't implement clearSavedSession(role).");
+    auth.clearSavedSession(name);
   });
 
   // Always submits the login form (use when testing the login itself).

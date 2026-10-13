@@ -393,12 +393,15 @@ interface AuthPort {
   apiLoginAs?(world: World, role: string): Promise<void>;
   uiLoginAs?(world: World, role: string, options?: UiLoginOptions): Promise<void>;
 
+  // Optional (0.12+): forget the role's saved UI session in every worker
+  clearSavedSession?(role: string): void;
+
   // Optional (0.10+): the role's current one-time code
   oneTimeCodeFor?(role: string): Promise<string>;
 }
 
 type UiLoginOptions = {
-  /** Submit the form once per role (per worker), then restore the saved session. */
+  /** Submit the form once per role (per run, shared by all workers), then restore the saved session. */
   reuseSession?: boolean;
 };
 ```
@@ -411,9 +414,13 @@ Logs in to the API as `role`, setting the bearer token in `world.headers` (or ke
 
 #### `uiLoginAs(world, role, options?)`
 
-Logs in through the UI as `role`. `Given I am logged in as "<role>"` passes `{ reuseSession: true }`; `When I log in as "<role>" in UI` passes nothing.
+Logs in through the UI as `role`. `Given I am logged in as "<role>"` passes `{ reuseSession: true }`; `When I log in as "<role>" in UI` passes nothing. With `reuseSession`, `UniversalAuthAdapter` logs in once per role per run and shares the session with every worker (see [Session reuse](../../guides/authentication.md#session-reuse)).
 
 The role methods are optional so adapters written before 0.8 keep compiling. If they're missing, the built-in steps fall back to the admin/user methods for the roles `"admin"` and `"user"`, and fail for any other role.
+
+#### `clearSavedSession(role)`
+
+Forgets the role's saved UI session, so the next `uiLoginAs(world, role, { reuseSession: true })` submits the form. Used by `Given I clear the saved session for "<role>"`.
 
 #### `oneTimeCodeFor(role)`
 

@@ -196,8 +196,29 @@ This covers API logins. For browser logins that redirect to the provider's page,
 | `UI_LOGIN_SUCCESS_TEXT` | — | text shown once logged in; use when the URL doesn't change |
 | `UI_LOGIN_TIMEOUT` | `10000` | milliseconds |
 | `UI_SESSION_REUSE` | `true` | `false` makes `I am logged in as` submit the form every time |
+| `UI_SESSION_DIR` | `.xspec/auth` | where saved sessions are kept (git-ignored) |
+| `UI_SESSION_TTL` | `30m` | how long a saved session is used; e.g. `90s`, `30m`, `2h`. Set it below your app's session timeout |
+| `UI_SESSION_SCOPE` | `run` | `persistent`: keep using sessions saved by earlier runs (until the TTL), for fast local re-runs |
+| `UI_SESSION_LOCK_TIMEOUT` | `2m` | how long a login may hold the lock before another worker takes over |
 
-**Session reuse:** `I am logged in as "pm"` submits the form the first time a worker needs "pm". It saves the cookies and localStorage, and later scenarios start already logged in, which is much faster than logging in every time. If a scenario logs out or changes the password, later scenarios may restore a dead session; use `When I log in as "pm" in UI` there instead, or set `UI_SESSION_REUSE=false`.
+### Session reuse
+
+`I am logged in as "pm"` submits the login form **once per role for the whole run**, then every scenario in every worker starts already logged in:
+
+1. The first worker that needs "pm" takes a lock and logs in. It saves the cookies and localStorage to `.xspec/auth/pm-….json`, readable only by you.
+2. Workers that need "pm" at the same time wait for that login and use its session instead of logging in themselves.
+3. Later scenarios restore the saved session. A worker restarted after a failure reads it from disk too.
+
+This is much faster than logging in every time, and it avoids problems with login pages that rate-limit or lock accounts, and with [one-time codes](#one-time-passcodes-totp), which a provider accepts only once.
+
+A saved session is used if it was saved **by this run** (with `UI_SESSION_SCOPE=run`, the default) and **within `UI_SESSION_TTL`**; otherwise the role logs in again. Sessions are kept apart by role, username, `UI_LOGIN_PATH` and `FRONTEND_URL`, so changing any of them logs in again. Workers recognize their run by the Playwright runner's process; set `XSPEC_RUN_ID` to choose the run id yourself.
+
+If a scenario logs out or changes the password, later scenarios may restore a dead session. Clear it in that scenario, use `When I log in as "pm" in UI` (always submits the form), or set `UI_SESSION_REUSE=false`:
+
+```gherkin
+Given I clear the saved session for "pm"   # one role
+Given I clear saved sessions               # every role
+```
 
 **`I log in as "pm" in UI`** always submits the form. Use it when the login itself is under test.
 
@@ -278,7 +299,7 @@ roles: {
 
 `generateTotp({ secret, encoding, digits, period, algorithm })` is exported for your own steps and adapters, and the auth adapter's `oneTimeCodeFor(role)` returns the role's current code using the settings above.
 
-**Codes can only be used once.** Most providers reject a code that was already accepted in the same 30-second window. If several logins as the same user happen within one window (parallel workers, or a scenario that logs in twice), wait for the next window between them, or log in once and reuse the session.
+**Codes can only be used once.** Most providers reject a code that was already accepted in the same 30-second window. If several logins as the same user happen within one window (a scenario that logs in twice, or custom login steps in parallel workers), wait for the next window between them. `Given I am logged in as "pm"` avoids this by logging in once per run and sharing the session with every worker (see [Session reuse](#session-reuse)).
 
 ## Keeping secrets out of logs and git
 
@@ -286,7 +307,7 @@ Test reports and CI logs are often shared more widely than credentials should be
 
 - **Error messages.** When an API request fails, Playwright's error lists the request headers. The built-in API adapter and cleanup replace the values of `Authorization`, `Cookie`, `Set-Cookie`, `DPoP`, `Proxy-Authorization`, `X-Api-Key`, `X-Auth-Token` and `X-CSRF-Token`, and any `Bearer` / `DPoP` / `Basic` credential, with `[redacted]`.
 - **Debug steps.** `Then I log all cookies` prints cookie values as `[redacted, N chars]`; `Then I log localStorage` does the same for keys that look like tokens or sessions (`token`, `auth`, `session`, `jwt`, …) and for values that look like JWTs.
-- **Saved sessions.** Session files go in `.xspec/auth/`, written so only your user can read them (`0600`, in a `0700` folder). `katalyst-xspec init` and `katalyst-xspec upgrade` add `.xspec/` to `.gitignore`.
+- **Saved sessions.** [Session reuse](#session-reuse) files go in `.xspec/auth/` (`UI_SESSION_DIR`), written so only your user can read them (`0600`, in a `0700` folder). `katalyst-xspec init` and `katalyst-xspec upgrade` add `.xspec/` to `.gitignore`. In CI, they're deleted with the workspace; locally, delete the folder to log everyone out.
 - **One-time code secrets** never appear in messages; errors name the variable instead.
 
 `XSPEC_SHOW_SECRETS=true` turns redaction off, for debugging on your own machine. Don't set it in CI.

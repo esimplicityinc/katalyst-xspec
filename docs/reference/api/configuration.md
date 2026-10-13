@@ -44,6 +44,11 @@ See the [Authentication guide](../../guides/authentication.md) for how these fit
 | `AUTH_<ROLE>_OTP_DIGITS` / `_PERIOD` / `_ALGORITHM` | `6` / `30` / `SHA1` | TOTP code length, window in seconds, HMAC algorithm. `AUTH_OTP_*` for every role |
 | `DEFAULT_ADMIN_USERNAME` / `DEFAULT_ADMIN_EMAIL` / `DEFAULT_ADMIN_PASSWORD` | - | Older names for the `admin` role |
 | `XSPEC_SHOW_SECRETS` | `false` | `true`: don't redact credentials in error messages and debug steps (local debugging only). See [Keeping secrets out of logs and git](../../guides/authentication.md#keeping-secrets-out-of-logs-and-git) |
+| `UI_SESSION_DIR` | `.xspec/auth` | Where `I am logged in as` saves sessions, shared by all workers |
+| `UI_SESSION_TTL` | `30m` | How long a saved session is used (`90s`, `30m`, `2h`; plain numbers are seconds) |
+| `UI_SESSION_SCOPE` | `run` | `persistent`: also use sessions saved by earlier runs |
+| `UI_SESSION_LOCK_TIMEOUT` | `2m` | A login holding the lock longer than this is assumed crashed |
+| `XSPEC_RUN_ID` | the runner's process id | Identifies the run for `UI_SESSION_SCOPE=run` |
 | `DEFAULT_USER_USERNAME` / `DEFAULT_USER_PASSWORD`, `NON_ADMIN_USERNAME` / `NON_ADMIN_PASSWORD` | - | Older names for the `user` role |
 | `API_AUTH_LOGIN_PATH` | `/auth/login` | API login endpoint |
 | `API_AUTH_BODY` | `form` | `form` or `json` |

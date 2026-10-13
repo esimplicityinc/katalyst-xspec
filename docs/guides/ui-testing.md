@@ -281,7 +281,7 @@ Scenario: The login form works
   Then the URL should contain "/dashboard"
 ```
 
-- `Given I am logged in as "<role>"` submits the login form once per role per worker, then restores the saved cookies and localStorage in later scenarios. Set `UI_SESSION_REUSE=false` to log in every time.
+- `Given I am logged in as "<role>"` submits the login form once per role per run and shares the session with every worker, restoring the saved cookies and localStorage in later scenarios. Set `UI_SESSION_REUSE=false` to log in every time. See [Session reuse](./authentication.md#session-reuse).
 - `When I log in as "<role>" in UI` always submits the form. Use it when the login is what you're testing.
 - The step fails if credentials are missing (the message names the variables) or if the page is still on the login page afterwards.
 
