@@ -225,7 +225,7 @@ createAuth: ({ api, ui }) =>
   }),
 ```
 
-Keep real passwords out of git: `.env` is in the scaffolded `.gitignore`, and in CI set the `AUTH_*` variables from your secret store.
+Keep real passwords out of git: `.env` is in the scaffolded `.gitignore`, and in CI set the `AUTH_*` variables from your secret store. See [Keeping secrets out of logs and git](#keeping-secrets-out-of-logs-and-git).
 
 ## One-time passcodes (TOTP)
 
@@ -279,6 +279,19 @@ roles: {
 `generateTotp({ secret, encoding, digits, period, algorithm })` is exported for your own steps and adapters, and the auth adapter's `oneTimeCodeFor(role)` returns the role's current code using the settings above.
 
 **Codes can only be used once.** Most providers reject a code that was already accepted in the same 30-second window. If several logins as the same user happen within one window (parallel workers, or a scenario that logs in twice), wait for the next window between them, or log in once and reuse the session.
+
+## Keeping secrets out of logs and git
+
+Test reports and CI logs are often shared more widely than credentials should be. katalyst-xspec keeps them out:
+
+- **Error messages.** When an API request fails, Playwright's error lists the request headers. The built-in API adapter and cleanup replace the values of `Authorization`, `Cookie`, `Set-Cookie`, `DPoP`, `Proxy-Authorization`, `X-Api-Key`, `X-Auth-Token` and `X-CSRF-Token`, and any `Bearer` / `DPoP` / `Basic` credential, with `[redacted]`.
+- **Debug steps.** `Then I log all cookies` prints cookie values as `[redacted, N chars]`; `Then I log localStorage` does the same for keys that look like tokens or sessions (`token`, `auth`, `session`, `jwt`, …) and for values that look like JWTs.
+- **Saved sessions.** Session files go in `.xspec/auth/`, written so only your user can read them (`0600`, in a `0700` folder). `katalyst-xspec init` and `katalyst-xspec upgrade` add `.xspec/` to `.gitignore`.
+- **One-time code secrets** never appear in messages; errors name the variable instead.
+
+`XSPEC_SHOW_SECRETS=true` turns redaction off, for debugging on your own machine. Don't set it in CI.
+
+For your own steps and adapters, `redactSecrets(text)`, `redactHeaders(headers)`, `redactError(err)` and `writeSecretFile(path, content)` are exported (see [Utilities](../reference/api/utilities.md#secrets)).
 
 ## Header-based UI auth
 

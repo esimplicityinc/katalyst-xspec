@@ -416,6 +416,8 @@ Then I log all cookies
 Then I log localStorage
 ```
 
+Cookie values, and localStorage values that look like tokens or sessions, are printed as `[redacted, N chars]`. `XSPEC_SHOW_SECRETS=true` prints them (local debugging only).
+
 ### Screenshots
 
 ```gherkin

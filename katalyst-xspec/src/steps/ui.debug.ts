@@ -6,6 +6,7 @@
 
 import { createBdd } from 'playwright-bdd';
 import { interpolate } from '../utils';
+import { looksLikeJwt, looksSecretKey, maskValue, showSecrets } from '../auth/secrets';
 
 export function registerDebugSteps(test: any): void {
   const { When, Then } = createBdd(test as any) as any;
@@ -176,7 +177,9 @@ export function registerDebugSteps(test: any): void {
       const cookies = await context.cookies();
       console.log(`[DEBUG] Cookies (${cookies.length}):`);
       for (const cookie of cookies) {
-        console.log(`  - ${cookie.name}: ${cookie.value.substring(0, 50)}${cookie.value.length > 50 ? '...' : ''}`);
+        // Cookie values are often sessions: masked unless XSPEC_SHOW_SECRETS=true.
+        const value = showSecrets() ? `${cookie.value.substring(0, 50)}${cookie.value.length > 50 ? '...' : ''}` : maskValue(cookie.value);
+        console.log(`  - ${cookie.name}: ${value}`);
       }
     }
   );
@@ -202,7 +205,8 @@ export function registerDebugSteps(test: any): void {
       });
       console.log('[DEBUG] localStorage:');
       for (const [key, value] of Object.entries(storage) as [string, string][]) {
-        const truncated = value.length > 100 ? `${value.substring(0, 100)}...` : value;
+        const secret = !showSecrets() && (looksSecretKey(key) || looksLikeJwt(value));
+        const truncated = secret ? maskValue(value) : value.length > 100 ? `${value.substring(0, 100)}...` : value;
         console.log(`  - ${key}: ${truncated}`);
       }
     }

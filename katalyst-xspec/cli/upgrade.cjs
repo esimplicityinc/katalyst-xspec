@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const readline = require('readline');
+const { ensureGitignoreEntries } = require('./gitignore.cjs');
 
 // Published on npmjs.com.
 const PACKAGE_NAME = '@esimplicitylabs/katalyst-xspec';
@@ -207,6 +208,7 @@ function migrateLegacyPackage(cwd, pm, legacyName, targetVersion) {
   if (removeGithubPackagesNpmrc(cwd)) log(`Removed "${GITHUB_PACKAGES_NPMRC_LINE}" from .npmrc (no longer needed)`);
   for (const file of rewriteLegacyImports(cwd)) log(`Updated imports: ${file}`);
   if (rewriteLegacyScripts(cwd)) log('Updated package.json scripts to use the katalyst-xspec command');
+  for (const entry of ensureGitignoreEntries(cwd)) log(`Added ${entry} to .gitignore (saved login sessions)`);
 
   const removeCmd = { npm: 'npm uninstall', bun: 'bun remove', pnpm: 'pnpm remove', yarn: 'yarn remove' }[pm] || 'npm uninstall';
   log(`Running: ${removeCmd} ${legacyName}`);
@@ -795,6 +797,11 @@ async function migrate(cwd, options) {
   if (rewriteLegacyScripts(cwd, { dryRun: options.dryRun })) {
     console.log('  package.json: scripts now use the katalyst-xspec command');
   }
+  const ignored = ensureGitignoreEntries(cwd, { dryRun: options.dryRun });
+  if (ignored.length) {
+    console.log(`  .gitignore: added ${ignored.join(', ')} (saved login sessions)`);
+    if (!options.dryRun) results.updated.push('.gitignore');
+  }
   const untagged = stripTypeTagFilters(cwd, { dryRun: options.dryRun });
   if (untagged.length) {
     console.log(`  ${untagged.join(', ')}: removed @api/@ui/@hybrid/@tui project tag filters`);
@@ -1011,6 +1018,9 @@ async function main() {
 
   if (!installed.legacy && !options.check && rewriteLegacyScripts(cwd)) {
     log('Updated package.json scripts to use the katalyst-xspec command');
+  }
+  if (!installed.legacy && !options.check) {
+    for (const entry of ensureGitignoreEntries(cwd)) log(`Added ${entry} to .gitignore (saved login sessions)`);
   }
   if (hasTypeTagFilters(cwd)) {
     log('Note: playwright.config filters projects by @api/@ui/@hybrid/@tui tags, which are no longer');

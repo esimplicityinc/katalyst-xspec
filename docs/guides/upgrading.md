@@ -251,6 +251,12 @@ const targets = logTargets(resolveTargets());
 
 ## Version History
 
+### 0.11.0
+
+- Credentials are redacted in API error messages, cleanup warnings and the cookie/localStorage debug steps. `XSPEC_SHOW_SECRETS=true` turns this off locally. See [Keeping secrets out of logs and git](./authentication.md#keeping-secrets-out-of-logs-and-git).
+- `katalyst-xspec upgrade` adds `.xspec/` (where saved login sessions will go) to `.gitignore`.
+- No breaking changes. If you relied on `Then I log all cookies` printing values, set `XSPEC_SHOW_SECRETS=true`.
+
 ### 0.10.0
 
 - One-time passcodes (TOTP): `AUTH_<ROLE>_OTP_SECRET` (or `AUTH_OTP_*` for every role), the steps `When I fill the one-time code for {string} in {string}` and `Given I generate a one-time code for {string} as {string}`, and `generateTotp()` for custom steps. See [One-time passcodes](./authentication.md#one-time-passcodes-totp).
