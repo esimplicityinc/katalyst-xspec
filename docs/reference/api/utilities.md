@@ -631,6 +631,18 @@ class SessionStore {
 function clearUiSessions(options?: { env?: Env }): void; // delete every saved session
 ```
 
+Logging roles in before the run, in a Playwright setup project (see [Session reuse](../../guides/authentication.md#session-reuse)):
+
+```typescript
+import { createAuthSetup } from '@esimplicitylabs/katalyst-xspec';
+
+createAuthSetup({
+  roles: ['applicant', 'admin'],
+  fresh: false,                                  // true: log in even if a usable session is saved
+  createAuth: ({ api, ui }) => new MyAuth({ api, ui }), // optional, for a custom adapter
+});
+```
+
 Helpers for checking a restored session:
 
 ```typescript

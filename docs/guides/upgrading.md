@@ -251,6 +251,10 @@ const targets = logTargets(resolveTargets());
 
 ## Version History
 
+### 0.19.0
+
+- `createAuthSetup({ roles })` logs roles in from a Playwright setup project and saves the sessions where `I am logged in as` and `API_AUTH_MODE=ui-session` find them. See [Session reuse](./authentication.md#session-reuse). No breaking changes.
+
 ### 0.18.0
 
 - One-time codes can come from email (`AUTH_<ROLE>_OTP_SOURCE=email`, read from the test inbox) or from a function passed as `roles: { x: { otp: () => code } }`, as well as from a TOTP secret. See [Codes from email or elsewhere](./authentication.md#codes-from-email-or-elsewhere).

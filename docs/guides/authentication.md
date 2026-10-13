@@ -301,6 +301,26 @@ A saved session is used if it was saved **by this run** (with `UI_SESSION_SCOPE=
 
 **Expired sessions are replaced automatically.** After restoring a session, `I am logged in as` loads `UI_SESSION_CHECK_PATH` (default `/`). If that ends up on the login page, the session has expired on the server: the role logs in again, the new session is saved for the other workers, and the scenario carries on. "The login page" means `UI_LOGIN_PATH`, a URL containing one of `UI_LOGIN_SUCCESS_URL_EXCLUDES`, or (when `FRONTEND_URL` is set) any page outside the app, such as the identity provider. With `UI_LOGIN_SUCCESS_TEXT` set, the check is that the text appears instead. A session whose cookies have passed their expiry date is replaced without loading anything. The check leaves the browser on `UI_SESSION_CHECK_PATH`; set it to a light page that requires login, or `UI_SESSION_CHECK=false` to skip it. Sessions are kept apart by role, username, `UI_LOGIN_PATH` and `FRONTEND_URL`, so changing any of them logs in again. Workers recognize their run by the Playwright runner's process; set `XSPEC_RUN_ID` to choose the run id yourself.
 
+**Logging in before the run.** If you'd rather log every role in up front (Playwright's setup-project pattern), `createAuthSetup` writes the same session files, so scenarios start logged in:
+
+```typescript
+// tests/auth.setup.ts
+import { createAuthSetup } from '@esimplicitylabs/katalyst-xspec';
+
+createAuthSetup({ roles: ['applicant', 'admin'] });
+```
+
+```typescript
+// playwright.config.ts
+projects: [
+  { name: 'auth-setup', testMatch: /auth\.setup\.ts/ },
+  { ...apiBdd, dependencies: ['auth-setup'] },
+  { ...uiBdd, dependencies: ['auth-setup'] },
+],
+```
+
+Each role logs in once, in its own setup test, so a failing login is reported by role before any scenario runs. Sessions that are still usable are reused; `createAuthSetup({ roles, fresh: true })` always logs in. Pass `createAuth` if you use a custom auth adapter. Roles not listed still log in on demand.
+
 If a scenario logs out or changes the password, later scenarios may restore a dead session. Clear it in that scenario, use `When I log in as "pm" in UI` (always submits the form), or set `UI_SESSION_REUSE=false`:
 
 ```gherkin
