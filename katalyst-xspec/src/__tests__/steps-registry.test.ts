@@ -72,3 +72,24 @@ describe('step registry', () => {
     assert.deepEqual(ambiguous, []);
   });
 });
+
+describe('shared variable steps', () => {
+  const step = (pattern: string) => {
+    const def = stepDefinitions.find((s) => s.patternString === pattern) as unknown as { fn: (...args: unknown[]) => Promise<void> };
+    assert.ok(def, `step "${pattern}" is registered`);
+    return def.fn;
+  };
+
+  it('I set header fills in {variables}, e.g. a token stored by an earlier step', async () => {
+    const world = { vars: { csrf: 'tok-123', token: 'abc' }, headers: { Cookie: 'sid=1' } as Record<string, string> };
+    await step('I set header {string} to {string}')({ world }, 'x-csrf-token', '{csrf}');
+    await step('I set header {string} to {string}')({ world }, 'Authorization', 'Bearer {token}');
+    assert.deepEqual(world.headers, { Cookie: 'sid=1', 'x-csrf-token': 'tok-123', Authorization: 'Bearer abc' });
+  });
+
+  it('unknown variables are left as written', async () => {
+    const world = { vars: {}, headers: {} as Record<string, string> };
+    await step('I set header {string} to {string}')({ world }, 'X-Thing', '{missing}');
+    assert.equal(world.headers['X-Thing'], '{missing}');
+  });
+});

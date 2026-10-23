@@ -91,7 +91,12 @@ export function apiSessionCookies({
     const i = part.indexOf('=');
     if (i <= 0) continue;
     const name = part.slice(0, i).trim();
-    if (!cookies.some((c) => c.name === name)) cookies.push({ name, value: part.slice(i + 1).trim(), url: origin });
+    // Browsers only accept __Host- / __Secure- cookies marked secure and set
+    // from a secure URL. Cookies aren't scoped by scheme, so an https URL for
+    // the same host still covers http://localhost.
+    const prefixed = /^__(Host|Secure)-/.test(name);
+    const url = prefixed ? origin.replace(/^http:/, 'https:') : origin;
+    if (!cookies.some((c) => c.name === name)) cookies.push({ name, value: part.slice(i + 1).trim(), url, ...(prefixed ? { secure: true } : {}) });
   }
   return cookies;
 }

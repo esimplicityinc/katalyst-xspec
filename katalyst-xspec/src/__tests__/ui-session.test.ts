@@ -32,7 +32,43 @@ describe('cookieHeaderFor', () => {
   });
 });
 
+let browser: Browser | undefined;
+let skip: string | false = false;
+try {
+  browser = await chromium.launch();
+} catch (err) {
+  skip = `chromium unavailable: ${(err as Error).message.split('\n')[0]}`;
+}
+
 describe('apiSessionCookies', () => {
+  it('marks __Host- and __Secure- cookies secure, as browsers require for those names', () => {
+    const cookies = apiSessionCookies({ cookieHeader: '__Host-ses=abc; __Secure-x=1; plain=2', apiBaseUrl: 'http://localhost:8000' });
+    assert.deepEqual(cookies, [
+      { name: '__Host-ses', value: 'abc', url: 'https://localhost:8000', secure: true },
+      { name: '__Secure-x', value: '1', url: 'https://localhost:8000', secure: true },
+      { name: 'plain', value: '2', url: 'http://localhost:8000' },
+    ]);
+  });
+
+  it('a __Host- session cookie from the API can be added to a browser', { skip }, async () => {
+    const context = await browser!.newContext();
+    try {
+      await context.addCookies(apiSessionCookies({ cookieHeader: '__Host-ses=abc', apiBaseUrl: 'http://localhost:8000/v1' }));
+      assert.deepEqual((await context.cookies('http://localhost:3000')).map((c) => [c.name, c.path, c.secure]), [['__Host-ses', '/', true]]);
+      // And the page actually sends it to http://localhost.
+      const page = await context.newPage();
+      let sent: string | undefined;
+      await page.route('http://localhost:3000/**', async (route) => {
+        sent = route.request().headers().cookie;
+        await route.fulfill({ body: 'ok' });
+      });
+      await page.goto('http://localhost:3000/application/');
+      assert.equal(sent, '__Host-ses=abc');
+    } finally {
+      await context.close();
+    }
+  });
+
   it("merges the API context's cookies and a Cookie header", () => {
     const cookies = apiSessionCookies({
       jar: [{ name: 'sid', value: 'jar', domain: 'api.local', path: '/' }],
@@ -46,13 +82,6 @@ describe('apiSessionCookies', () => {
   });
 });
 
-let browser: Browser | undefined;
-let skip: string | false = false;
-try {
-  browser = await chromium.launch();
-} catch (err) {
-  skip = `chromium unavailable: ${(err as Error).message.split('\n')[0]}`;
-}
 
 describe('API_AUTH_MODE=ui-session against a BFF', { skip }, () => {
   let bff: Awaited<ReturnType<typeof startFakeBff>>;
