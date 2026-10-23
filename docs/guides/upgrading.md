@@ -251,6 +251,11 @@ const targets = logTargets(resolveTargets());
 
 ## Version History
 
+### 0.19.3
+
+- Fix: `I set header "…" to "{var}"` fills in variables (e.g. a CSRF token stored by an earlier step).
+- Fix: `I use the API session in the browser` works with `__Host-` / `__Secure-` session cookies on `http://localhost`.
+
 ### 0.19.2
 
 - Fix: parallel workers no longer submit the same one-time code for an account. A login may wait up to 30 s for a fresh code, so give scenarios that log the same account in again a Playwright `timeout` of at least 60 s.

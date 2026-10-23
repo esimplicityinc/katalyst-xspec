@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.19.3] - 2026-10-23
+
+### Fixed
+
+- `Given I set header "x-csrf-token" to "{csrf}"` now fills in `{variables}`, as the docs show (`"Bearer {token}"`). It used to send the text as written.
+- `Given I use the API session in the browser` failed with "Invalid cookie fields" for `__Host-` / `__Secure-` session cookies on `http://localhost`. They're now added as secure cookies, which browsers require for those names.
+
 ## [0.19.2] - 2026-10-13
 
 Found by running parallel scenarios against a real Keycloak 26.
